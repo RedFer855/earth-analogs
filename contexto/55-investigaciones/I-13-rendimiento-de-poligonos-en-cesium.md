@@ -1,5 +1,5 @@
 ---
-title: "I-13 — Rendimiento de CesiumJS con decenas de miles de celdas que cambian de color"
+title: "I-13 — Rendimiento de CesiumJS con decenas de miles de polígonos que cambian de color"
 type: investigacion
 status: vigente
 date: 2026-11-04
@@ -10,7 +10,7 @@ tipo_investigacion: A
 riesgo: bajo
 ---
 
-# I-13 — Rendimiento de CesiumJS con decenas de miles de celdas que cambian de color
+# I-13 — Rendimiento de CesiumJS con decenas de miles de polígonos que cambian de color
 
 Evalúa cómo dibujar y recolorear entre 10 000 y 200 000 polígonos sobre un globo CesiumJS según documentación oficial e issues.
 
@@ -25,7 +25,7 @@ OBJETIVO
 Saber cómo dibujar y recolorear entre 10 000 y 200 000 polígonos sobre un globo CesiumJS y qué rendimiento está documentado.
 
 CONTEXTO (solo lo que cambia la respuesta)
-- Página web estática en CesiumJS 1.147.0 para dibujar celdas de una cuadrícula global de área igual (cuadriláteros de 4 vértices, incluido el polo sur lunar) y actualizar sus colores en lote de forma dinámica.
+- Página web estática en CesiumJS 1.147.0 para dibujar polígonos de una cuadrícula global de área igual (cuadriláteros de 4 vértices, incluido el polo sur lunar) y actualizar sus colores en lote de forma dinámica.
 
 YA SABEMOS (no investigar ni repetir)
 - CesiumJS tiene Entity y Primitive.
@@ -70,5 +70,5 @@ Respuesta a los cinco puntos según documentación oficial e issues de CesiumJS;
 
 ## Relaciones
 
-- [[I-08-cuadriculas-de-area-igual]] — la cuadrícula HEALPix
+- [[I-08-cuadriculas-de-area-igual]] — cuadrículas de área igual
 - [[I-14-alternativas-de-globo-3d]] — comparativa de librerías de globo 3D

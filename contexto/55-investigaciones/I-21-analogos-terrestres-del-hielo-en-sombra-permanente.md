@@ -69,10 +69,9 @@ análogos parciales, cada uno por un aspecto.
 - El mapa circumártico de permafrost y hielo del suelo es NSIDC GGD318 (Brown et al.); NSIDC-0272 corresponde a la
   base de glaciares GLIMS.
 
-Datos que las fuentes consultadas no permiten confirmar: la pérdida de hielo "< 1.0 mm/Gyr" atribuida a Schorghofer y
-Aharonson 2005 (artículo sobre hielo en Marte), las pruebas de "Pongó et al." y la campaña "VIPER TRIDENT" en la isla
-Devon en 2021, y la temperatura de 1.8 °C en Valentine Cave (sin contexto de medición). Un valor de "55.9 % vol"
-atribuido a Karjalainen se cita sin lugar.
+Datos no encontrados en las fuentes consultadas: la pérdida de hielo "< 1.0 mm/Gyr", las pruebas de "Pongó et al.", la
+campaña "VIPER TRIDENT" en la isla Devon en 2021, la temperatura de 1.8 °C en Valentine Cave (sin contexto de
+medición) y el valor de "55.9 % vol" de Karjalainen.
 
 ## Preguntas abiertas
 

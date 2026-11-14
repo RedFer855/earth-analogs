@@ -66,7 +66,7 @@ REGLAS
 
 ### Contornos y centroides oficiales de las 9 regiones Artemis
 
-El data release del USGS (`10.5066/P1MEQ6UK`, 2024-12-05, dominio público; *Down Selected Artemis III Candidate Landing Site Navigational Grids*) incluye el paquete `A3_9regions-lonlat-simplified.zip` (shapefile y GeoJSON con 9 polígonos en `GCS_Moon_2000`, esfera de 1737.4 km, además de cuadrículas LGRS de 1 km, 100 m y 10 m). Sus centroides en estereográfica polar sur y áreas coinciden dentro del <1 % con NTRS `20250007692`:
+El data release del USGS (`10.5066/P1MEQ6UK`, 2024-12-05, dominio público; *Down Selected Artemis III Candidate Landing Site Navigational Grids*) incluye el paquete `A3_9regions-lonlat-simplified.zip` (shapefile y GeoJSON con 9 polígonos en `GCS_Moon_2000`, esfera de 1737.4 km, además de cuadrículas LGRS de 1 km, 100 m y 10 m). Las áreas se listan junto a las de NTRS `20250007692`:
 
 | Región | Código | Latitud del centro | Longitud del centro (°E) | Área del polígono (km²) | Área en NTRS (km²) |
 | :-- | :-- | --: | --: | --: | --: |

@@ -104,8 +104,8 @@ Un lugar puede parecerse a Marte por **lo que es el polvo** o por **lo que hace 
 | 2 | `M2T1NXADG` V5.12.4, 0.625° × 0.5°, horario | [O] https://cmr.earthdata.nasa.gov (short_name M2T1NXADG) |
 | 3 | `MODFDS_MON_GLB_L3` v1, MOD04_L2 C6.1, 0.1°, 2000–2022 | [O] https://cmr.earthdata.nasa.gov (short_name MODFDS_MON_GLB_L3) |
 | 4 | Límite de 0.1 mg/m³ (< 10 µm, 24 h), Cr⁶⁺, Mn y perclorato de bajo riesgo inhalado | [O] https://www.nasa.gov/wp-content/uploads/2026/07/martian-dust-exposure-limits-sp-20260005907.pdf |
-| 5 | Variables `DUEM001`–`DUEM005` y sus bins (fuente por abrir) | Collow et al., GMAO, https://gmao.gsfc.nasa.gov/pubs/docs/Collow1489.pdf |
-| 6 | SoilGrids 2.0, CC BY 4.0 (fuente por abrir) | doi:10.5194/soil-7-217-2021 |
+| 5 | Variables `DUEM001`–`DUEM005` y sus bins | Collow et al., GMAO, https://gmao.gsfc.nasa.gov/pubs/docs/Collow1489.pdf |
+| 6 | SoilGrids 2.0, CC BY 4.0 | doi:10.5194/soil-7-217-2021 |
 
 ### Bibliografía
 

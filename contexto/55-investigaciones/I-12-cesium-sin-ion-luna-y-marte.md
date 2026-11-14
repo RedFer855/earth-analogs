@@ -25,7 +25,7 @@ OBJETIVO
 Saber con qué imágenes y terreno de la Luna y Marte puede funcionar una aplicación CesiumJS, con y sin cuenta de Cesium ion.
 
 CONTEXTO (solo lo que cambia la respuesta)
-- Visor web estático en CesiumJS 1.147.0 (con Ellipsoid.MOON y Ellipsoid.MARS), sin servidor propio.
+- Aplicación web estática en CesiumJS 1.147.0 (con Ellipsoid.MOON y Ellipsoid.MARS), sin servidor propio.
 - Cobertura requerida del polo sur lunar (latitudes de 85° S a 90° S).
 
 YA SABEMOS (no investigar ni repetir)

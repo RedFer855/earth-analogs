@@ -27,7 +27,7 @@ OBJETIVO
 ¿Qué magnitudes medibles por celda representan la habitabilidad o la esterilidad de un lugar, con qué productos globales de la Tierra, la Luna y Marte, y qué trabajos ya las compararon entre cuerpos?
 
 CONTEXTO (solo lo que cambia la respuesta)
-- Comparación por variable de condiciones superficiales de habitabilidad o esterilidad (agua disponible, radiación, temperatura, química) a escala compatible con cuadrículas globales de ~0.6 a 2.5 km².
+- Comparación por variable de condiciones superficiales de habitabilidad o esterilidad (agua disponible, radiación, temperatura, química) a escala compatible con cuadrículas globales de área igual.
 - En la Luna y Marte no existe vida conocida, por lo que la comparación se centra en los parámetros físicos y químicos que condicionan la supervivencia microbiana o la esterilidad.
 
 YA SABEMOS (no investigar ni repetir)

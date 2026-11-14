@@ -13,7 +13,7 @@ riesgo: critico
 # I-19 — Subsuelo: cuevas, fosas y tubos de lava
 
 La dimensión 7 del reto abarca cuevas, tubos de lava y subsuelo ([[dimensiones-innegociables]]). En la
-Tierra se identificó el Pyroduct Digital Catalog ([[sensores-tierra]]); no se relevaron las fuentes equivalentes de la Luna y Marte.
+Tierra se identificó el Pyroduct Digital Catalog ([[sensores-tierra]]); no se cubren aquí las fuentes equivalentes de la Luna y Marte.
 
 ## Prompt
 

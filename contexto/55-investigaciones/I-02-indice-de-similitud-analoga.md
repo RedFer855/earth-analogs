@@ -39,10 +39,12 @@ Revisión de métodos publicados de similitud con distancia ponderada:
 
 ### Técnicas identificadas en la literatura
 
-1. **Normalización resistente a extremos:** transformación de asimetría (Yeo y Johnson 2000), centrado en la mediana y escalado mediante el estimador $Q_n$ de Rousseeuw y Croux (1993) —82 % de eficiencia gaussiana frente a 37 % de MAD—, con acotamiento suave mediante tangente hiperbólica ($\kappa = 3$).
+Las técnicas siguientes son alternativas publicadas en la literatura; las citas no se verificaron en la fuente.
+
+1. **Normalización resistente a extremos:** transformación de asimetría (Yeo y Johnson 2000), centrado en la mediana y escalado mediante el estimador $Q_n$ de Rousseeuw y Croux (1993) —82 % de eficiencia gaussiana frente a 37 % de MAD—, con acotamiento suave mediante tangente hiperbólica (alternativa publicada).
 2. **Variables dependientes del ambiente** (inercia térmica, temperatura, viento): en la comparación entre cuerpos planetarios se normalizan dentro de la distribución de cada cuerpo o se convierten a magnitudes físicas equivalentes (tamaño de grano efectivo vía conductividad en atmósfera marciana según Presley y Christensen 1997; parámetro de Shields para transporte eólico). Las variables intrínsecas de terreno se comparan con escala común.
 3. **Métrica:** distancia de Mahalanobis ponderada con matriz de correlación regularizada mediante contracción hacia la identidad (Ledoit y Wolf 2004), para mitigar la colinealidad entre pendiente y rugosidad. La similitud coseno no captura diferencias de magnitud.
-4. **Métodos de similitud con distancia ponderada y descomposición por variable:** transformación exponencial $S = \exp(-\gamma D^2)$ con blanqueo ZCA-cor (Kessy et al. 2018) para descomponer el aporte de cada variable sin signos negativos. Foucher et al. (2021) presentan ejemplos de evaluación multi-variable de análogos sin fijar pesos universales en la literatura; las variables categóricas (como mineralogía) requieren métricas mixtas como Gower o divergencia de Jensen-Shannon ([[I-09-metodos-de-busqueda-de-analogos]]).
+4. **Métodos de similitud con distancia ponderada y descomposición por variable:** transformación exponencial de la distancia como alternativa publicada, con blanqueo ZCA-cor (Kessy et al. 2018) para descomponer el aporte de cada variable sin signos negativos. Foucher et al. (2021) presentan ejemplos de evaluación multi-variable de análogos sin fijar pesos universales en la literatura; las variables categóricas (como mineralogía) requieren métricas mixtas como Gower o divergencia de Jensen-Shannon ([[I-09-metodos-de-busqueda-de-analogos]]).
 5. **Factores no comparables directamente** (gravedad, atmósfera, radiación; Hassler et al. 2014 reporta 76 mGy/año en superficie marciana): quedan fuera del vector geomorfológico-climático y se documentan por separado.
 6. **Máscaras de tierra:** algunos análogos documentados están bajo el nivel del mar (Danakil, mar Muerto, valle de la Muerte); un criterio de máscara basado en elevación positiva los excluiría, mientras que las máscaras basadas en agua superficial no ([[I-10-mascaras-de-agua]]).
 
@@ -52,7 +54,7 @@ Revisión de métodos publicados de similitud con distancia ponderada:
 | :-- | :-- | :-- | :-- |
 | 1 | Transformación Yeo-Johnson | $y_i=\frac{(x_i+1)^{\lambda_i}-1}{\lambda_i}$ si $x_i\ge0$; $-\frac{(-x_i+1)^{2-\lambda_i}-1}{2-\lambda_i}$ si $x_i<0$ | Yeo y Johnson (2000) |
 | 2 | Estimador de escala $Q_n$ | $Q_n=d_n\cdot2.21914\cdot\{\lvert y^{(j)}-y^{(k)}\rvert;\,j<k\}_{(m)}$, $m=\binom{\lfloor N/2\rfloor+1}{2}$ | Rousseeuw y Croux (1993) |
-| 3 | Estandarización resistente | $z^{raw}_i=\frac{y_i-\mathrm{med}_B(y_i)}{Q_{n,B}(y_i)+\epsilon_0}$, $z_i=\kappa\tanh(z^{raw}_i/\kappa)$ | Rousseeuw y Croux (1993) |
+| 3 | Estandarización resistente | $z^{raw}_i=\frac{y_i-\mathrm{med}_B(y_i)}{Q_{n,B}(y_i)+\epsilon_0}$, acotamiento suave con tangente hiperbólica | Rousseeuw y Croux (1993) |
 | 4 | Contracción de matriz de correlación | $\hat R_{LW}=(1-\delta)R+\delta I$ | Ledoit y Wolf (2004) |
 | 5 | Distancia de Mahalanobis ponderada | $M_w=W^{1/2}\hat R_{LW}^{-1}W^{1/2}$, $D^2=\sum_i\sum_j\sqrt{w_iw_j}\,(\hat R^{-1}_{LW})_{ij}\,\Delta z_i\Delta z_j$ | Mahalanobis (1936) |
 | 6 | Desglose por variable (ZCA-cor) | $\delta=M_w^{1/2}\Delta z$, $\lVert\delta\rVert^2=D^2=\sum\delta_i^2$, $\eta_i=\delta_i^2/D^2$ | Kessy et al. (2018) |

@@ -74,8 +74,7 @@ Ninguno es "fracción de tiempo con sol directo".
 
 **Diferencia Tierra-Luna:** la Tierra tiene atmósfera y luz difusa; la Luna no.
 
-La afirmación de que la literatura descarta análogos naturales de iluminación rasante, atribuida a un DOI de IEEE
-Aerospace 2024, no tiene respaldo: ese DOI corresponde a un artículo sobre liderazgo técnico
+Que la literatura descarte análogos naturales de iluminación rasante: no encontrado en las fuentes consultadas
 (https://api.crossref.org/works/10.1109/AERO58975.2024.10521257).
 
 ## Preguntas abiertas

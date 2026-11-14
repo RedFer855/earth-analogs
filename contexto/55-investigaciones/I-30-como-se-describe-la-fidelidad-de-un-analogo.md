@@ -76,9 +76,8 @@ Consulta del 2026-11-08. Los DOI citados existen en Crossref; los artículos no 
 - **Único antecedente con puntaje:** Meng et al. (arXiv:2501.08584, https://arxiv.org/abs/2501.08584), aprendizaje profundo para elegir análogos de
   sitios de aterrizaje de Marte en la cuenca de Qaidam. Da un solo puntaje de parecido de imagen, sin desglose. Es un
   preprint sin revisión por pares.
-- **Otras fuentes consultadas:** el registro NTRS 20110005522 es el informe anual 2010 del Human Research Program; el
-  registro NTRS 20140003177 es "Manufacture of Lunar Regolith Simulants" (Rickman, Wilson y Stoeser, 2013), cuyo índice
-  compara simulantes, no sitios.
+- **Otras fuentes consultadas:** NTRS 20110005522 (informe anual 2010 del Human Research Program) y NTRS 20140003177
+  ("Manufacture of Lunar Regolith Simulants", Rickman, Wilson y Stoeser, 2013); ninguna califica sitios.
 
 ## Preguntas abiertas
 

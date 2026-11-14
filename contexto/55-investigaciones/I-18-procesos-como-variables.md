@@ -26,7 +26,7 @@ OBJETIVO
 
 CONTEXTO (solo lo que cambia la respuesta)
 - Reto de NASA Space Apps 2026: identificar análogos considerando procesos superficiales (sedimentación, tormentas de polvo, actividad volcánica, erosión, dinámica del hielo y alteración provocada por el agua, actual o pasada).
-- Evaluación de magnitudes calculables a escala de cuadrículas de área igual (~0.6 a 2.5 km²) y su comparabilidad entre la Tierra, la Luna y Marte.
+- Evaluación de magnitudes calculables a escala de cuadrículas globales de área igual y su comparabilidad entre la Tierra, la Luna y Marte.
 
 YA SABEMOS (no investigar ni repetir)
 - Viento y polvo en la Tierra: MERRA-2 (M2T1NXSLV, M2T1NXAER); aerosoles: MODIS MAIAC (MCD19A2).
@@ -84,7 +84,7 @@ Catálogo de magnitudes, productos globales y comparaciones cuantitativas entre 
 
 - **GloSEM (ESDAC, `esdac.jrc.ec.europa.eu/content/glosem`):** cubre únicamente tierras de cultivo a 100 m (Borrelli et al. 2022), exige registro con declaración de propósito y prohíbe transferir datos a terceros; no cubre desiertos ni zonas polares.
 - **Earth Impact Database y GVP VOTW (`volcano.si.edu`):** requieren verificación directa en navegador de versión vigente y términos de redistribución antes de incorporarlos.
-- **Escala de productos gruesos:** SIM 3292 (1:20 000 000) y SWIM (~3 km) exceden el tamaño de las celdas de cuadrículas de 0.6 a 2.5 km² y operan como contexto con incertidumbre asociada ([[I-11-sesgo-por-escala-de-cada-variable]]).
+- **Escala de productos gruesos:** SIM 3292 (1:20 000 000) y SWIM (~3 km) exceden el tamaño de las celdas de cuadrículas globales de área igual y operan como contexto con incertidumbre asociada ([[I-11-sesgo-por-escala-de-cada-variable]]).
 - **Alcance metodológico:** un proceso puede representarse globalmente mediante presencia o distancia al rasgo más cercano (dunas, glaciar, volcán holoceno, salar, minerales hidratados) a partir de catálogos globales, mientras que las tasas cuantitativas (m³/m/año, nm/año) solo existen en sitios puntuales estudiados (p. ej., Nili Patera frente a Victoria Valley). Las licencias de los catálogos terrestres (GVP, RGI 7.0, GLWD v2, JRC GSW, GLiM) se recopilan en [[sensores-tierra]].
 
 ## Fuentes

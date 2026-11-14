@@ -63,7 +63,7 @@ entre bandas.
 
 - Cooper et al. 2002 (JGR): SiO₂ = −29.8 · λCF + 296, con r² = 0.772. Coeficientes no abiertos en la fuente.
 - Renggli et al. (2026): λCF = 1.28 × 10⁻⁴ · SiO₂² − 3.55 × 10⁻² · SiO₂ + 9.649, con 50.9 ± 1.6 % en las tierras altas
-  lunares y 45.8 ± 0.9 % en los mares. El artículo de 2026 no se encontró; en Crossref solo aparece un resumen de
+  lunares y 45.8 ± 0.9 % en los mares. El artículo de 2026: no encontrado en las fuentes consultadas; en Crossref aparece un resumen de
   Renggli en Goldschmidt 2025 (10.7185/gold2025.27385).
 
 **Limitación de ASTER:** su primera banda empieza en 8.125 µm, y el CF de las anortositas (unos 7.95 µm) y de las

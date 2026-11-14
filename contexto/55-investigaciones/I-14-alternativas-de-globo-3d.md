@@ -4,7 +4,7 @@ type: investigacion
 status: vigente
 date: 2026-11-04
 updated: 2026-11-04
-summary: "Compara cuatro librerías de globo 3D para mostrar la Tierra, la Luna y Marte con decenas de miles de celdas coloreadas: terreno, cambio de cuerpo, rendimiento con polígonos, polos, licencia y dependencia de servicios con token."
+summary: "Compara cuatro librerías de globo 3D para mostrar la Tierra, la Luna y Marte con decenas de miles de polígonos coloreados: terreno, cambio de cuerpo, rendimiento con polígonos, polos, licencia y dependencia de servicios con token."
 autor: fernando
 tipo_investigacion: B
 riesgo: bajo
@@ -22,7 +22,7 @@ I-14 — Alternativas de globo 3D
 IMPORTANTE: Esta es una comparación de opciones contra criterios definidos. No escribas guías, no repitas el contexto y no elijas una opción: solo compara.
 
 OBJETIVO
-Comparar librerías web de globo 3D para mostrar la Tierra, la Luna y Marte con decenas de miles de celdas coloreadas por atributos numéricos.
+Comparar librerías web de globo 3D para mostrar la Tierra, la Luna y Marte con decenas de miles de polígonos coloreados por atributos numéricos.
 
 CONTEXTO (solo lo que cambia la comparación)
 - Sitio web estático, sin servidor.

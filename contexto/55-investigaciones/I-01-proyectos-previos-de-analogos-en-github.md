@@ -92,6 +92,6 @@ REGLAS
 
 ## Relaciones
 
-- [[reto-oficial-y-calendario]] — afirma que el reto es inédito; contraste con esta nota
+- [[reto-oficial-y-calendario]] — el reto y el calendario
 - [[dimensiones-innegociables]] — las dimensiones contra las que se compara cada proyecto
 - [[proyecto-solmate-northern-lights]] — otro proyecto externo del mismo reto

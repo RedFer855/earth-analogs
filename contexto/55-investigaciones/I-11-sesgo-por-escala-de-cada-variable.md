@@ -57,7 +57,7 @@ REGLAS
 
 ## Resultado
 
-Revisión de la literatura sobre los siete puntos para las ocho variables. Según Gotway y Young (2002), asignar un promedio de área gruesa como valor puntual en celdas finas constituye un problema de cambio de soporte que oculta la variabilidad interna.
+Revisión de la literatura sobre los siete puntos para las variables consideradas. Según Gotway y Young (2002), asignar un promedio de área gruesa como valor puntual en celdas finas constituye un problema de cambio de soporte que oculta la variabilidad interna.
 
 ### Lo que dice la literatura, por variable
 
@@ -88,6 +88,6 @@ Openshaw (1984), Woodcock y Strahler (1987, 1988), Kirk et al. (2003), Golombek 
 
 ## Relaciones
 
-- [[I-07-armonizar-tierra-luna-marte]] — el efecto de escala ya verificado en pendiente y rugosidad
+- [[I-07-armonizar-tierra-luna-marte]] — el efecto de escala en pendiente y rugosidad
 - [[I-02-indice-de-similitud-analoga]] — formulación de puntaje y agregación
 - [[I-09-metodos-de-busqueda-de-analogos]] — métodos de comparación de clases y búsqueda global

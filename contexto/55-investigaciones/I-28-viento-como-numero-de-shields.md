@@ -55,8 +55,7 @@ Consulta del 2026-11-08. Los DOI citados existen en Crossref; no todos los artí
 **Hallazgos de las fuentes**
 
 - **Punto 1, umbral de inicio:** Shao y Lu (2000), u*ft = A_N · √( (ρp − ρa)/ρa · g · Dp + γ/(ρa · Dp) ), con
-  A_N = √0.0123 ≈ 0.111 y γ = 2.9 × 10⁻⁴ N/m (https://doi.org/10.1029/2000JD900304). Evaluada con esa ecuación: Tierra 0.24 m/s (100 µm) y 0.26 m/s (200 µm); Marte
-  1.57–1.81 m/s (100 µm, ρa 0.015–0.020 kg/m³, basalto). **Umbral de impacto:** en la Tierra u*it/u*ft ≈ 0.80–0.82
+  A_N = √0.0123 ≈ 0.111 y γ = 2.9 × 10⁻⁴ N/m (https://doi.org/10.1029/2000JD900304). **Umbral de impacto:** en la Tierra u*it/u*ft ≈ 0.80–0.82
   (Bagnold 1937); en Marte ~0.10–0.30, un orden de magnitud menos (Kok 2010).
 - **Punto 2, qué umbral usan los estudios de dunas en Marte:** un umbral efectivo de τ = 0.01 ± 0.0015 Pa
   (u* ≈ 0.71–0.82 m/s), calibrado con la migración observada en Nili Patera (Ayoub et al. 2014). Está cerca del de
@@ -81,7 +80,7 @@ Consulta del 2026-11-08. Los DOI citados existen en Crossref; no todos los artí
 
 - La parametrización de u*it de Kok 2010b (GRL) con los valores 0.57 / 0.13 m/s no se localizó: arXiv:1001.4840 (https://arxiv.org/abs/1001.4840) es otro trabajo de Kok ("Analytical calculation…").
 - El manual de la MCD (variable `extvar(57)`, malla, licencia) y Michel 2018 (35 %) no se abrieron.
-- Un factor de 2 a 3 atribuido a Ridley et al. 2013 queda sin fuente: el DOI 10.5194/acp-13-8879-2013 corresponde a Lee et al., sobre núcleos de condensación.
+- Un factor de 2 a 3 atribuido a Ridley et al. 2013: no encontrado en las fuentes consultadas.
 - Falta comparar el umbral efectivo calibrado en Marte (τ ≈ 0.01 Pa) con los umbrales en MERRA-2, y el sesgo de escala de la MCD frente a MERRA-2 para la fracción de tiempo.
 
 ## Fuentes

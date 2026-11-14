@@ -93,9 +93,8 @@ Las pruebas de ISRU en campo documentadas usaron **Mauna Kea** (2008, 2010 "Dust
 ### Matices de interpretación
 
 - Hielo lunar: se citan cifras de 34 a 300 millones de t; un meta-análisis de 2022 baja a ~34 millones en los 8 cráteres principales.
-- Radiación lunar: la medida de Chang'e 4 es 1.37 mSv/día; la cifra de ~0.9 mSv/día de "estimación operativa NASA" no tiene fuente abierta.
+- Radiación lunar: la medida de Chang'e 4 es 1.37 mSv/día; la cifra de ~0.9 mSv/día: no encontrada en las fuentes consultadas.
 - Comparar dosis diarias sin el contexto de duración de misión subestima la dosis acumulada hacia Marte.
-- Los orígenes de LHS-1, LMS-1, JSC-1A y JSC Mars-1 constan en NTRS 20240011783 y 20230016971 (fuente por abrir).
 
 ### Datos y fuentes (consultado 2026-11-08)
 
@@ -107,7 +106,6 @@ Las pruebas de ISRU en campo documentadas usaron **Mauna Kea** (2008, 2010 "Dust
 | 4 | Chang'e 4, *First measurements of the radiation dose on the lunar surface* (2020-09-25) | [P] doi:10.1126/sciadv.aaz1334 |
 | 5 | Curiosity RAD, superficie de Marte (2014-01-24) | [P] doi:10.1126/science.1244797 |
 | 6 | MGS-1, estándar basado en Rocknest (2019-01) | [P] doi:10.1016/j.icarus.2018.08.019 |
-| 7 | Orígenes de LHS-1, LMS-1, JSC-1A y JSC Mars-1 (fuente por abrir) | NTRS 20240011783 (guía de simulantes) y 20230016971 |
 
 ### Bibliografía
 

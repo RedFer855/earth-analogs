@@ -4,7 +4,7 @@ type: investigacion
 status: vigente
 date: 2026-11-08
 updated: 2026-11-08
-summary: "Cómo agregan otros rasters de distinta resolución a celdas HEALPix (cobertura fraccional, estadísticas por celda, faltantes), qué librerías de Python y Rust lo hacen y a qué velocidad, en qué formato guardan la tabla resultante y cómo comprueban que la tubería no metió errores."
+summary: "Cómo agregan otros rasters de distinta resolución a celdas HEALPix (cobertura fraccional, estadísticas por celda, faltantes), qué librerías abiertas lo hacen y a qué velocidad, en qué formato guardan la tabla resultante y cómo comprueban que la tubería no metió errores."
 autor: fernando
 tipo_investigacion: B
 riesgo: critico
@@ -27,7 +27,7 @@ Saber con qué método y qué librerías se agregan rasters de distinta resoluci
 ALCANCE
 - Entradas: GeoTIFF, HDF4, HDF5 y netCDF de resoluciones dispares.
 - Estadísticas por celda y variable (por ejemplo media, desviación, percentiles y fracciones), y tratamiento de "sin dato".
-- Implementaciones en Python o Rust.
+- Implementaciones abiertas en cualquier lenguaje.
 
 PUNTOS A RESPONDER
 1. Qué métodos usan para pasar un raster a HEALPix: centro del píxel, cobertura fraccional (exactextract), remuestreo previo a la resolución de la celda. Qué error deja cada uno cuando el píxel es más grande que la celda o al revés.
@@ -59,7 +59,7 @@ REGLAS
 2. **Percentiles exactos:** con decenas a miles de píxeles por celda, ordenar por bloque permite percentiles exactos sin aproximaciones tipo t-digest; media y desviación admiten Welford incremental.
 3. **Fracción válida:** las fuentes señalan el riesgo de que un único píxel válido represente toda una celda costera o de nivel jerárquico superior; no se encontró un umbral estándar.
 4. **Latitud en la Tierra:** HEALPix trabaja en una esfera. Pasar latitud geodésica WGS84 directamente deforma el área de las celdas hasta ~0.9 % y las desplaza hasta ~14 km respecto de la latitud autálica; las fuentes recomiendan documentar la convención de latitud usada (en la Luna y Marte esféricos no hay diferencia).
-5. **Librerías documentadas:** `cdshealpix` (BSD-3, 0.9.0, con ruedas para Windows, disponible en Python y Rust) y `raster2dggs` (LGPL-3.0, 0.19.1, soporta HEALPix y `exactextract`).
+5. **Librerías documentadas:** `cdshealpix` (BSD-3, 0.9.0, con ruedas para Windows, disponible en más de un lenguaje) y `raster2dggs` (LGPL-3.0, 0.19.1, soporta HEALPix y `exactextract`).
 6. **Formato de tabla:** Parquet sin geometría, indexado por `healpix_id` (`uint64`, esquema nested), `float32` y compresión `zstd` (~4 MB sin comprimir por millón de celdas y por variable, según la fuente).
 7. **Número de celdas:** a `nside 8192` (~0.8 km), HEALPix tiene unos 805 millones de celdas en toda la esfera (12·nside²); el tamaño de la tabla depende del número de columnas y del tipo de dato.
 8. **Validación descrita en las fuentes:** pruebas sintéticas con valores conocidos, conteo de celdas por nivel, verificación de unicidad de `healpix_id` y contraste puntual contra recortes manuales.

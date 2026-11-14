@@ -51,12 +51,11 @@ REGLAS
 
 ## Hallazgos de la literatura y documentación
 
-1. **Procesar cada tesela con un halo de las vecinas.** Ningún proyecto global calculó pendiente tesela por tesela sin
+1. **Halo de las vecinas.** Según las fuentes, ningún proyecto global calculó pendiente tesela por tesela sin
    solape (Geomorpho90m, GEDTM30, Hydrography90m). Las COG de AWS quitaron la fila y la columna que compartían las
-   teselas originales. Un VRT con todas las teselas permite leer cada ventana más un borde de ~0.02° antes de reproyectar y recortar después.
-2. **Enmascarar todas las clases de agua de la WBM (1, 2 y 3), no solo el océano**, antes de calcular pendiente.
-   GEDTM30 encontró ruido sobre lagos que contamina la pendiente.
-3. **Reproyección local por tesela y antimeridiano:** reproyectar cada tesela en métrica plana evita la distorsión este-oeste de las coordenadas geográficas; en las teselas junto a ±180°, el halo debe tomar vecinas del otro lado del antimeridiano. Al agregar de 90 m a ~200 m, no hace falta remuestreo cúbico para subir de resolución en latitudes altas.
+   teselas originales. La documentación describe un VRT con todas las teselas que permite leer cada ventana más un borde de ~0.02° antes de reproyectar y recortar después.
+2. **Máscara de agua.** GEDTM30 enmascaró las clases de agua de la WBM (1, 2 y 3), no solo el océano, antes de calcular pendiente; encontró ruido sobre lagos que contamina la pendiente.
+3. **Reproyección local por tesela y antimeridiano:** según las fuentes, reproyectar cada tesela en métrica plana evita la distorsión este-oeste de las coordenadas geográficas; en las teselas junto a ±180°, el halo toma vecinas del otro lado del antimeridiano. Al agregar de 90 m a ~200 m, las fuentes indican que no hace falta remuestreo cúbico para subir de resolución en latitudes altas.
 4. **Producto ya publicado:** la pendiente de GEDTM30 a 240 m (CC BY 4.0, 4.88 GB, v1.2.0, en Zenodo). Es un modelo de terreno sin bosques ni edificios, calculado con polinomio de 5×5 sobre fusión de varios DEM.
 5. **Anchos de tesela por latitud** (readme de AWS): 1200 px hasta 49°, 800 de 50° a 59°, 600 de 60° a 69°, 400 de 70° a 79° y 240 desde 80°; el ancho en longitud es 3x entre 70° y 80° y 5x entre 80° y 85°.
 

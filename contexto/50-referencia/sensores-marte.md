@@ -69,8 +69,6 @@ Licencias: dominio público de NASA y USGS (incluido `MGC³`, según PDS y USGS 
   - Uso científico libre si se cita el origen y se informa a los autores.
   - Uso comercial prohibido sin autorización.
   - La interfaz web no pide registro, pero es "for moderate use only".
-  - Convención de tiempo (2026-11-11): en `clim_aveEUV/clim_NN_me.nc` (12 tramos de 30° de Ls, malla de
-    5,625° × 3,75°) la dimensión `Time` es la hora universal en longitud 0; la hora local es `Time + lon/15`.
   - La versión completa (netCDF) se baja gratis con un formulario ([MCD_pro](http://www-mars.lmd.jussieu.fr/MCD_pro/mcd_pro.html)). Ahí se acepta **no transmitir la MCD a terceros, ni en parte ni completa**, y no hacer negocio con ella.
   - Nada sobre hackathons ni proyectos de estudiantes.
   - **Duda abierta:** si publicar valores derivados cuenta como transmitir "una parte"; el contacto de los autores está en access.html.

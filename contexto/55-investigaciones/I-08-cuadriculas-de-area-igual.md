@@ -4,7 +4,7 @@ type: investigacion
 status: vigente
 date: 2026-11-04
 updated: 2026-11-04
-summary: "Compara HEALPix, S2, H3 y otras cuadrículas globales anidadas para dividir los tres cuerpos en celdas de área igual con subdivisión exacta, y qué librerías de Rust las implementan."
+summary: "Compara HEALPix, S2, H3 y otras cuadrículas globales anidadas para dividir los tres cuerpos en celdas de área igual con subdivisión exacta, y qué implementaciones abiertas existen."
 autor: fernando
 tipo_investigacion: B
 riesgo: bajo
@@ -22,10 +22,10 @@ I-08 — Cuadrículas globales de área igual
 IMPORTANTE: Esta es una comparación de opciones contra criterios definidos. No escribas guías, no repitas el contexto y no elijas una opción: solo compara.
 
 OBJETIVO
-Comparar cuadrículas globales jerárquicas para dividir la superficie de la Tierra, la Luna y Marte en celdas de área igual que se subdividen en celdas hijas, para consultas de grueso a fino.
+Comparar cuadrículas globales jerárquicas para dividir la superficie de la Tierra, la Luna y Marte en celdas de área igual que se subdividen en celdas hijas, para análisis a distintas escalas.
 
 CONTEXTO (solo lo que cambia la comparación)
-- Celdas de 1 km² a ~10 000 km² en Tierra, Luna y Marte (incluido el polo sur lunar), evaluando implementaciones abiertas disponibles.
+- Aplicabilidad a Tierra, Luna y Marte (incluido el polo sur lunar), evaluando implementaciones abiertas disponibles.
 
 YA SABEMOS (no investigar ni repetir)
 - Una cuadrícula de latitud y longitud tiene celdas de área distinta según la latitud.
@@ -39,10 +39,10 @@ OPCIONES A COMPARAR
 CRITERIOS
 1. ¿Las celdas tienen área exactamente igual? Si no, variación máxima de área entre celdas en un mismo nivel.
 2. ¿Cada celda se divide exactamente en sus hijas (anidamiento exacto) y cuántas hijas tiene?
-3. Tamaño de celda disponible entre 1 km² y 10 000 km² en la Tierra: qué niveles caen en ese rango.
+3. Tamaños de celda que ofrece cada sistema en la Tierra, por nivel.
 4. ¿Se puede usar sobre otra esfera (radio 1737.4 km de la Luna, 3396.19 km de Marte)? ¿La librería acepta el radio como parámetro?
 5. Comportamiento en los polos (deformación o singularidades).
-6. Librería en Rust: nombre del crate, versión, fecha del último release, licencia y si compila a WebAssembly.
+6. Implementaciones abiertas (cualquier lenguaje): nombre, versión, fecha del último release, licencia y soporte de WebAssembly.
 7. Cómo se obtienen los vecinos de una celda.
 
 ENTREGA
@@ -59,17 +59,17 @@ REGLAS
 
 ## Resultado
 
-Comparación de seis cuadrículas globales jerárquicas (HEALPix, S2, H3, rHEALPix, ISEA3H y A5) bajo los siete criterios técnicos. Existen cuadrículas de área exactamente igual con implementación en Rust.
+Comparación de seis cuadrículas globales jerárquicas (HEALPix, S2, H3, rHEALPix, ISEA3H y A5) bajo los siete criterios técnicos. Existen cuadrículas de área exactamente igual con implementación abierta.
 
 ### Resumen de la comparación
 
-| Opción | Área igual | Anidamiento exacto | Hijas | Crate Rust (WASM) | Polos |
+| Opción | Área igual | Anidamiento exacto | Hijas | Implementación abierta encontrada (WASM) | Polos |
 | :-- | :-- | :-- | :-- | :-- | :-- |
 | HEALPix | Sí | Sí | 4 | `cdshealpix` 0.10.1 (sí) | Área igual, celdas alargadas cerca del polo |
 | S2 | No (máx/mín ~2.1×) | Sí | 4 | `s2` 0.2.0 (no encontrado; sin polígonos) | Polo en el centro de una cara, sin singularidad |
 | H3 | No (~2× entre hexágonos; pentágonos ~0.5×) | No | 7 | `h3o` 0.11.1 (sí) | Hexágonos, sin singularidad |
-| rHEALPix | Sí | Sí | 9 | No hay crate nativo | Celda circular en el polo y celdas triangulares |
-| ISEA3H | Sí entre hexágonos (pentágonos 5/6) | No | apertura 3 | No hay crate nativo (DGGRID es C++, AGPL-3.0) | Sin singularidad con la orientación por defecto |
+| rHEALPix | Sí | Sí | 9 | Sin implementación nativa encontrada | Celda circular en el polo y celdas triangulares |
+| ISEA3H | Sí entre hexágonos (pentágonos 5/6) | No | apertura 3 | Sin implementación nativa encontrada (DGGRID es C++, AGPL-3.0) | Sin singularidad con la orientación por defecto |
 | A5 | Sí | No (jerarquía solo lógica) | 4 | `a5` 1.0.0 (no encontrado) | No encontrado |
 
 Ninguna librería recibe el radio del cuerpo: todas trabajan en ángulos sobre la esfera unitaria y el área se escala

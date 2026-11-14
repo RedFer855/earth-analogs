@@ -42,7 +42,7 @@ PUNTOS A RESPONDER
 4. Normalizaciones resistentes a valores extremos usadas en estos trabajos (por rango con percentiles, z-score con mediana y MAD, por rangos o cuantiles): cuál, con qué percentiles de corte.
 5. Qué hacen con una celda a la que le falta una variable: la descartan, reparten el peso entre las variables que sí tiene (como Gower), imputan, o penalizan. Cita del trabajo que lo hace.
 6. Cómo comprobaron que el puntaje encuentra lo correcto: análogos conocidos, sitios sembrados, comparación con expertos, sensibilidad a los pesos.
-7. Implementaciones abiertas de estos métodos (repositorio, paquete de R o Python, crate de Rust) con su licencia.
+7. Implementaciones abiertas de estos métodos (repositorio, paquete de R o Python u otro lenguaje) con su licencia.
 
 ENTREGA
 - Tabla 1 (puntos 1-2): # | Campo | Trabajo (autor, año, revista) | Variables | Normalización | Métrica | Regla de faltantes | Validación | DOI o enlace | Certeza

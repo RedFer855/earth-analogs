@@ -38,7 +38,7 @@ PUNTOS A RESPONDER
 4. Algoritmos estándar de pendiente y rugosidad (Horn, Zevenbergen-Thorne, RMS de desviación, TRI) y en qué herramienta gratuita están (gdaldem, WhiteboxTools, otras).
 5. Cómo se comparan temperaturas de superficie entre cuerpos con rangos muy distintos (normalización por amplitud diurna, por percentiles, otra) en la literatura de análogos.
 6. Cómo se comparan índices minerales de espectrómetros distintos (CRISM o M3 frente a EMIT o ASTER): bandas equivalentes o mapas de clases.
-7. Soporte de CRS planetarios en GDAL/PROJ actual y en el crate gdal de Rust y en rasterio (versiones).
+7. Soporte de CRS planetarios en GDAL/PROJ actual y y en rasterio y otros bindings de GDAL (versiones).
 8. Artículos o herramientas publicadas que ya hagan comparaciones cuantitativas Tierra-Marte o Tierra-Luna de terreno, con su método.
 
 ENTREGA
@@ -66,7 +66,7 @@ Principio central identificado en la literatura: la temperatura superficial no s
 | 3 | `IAU_2015:49905` devuelve 404 en spatialreference.org (código inexistente en el registro IAU 2015). | https://spatialreference.org/ref/iau_2015/49905/ | 2026-11-04 |
 | 4 | `gdaldem TRI` usa la definición de Riley por defecto desde GDAL 3.3 (sin dividir por vecinos); Wilson es la alternativa disponible. | https://gdal.org/en/stable/programs/gdaldem.html | 2026-11-04 |
 | 5 | GDAL 3.11 calcula la relación vertical/horizontal desde el CRS en `slope` y `hillshade` sin `-s`; advierte resultados distorsionados a latitud alta en CRS geográfico y `-s 111120` aplica únicamente a la Tierra. | Misma página | 2026-11-04 |
-| 6 | Crate `gdal` 0.19.0 (2025-12-23): bindings para GDAL 3.4 a 3.11 (la documentación de 0.19.0 falla en docs.rs; la última compilada ahí es 0.18.0). | https://docs.rs/crate/gdal/latest · https://crates.io/api/v1/crates/gdal | 2026-11-04 |
+| 6 | Binding `gdal` 0.19.0 (2025-12-23): bindings para GDAL 3.4 a 3.11 (la documentación de 0.19.0 falla en docs.rs; la última compilada ahí es 0.18.0). | https://docs.rs/crate/gdal/latest · https://crates.io/api/v1/crates/gdal | 2026-11-04 |
 | 7 | `rasterio` incluye `CRS.from_authority` desde la versión 1.1.7. | https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html | 2026-11-04 |
 | 8 | Sanganeria (2026, NHSJS, 2026-04-21) existe, pero compara brillo de imágenes normalizado por min-max, no DEM ni variables físicas. | https://nhsjs.com/2026/finding-earths-best-testbeds-for-moon-and-mars-rovers-a-quantitative-terrain-comparison/ | 2026-11-04 |
 
@@ -78,7 +78,7 @@ La literatura también documenta el efecto de escala en morfometría (Shepard et
 2. **Escala:** la literatura citada (Shepard et al. 2001, Kreslavsky y Head 2000, Rosenburg et al. 2011) documenta que pendiente y rugosidad dependen de la resolución y la línea base.
 3. **Temperatura e inercia térmica:** Marte tiene THEMIS (100 m) y TES (~3 km); la Luna tiene el parámetro H de Diviner. La literatura trata la inercia térmica como magnitud comparable entre cuerpos, no la temperatura en kelvin ([[I-27-inercia-termica-con-unidades-fisicas]]).
 4. **Mineralogía:** la literatura compara espectrómetros distintos mediante clases o parámetros resumen (p. ej. CRISM, M3, EMIT), no mediante bandas crudas.
-5. **Versiones de herramientas:** el crate `gdal` 0.19.0 declara bindings para GDAL 3.4 a 3.11 (ver tabla).
+5. **Versiones de herramientas:** el binding `gdal` 0.19.0 (crates.io) declara soporte para GDAL 3.4 a 3.11 (ver tabla).
 
 ## Relaciones
 
