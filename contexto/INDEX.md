@@ -65,7 +65,7 @@ _(vacía)_
 
 ## 70-bitacora — Notas de sesión por mes
 
-_(vacía)_
+- [[2026-11-14-fernando-etl-e01-a-e13]] · sesion · fernando · claude-code · 2026-11-14 — Se escribió y corrió el ETL completo (malla, terreno, temperatura, NDVI, aridez, permafrost, viento y polvo, material, agua, objetivos de la Luna y Marte, manifiesto), cada paso con su comprobación y su registro de auditoría; los errores encontrados quedaron corregidos y registrados.
 
 ## 80-deuda — Deuda técnica P-NNN
 

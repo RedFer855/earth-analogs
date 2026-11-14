@@ -66,3 +66,4 @@ __pycache__/
 
 # Entorno pixi (se recrea con pixi install)
 **/.pixi/
+audit/*.lock

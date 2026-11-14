@@ -143,9 +143,24 @@ def construir(args, evento: str, comando: str, duracion: float | None, resultado
 
 
 def agregar(entrada: dict, registro: Path) -> None:
-    linea = json.dumps(entrada, ensure_ascii=False, separators=(",", ":"))
-    with registro.open("a", encoding="utf-8", newline="\n") as f:
-        f.write(linea + "\n")
+    """Agrega una línea dentro de un candado, para que varios pasos en paralelo no rompan la cadena."""
+    candado = registro.with_suffix(".lock")
+    for _ in range(600):
+        try:
+            fd = os.open(candado, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except FileExistsError:
+            time.sleep(0.1)
+    else:
+        raise SystemExit(f"audit: no se pudo tomar el candado {candado}")
+    try:
+        entrada["prev"] = hash_previo(registro)
+        linea = json.dumps(entrada, ensure_ascii=False, separators=(",", ":"))
+        with registro.open("a", encoding="utf-8", newline="\n") as f:
+            f.write(linea + "\n")
+    finally:
+        os.close(fd)
+        os.remove(candado)
     print(f"audit: {entrada['paso']} {entrada['evento']} {entrada['resultado']} ({entrada['ts']})")
 
 
