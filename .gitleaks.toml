@@ -1,0 +1,19 @@
+# gitleaks para earth-analogs. Lo usa el job "Cambios y secretos" de ci.yml.
+# Parte de las reglas por defecto y agrega las de los secretos propios del proyecto.
+# Si gitleaks marca un secreto real: se rota y se quita de la rama. Nunca se agrega una excepción para dejarlo pasar.
+
+title = "analogos"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "nasa-earthdata-token"
+description = "Token de NASA Earthdata (EDL). Solo va en .env o en los secretos del CI (AGENTS.md, regla 4)."
+regex = '''(?i)(earthdata|edl)_?(token|bearer)["']?\s*[:=]\s*["']?([A-Za-z0-9_\-.]{30,})'''
+secretGroup = 3
+keywords = ["earthdata", "edl_token", "edl_bearer"]
+
+[[rules.allowlists]]
+description = "Marcadores de .env.example, como <tu-clave>."
+regexes = ['''^<[^>]+>$''']

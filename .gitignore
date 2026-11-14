@@ -1,0 +1,68 @@
+# --- Datos crudos: se descargan y procesan offline, nunca van a git ---
+datos/
+!scripts/datos/
+scripts/datos/fuentes-glo90.json
+*.tif
+*.tiff
+*.img
+*.IMG
+*.nc
+*.hdf
+*.h5
+*.zip
+
+# --- Rust / WebAssembly ---
+target/
+pkg/
+**/*.rs.bk
+
+# --- Node / TypeScript ---
+node_modules/
+dist/
+.vite/
+
+# --- Secretos: nunca en git ---
+.env
+.env.*
+!.env.example
+*.pem
+.netrc
+
+# --- Grafo local de graphify (índice de solo lectura, nunca versionado) ---
+graphify-out/
+
+# --- Obsidian: solo se versiona app.json; el resto es de cada persona ---
+**/.obsidian/*
+!**/.obsidian/app.json
+
+# --- Entregables generados (se regeneran desde el .md) ---
+salidas/
+
+# --- IDE y sistema operativo ---
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Herramientas de agentes locales (los subagentes y habilidades del equipo sí se versionan) ---
+.claude/*
+!.claude/agents/
+!.claude/skills/
+.mcp.json
+mcp_config.json
+.atl/
+.gemini/
+.antigravity/
+
+# Archivos de trabajo de otras herramientas (no se versionan)
+.agents/
+
+# --- Python ---
+__pycache__/
+*.pyc
+
+# Entorno pixi (se recrea con pixi install)
+**/.pixi/

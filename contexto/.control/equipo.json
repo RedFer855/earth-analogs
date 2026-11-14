@@ -1,0 +1,4 @@
+[
+  { "alias": "fernando", "github": "RedFer855", "integrador": true, "agente": "claude-code" },
+  { "alias": "guillermo", "github": "IngGuillermoRosa", "integrador": false, "agente": "antigravity" }
+]

@@ -1,0 +1,17 @@
+# Graphify: qué NO entra al grafo (sintaxis gitignore)
+contexto/.control/
+contexto/.obsidian/
+graphify-out/
+node_modules/
+datos/
+target/
+pkg/
+dist/
+*.min.js
+# Generados, plantillas y apuntadores: duplican o no aportan al grafo
+contexto/INDEX*.md
+contexto/_plantillas/
+CLAUDE.md
+GEMINI.md
+.github/copilot-instructions.md
+.github/pull_request_template.md

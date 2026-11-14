@@ -1,0 +1,8 @@
+{
+  "userIgnoreFilters": [
+    "_plantillas/",
+    "INDEX.md",
+    "INDEX-bitacora.md",
+    ".control/"
+  ]
+}
