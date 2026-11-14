@@ -74,6 +74,14 @@ the input of the similarity engine; the website only loads light derived files (
 | GLiM | Class 15 (`nd`) is "no data": set to `NaN`. Class 11 (`wb`) is water. |
 | Mars Climate Database | Time is universal time at longitude 0: convert to local time before taking day and night. Values are `local_only`. |
 | Ground ice (Karjalainen) | Not used until its unit is read from the source paper. |
+| Sky-view factor (Li et al. 2024) | It is the fraction of visible sky, not illumination. Context for the site sheet only; it does not score similarity. |
+| LOLA `LDEM_80S_20M` V2.1 | Open through the `.lbl` label. Heights are in km over a 1737.4 km sphere; polar stereographic. |
+| LOLA illumination (Mazarico et al. 2011) | Read full resolution: the COG overviews are not valid for measurement. Context for the site sheet only. |
+| Diviner GDR L3 polar | `d` is local time 6–18 h and `n` is 18–6 h. Confirm with the data that day is warmer than night before using them. |
+| Diviner H-parameter (Hayne et al. 2017) | FITS file: read with `astropy`, not GDAL. Context only. |
+| HRSC-MOLA blended DEM 200 m | Int16, no data −32768, uncompressed: read by windows. Where HRSC is missing, the 200 m are interpolated MOLA (provisional product). |
+| TES thermal inertia (Putzig and Mellon 2007) | Binary with a 14 400-byte ASCII header, big-endian. Check how 0 and −32768 are used as no data; the `msk` layer marks interpolated pixels. |
+| THEMIS thermal inertia mosaic | Only between 60° S and 60° N; quadrangles are named by their south-west corner. |
 
 Water fractions are a partition: land + ocean + lake + river = 1. Ephemeral water is a part of lake + river.
 
@@ -104,3 +112,52 @@ The choices behind this plan are recorded as decision notes in
 - [ADR-006](../contexto/45-decisiones/ADR-006-valores-faltantes-y-cobertura.md) — missing values and coverage
 - [ADR-007](../contexto/45-decisiones/ADR-007-contrato-de-metrics-json.md) — `metrics.json` contract
 - [ADR-008](../contexto/45-decisiones/ADR-008-calidad-de-la-tabla-y-manifiesto.md) — table quality and manifest
+
+## 9. Environment and resources
+
+- **One locked environment for every node:** Python with GDAL built with HDF4, HDF5 and netCDF. FITS files are read
+  with `astropy`. The lock file is committed, so every PC runs the same versions.
+- **Processes per step are declared** in the audited command. Memory-heavy steps (30 m layers) run with fewer
+  processes; a step that runs out of memory on some tiles must fail, not continue.
+- **Disk:** E-02 measures the free space in `$DATOS` and `$RUN` and records it in the audit trail before any
+  layer runs.
+
+## 10. Never overwrite a verified output
+
+- A new run writes to a new folder (`$RUN/<name>_new/`); the verified one is not touched.
+- The new output is verified with the same checks. Columns that were not meant to change must be **byte-identical**
+  to the verified ones. If an unchanged column moves in a single cell, the run broke something.
+- Only then is the old output renamed as a dated backup and the new one takes its place. The audit trail records
+  which output produced which results.
+
+## 11. Two nodes, same plan
+
+Two PCs run the same plan in parallel as a backup.
+
+- Both start from the same commit, the same lock file and the same source versions (checksums in the manifest).
+- After each step, both compare per column: cell count, coverage, percentiles and a checksum. Deterministic steps
+  must match byte for byte; any other difference is reported with the column, the cells and the size of the gap.
+- A mismatch stops the step on both nodes until it is explained and written down.
+
+## 12. Named exceptions
+
+A check may accept a known bias only as a **named exception**: value, reason and who accepted it, printed under
+`EXCEPTIONS` and never as a pass. At most three per run. Anything else is a failure and stops the plan.
+
+## 13. Rules for agents
+
+- Every number goes into a JSON file together with the method that produced it.
+- An agent saying "done" is not a result: the validator runs and its output is read.
+- Place names derived from coordinates are marked "not verified" until checked against a gazetteer.
+- Agents never edit the audit trail by hand; it is written only by `audit/audit.py`.
+
+## 14. Open items
+
+- **Target sites:** E-11 and E-12 need the 9 Artemis regions and the 12 Mars sites as files in
+  `contexto/32-sitios/`. They are not in the repository yet.
+- **Decisions for the team**, to close before the steps that use them:
+  - whether the sixth dimension searches with aridity combined with the diurnal thermal range;
+  - whether the annual temperature amplitude enters against Mars, marked as model data;
+  - the sources of the two dust profiles (material and operational) and how a cell found by both is marked;
+  - whether illumination stays in the site sheet only;
+  - latitude convention for the grid (authalic or geodetic), before E-01.
