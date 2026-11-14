@@ -1,0 +1,23 @@
+{
+  "descripcion": "Regiones candidatas de alunizaje de Artemis III (9, sin orden de prioridad). Centroides y áreas de los polígonos del data release del USGS; los polígonos se leen de ese paquete en E-11.",
+  "fuente": {
+    "producto": "Down Selected Artemis III Candidate Landing Site Navigational Grids, A3_9regions-lonlat-simplified",
+    "doi": "10.5066/P1MEQ6UK",
+    "licencia": "dominio público (USGS)",
+    "lista_oficial": "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+    "consultado": "2026-11-05",
+    "nota_de_investigacion": "I-17-sitios-objetivo-luna-y-marte"
+  },
+  "sistema": "latitud y longitud este (0-360) tal como las da el paquete del USGS; el sistema de referencia exacto se lee del archivo en E-11 (no verificado aquí)",
+  "regiones": [
+    { "codigo": "CB", "nombre": "Peak near Cabeus B", "lat": -83.637, "lon_e": 291.251, "area_km2": 399.8 },
+    { "codigo": "HW", "nombre": "Haworth", "lat": -86.764, "lon_e": 337.223, "area_km2": 888.0 },
+    { "codigo": "MA", "nombre": "Malapert Massif", "lat": -85.995, "lon_e": 359.764, "area_km2": 441.0 },
+    { "codigo": "MP", "nombre": "Mons Mouton Plateau", "lat": -84.335, "lon_e": 30.592, "area_km2": 4451.8 },
+    { "codigo": "MM", "nombre": "Mons Mouton", "lat": -85.427, "lon_e": 31.743, "area_km2": 256.0 },
+    { "codigo": "N1", "nombre": "Nobile Rim 1", "lat": -85.436, "lon_e": 37.347, "area_km2": 400.0 },
+    { "codigo": "N2", "nombre": "Nobile Rim 2", "lat": -83.954, "lon_e": 58.822, "area_km2": 400.0 },
+    { "codigo": "G2", "nombre": "de Gerlache Rim 2", "lat": -88.230, "lon_e": 295.372, "area_km2": 400.0 },
+    { "codigo": "SP", "nombre": "Slater Plain", "lat": -87.164, "lon_e": 125.538, "area_km2": 399.8 }
+  ]
+}
