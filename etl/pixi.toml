@@ -1,0 +1,19 @@
+[workspace]
+name = "earth-analogs-etl"
+channels = ["conda-forge"]
+platforms = ["win-64", "linux-64"]
+
+[dependencies]
+python = "3.12.*"
+numpy = ">=2.1"
+gdal = ">=3.10"
+libgdal-hdf4 = "*"
+libgdal-hdf5 = "*"
+libgdal-netcdf = "*"
+astropy = ">=6.1"
+
+[pypi-dependencies]
+cdshealpix = ">=0.7"
+
+[tasks]
+pruebas = "python -I -m unittest discover -s . -p 'test_*.py'"
