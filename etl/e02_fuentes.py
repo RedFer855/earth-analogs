@@ -37,7 +37,7 @@ FUENTES = [
     ("MOD13C1 NDVI", "tierra/vegetacion-mod13c1-2013-2022", "*.hdf", 230, r"\.A(\d{7})\."),
     ("MERRA-2 viento", "tierra/merra2-viento-1de5-2013-2022", "*.nc4", None, None),
     ("MERRA-2 u*", "tierra/merra2-ustar-horario", "*.nc4", None, None),
-    ("MERRA-2 polvo", "tierra/merra2-polvo-mensual", "*.nc4", 120, r"\.(\d{6})\.nc4"),
+    ("MERRA-2 polvo", "tierra/merra2-polvo-mensual", "*.nc4", 120, r"\.(\d{6})\."),
     ("MODFDS", "tierra/modfds-tormentas-polvo", "*.nc", None, None),
     ("Global Aridity Index", "tierra/aridez-global-ai-v3_1", "*.zip", None, None),
     ("Obu permafrost", "tierra/permafrost-obu-2018", "*.zip", None, None),
@@ -54,7 +54,7 @@ FUENTES = [
     ("LOLA Barker 5 m", "luna/lola-5m-barker", "*.tif", None, None),
     ("Mazarico iluminación", "luna/iluminacion-mazarico", "*.TIF", None, None),
     ("Diviner L3 polar", "luna/diviner-gdr-l3-tbol-polar-sur", "*.lbl", None, None),
-    ("Diviner PRP", "luna/diviner-prp-polo-sur", "*.lbl", None, None),
+    ("Diviner PRP", "luna/diviner-prp-polo-sur", "*.zip", None, None),
     ("Diviner H", "luna/diviner-h-hayne-2017", "*.fits", None, None),
     ("Diviner CF", "luna/diviner-cf-lucey-2021", "*.tiff", None, None),
     ("Mini-RF", "luna/minirf-lromrf-0005", "*.lbl", None, None),
@@ -99,9 +99,9 @@ def abrir(ruta: Path) -> str:
 def comprobar(datos: Path, nombre, carpeta, patron, esperados, rx) -> dict:
     d = datos / carpeta
     r = {"fuente": nombre, "carpeta": carpeta, "ok": True, "errores": []}
-    archivos = sorted(d.glob(patron)) if d.is_dir() else []
+    archivos = sorted(d.rglob(patron)) if d.is_dir() else []
     r["archivos"] = len(archivos)
-    r["bytes"] = sum(a.stat().st_size for a in archivos)
+    r["bytes"] = sum(a.stat().st_size for a in d.rglob("*") if a.is_file()) if d.is_dir() else 0
     if not archivos:
         r["ok"] = False
         r["errores"].append("sin archivos")
