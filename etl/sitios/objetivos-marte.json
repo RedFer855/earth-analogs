@@ -1,0 +1,21 @@
+{
+  "descripcion": "12 sitios de Marte: puntos de aterrizaje con mediciones en superficie, Exploration Zones de la NASA y candidatos con hielo somero. Cada sitio se evalúa en un círculo de 50 km de radio.",
+  "decision": "lista y radio elegidos el 2026-11-14 por el equipo; pendientes de revisión",
+  "radio_km": 50,
+  "sistema": "latitud planetocéntrica, longitud este 0-360, esfera Mars 2000 (3396.19 km)",
+  "nota_de_investigacion": "I-17-sitios-objetivo-luna-y-marte",
+  "sitios": [
+    { "codigo": "JZ", "nombre": "Jezero", "tipo": "aterrizaje y Exploration Zone", "lat": 18.38, "lon_e": 77.58, "coordenadas": "I-17" },
+    { "codigo": "GA", "nombre": "Gale (punto de aterrizaje)", "tipo": "aterrizaje", "lat": -4.59, "lon_e": 137.44, "coordenadas": "longitud de I-17; latitud no verificada en esta sesión" },
+    { "codigo": "IN", "nombre": "InSight, Elysium Planitia", "tipo": "aterrizaje", "lat": 4.50, "lon_e": 135.62, "coordenadas": "no verificado en esta sesión" },
+    { "codigo": "ZH", "nombre": "Zhurong, Utopia Planitia", "tipo": "aterrizaje", "lat": 25.07, "lon_e": 109.93, "coordenadas": "no verificado en esta sesión" },
+    { "codigo": "ME", "nombre": "Meridiani Planum (Opportunity)", "tipo": "aterrizaje", "lat": -1.95, "lon_e": 354.47, "coordenadas": "no verificado en esta sesión" },
+    { "codigo": "MV", "nombre": "Mawrth Vallis", "tipo": "Exploration Zone", "lat": 24.3, "lon_e": 340.8, "coordenadas": "I-17" },
+    { "codigo": "NL", "nombre": "Noctis Landing", "tipo": "Exploration Zone", "lat": -6.494, "lon_e": 267.547, "coordenadas": "I-17" },
+    { "codigo": "DM", "nombre": "Deuteronilus Mensae", "tipo": "Exploration Zone", "lat": 39.3, "lon_e": 23.2, "coordenadas": "I-17" },
+    { "codigo": "EM", "nombre": "Erebus Montes", "tipo": "Exploration Zone", "lat": 38.9, "lon_e": 188.5, "coordenadas": "I-17" },
+    { "codigo": "AF", "nombre": "Acheron Fossae", "tipo": "Exploration Zone", "lat": 36.8, "lon_e": 222.8, "coordenadas": "I-17" },
+    { "codigo": "PM", "nombre": "Phlegra Montes (PM-1)", "tipo": "candidato con hielo somero", "lat": 35.23, "lon_e": 163.95, "coordenadas": "I-17" },
+    { "codigo": "AP", "nombre": "Arcadia Planitia (AP-1)", "tipo": "candidato con hielo somero", "lat": 39.84, "lon_e": 202.14, "coordenadas": "I-17" }
+  ]
+}
