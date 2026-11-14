@@ -21,7 +21,7 @@ the input of the similarity engine; the website only loads light derived files (
 
 ## 3. Architecture: one grid, one file per column
 
-- **Step E-01 builds the grid first.** HEALPix level 12 (≈ 1.7 km cells), land cells only, ascending `ipix`:
+- **Step E-01 builds the grid first.** HEALPix level 12 (≈ 2.5 km² per cell), land cells only, ascending `ipix`:
   `grid/ipix.u32`, `grid/lat.f32`, `grid/lon.f32`.
 - **Every layer writes its own column** `columns/<name>.f32`, aligned to that grid (same length, same order).
   Layers do not depend on each other and can run in parallel or be skipped.
@@ -90,3 +90,17 @@ Water fractions are a partition: land + ocean + lake + river = 1. Ephemeral wate
 
 Every step is run through `audit/audit.py correr --paso E-NN -- <command>`, which records start, end,
 duration, outputs and result. See the [audit trail](../audit/README.md).
+
+## 8. Decisions
+
+The choices behind this plan are recorded as decision notes in
+[`contexto/45-decisiones/`](../contexto/45-decisiones/):
+
+- [ADR-001](../contexto/45-decisiones/ADR-001-preprocesar-offline-y-servir-ligero.md) — preprocess offline, serve light
+- [ADR-002](../contexto/45-decisiones/ADR-002-malla-primero-y-una-columna-por-capa.md) — grid first, one column per layer
+- [ADR-003](../contexto/45-decisiones/ADR-003-variables-por-proceso-fisico.md) — variables by physical process
+- [ADR-004](../contexto/45-decisiones/ADR-004-periodo-comun-y-climatologia.md) — common period and climatology
+- [ADR-005](../contexto/45-decisiones/ADR-005-regla-de-escala-de-pendiente-y-rugosidad.md) — slope and roughness scale rule
+- [ADR-006](../contexto/45-decisiones/ADR-006-valores-faltantes-y-cobertura.md) — missing values and coverage
+- [ADR-007](../contexto/45-decisiones/ADR-007-contrato-de-metrics-json.md) — `metrics.json` contract
+- [ADR-008](../contexto/45-decisiones/ADR-008-calidad-de-la-tabla-y-manifiesto.md) — table quality and manifest
