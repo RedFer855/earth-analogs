@@ -3,7 +3,7 @@ title: "I-01 — Proyectos previos de análogos y de sitios lunares o marcianos 
 type: investigacion
 status: vigente
 date: 2026-11-03
-updated: 2026-11-05
+updated: 2026-11-14
 summary: "Qué proyectos públicos (Space Apps anteriores, universidades, agencias) ya comparan sitios terrestres con la Luna o Marte o seleccionan sitios de base, qué datos y métodos usan y qué es reutilizable según sus licencias."
 autor: fernando
 tipo_investigacion: B
@@ -31,7 +31,7 @@ CONTEXTO (solo lo que cambia la respuesta)
 
 YA SABEMOS (no investigar ni repetir)
 - Portales de datos: Moon Trek, Mars Trek, USGS Astrogeology STAC, OpenTopography.
-- Repo reportado para este mismo reto: github.com/shishir-kuet/terrestrial-analog-finder (creado en octubre de 2026). Incluirlo en la tabla y describirlo con lo que diga su README.
+- Hay repositorios públicos creados para este mismo reto en octubre de 2026. Incluirlos en la tabla y describirlos con lo que diga su README.
 - Sanganeria (2026, National High School Journal of Science) compara brillo de imágenes de la Tierra, la Luna y Marte, no variables físicas.
 - Netzel y Stepinski (2018, BAMS) buscan climas parecidos en una grilla global (no es de análogos planetarios).
 
@@ -56,22 +56,26 @@ REGLAS
 
 ## Resultado
 
-**`shishir-kuet/terrestrial-analog-finder`** (GitHub API y README, consultados el 2026-11-05):
+**Repositorios públicos del mismo reto (2026)**
 
-- Repositorio público creado el 2026-10-09, último push el 2026-10-10. No declara licencia en el repositorio.
-- Según su README, qué hace:
-  - Ordena 558 ventanas de la Tierra de 12 × 12 km: 20 sitios con nombre y 538 celdas de una grilla regular sobre 12 regiones desérticas, polares y volcánicas.
-  - Las compara con 12 regiones de referencia: 8 del polo sur lunar (LOLA a 5 m) y 4 de Marte (DTM de CTX: Jezero, Gale, Meridiani y el sur de Utopia).
-  - Todo va a una malla común de 30 m.
-- Variables de terreno declaradas en el README: relieve local, pendiente mediana y P90, rugosidad de base corta, integral hipsométrica y la distancia de Wasserstein entre histogramas de pendiente.
-- Capa térmica y mineral según el README:
-  - En la Tierra: ECOSTRESS, VIIRS y EMIT.
-  - En Marte: la inercia térmica de TES.
-  - En la Luna: el producto polar de Diviner.
-  - Solo la inercia térmica entra al puntaje, y con peso 0 por defecto.
-- Método declarado: distancia ponderada con escala resistente, reglas explícitas para faltantes y desglose del aporte de cada variable. Incluye un análisis de sensibilidad y advierte que el índice no es una probabilidad.
-- Pila declarada: Python, GDAL, FastAPI y React con Leaflet. Los datos son archivos JSON y PNG.
-- Alcance según su README: analiza 558 ventanas en 12 regiones elegidas (no cobertura terrestre global), su puntaje combina variables de terreno con una sola variable térmica opcional y no incluye agua/hielo, polvo/viento, cuevas ni biología.
+Se revisaron repositorios públicos de este mismo reto (README y documentación, 2026-11-05 y 2026-11-13). No se
+describen aquí uno por uno. De esa revisión se anotaron ideas de método. No se usa código de nadie: cada idea se
+escribe desde cero, con nuestros datos y nuestras reglas, y se prueba antes de entrar.
+
+- **Similitud en dos modos.** Si el valor del objetivo cae dentro del rango p1–p99 de la Tierra, la similitud es una
+  gaussiana con σ = 1,4826·MAD. Si cae fuera, se usa la ECDF y se reporta cuánto falta. Es la base de "hasta dónde
+  llega la Tierra" ([[ADR-007-contrato-de-metrics-json]]).
+- **Cobertura por dimensión:** cuántas dimensiones se pudieron comparar y cuáles faltan ([[ADR-007-contrato-de-metrics-json]]).
+- **Etiquetas de procesos** con reglas fijas sobre valores medidos, sin sumar al puntaje y con el valor como evidencia
+  ([[I-18-procesos-como-variables]]).
+- **Distancia en km al análogo documentado más cercano**, para marcar candidatos nuevos, y separación mínima entre los
+  primeros candidatos para que no se repita el mismo lugar ([[I-03-analogos-terrestres-documentados]]).
+- **Distancia de Wasserstein entre histogramas de pendiente**, como alternativa a comparar solo la mediana.
+- **Desglose del aporte de cada variable**, reglas explícitas para los faltantes y análisis de sensibilidad.
+- **Validación con controles negativos** (bosque, cultivo, ciudad) además de los análogos documentados.
+- **Cuidado con los DEM de superficie:** ASTER GDEM mide copas de árboles y edificios, así que la pendiente y la
+  rugosidad finas pueden reflejar vegetación y no terreno.
+- **Página de datos y método** servida en vivo y aviso de que el índice no es una probabilidad.
 
 **Otros proyectos y literatura**
 
@@ -87,11 +91,11 @@ REGLAS
 
 ## Fuentes
 
-- <https://github.com/shishir-kuet/terrestrial-analog-finder>
 - <https://github.com/samuelakosaonyejekwe/lunahorizon>
 
 ## Relaciones
 
 - [[reto-oficial-y-calendario]] — el reto y el calendario
 - [[dimensiones-innegociables]] — las dimensiones contra las que se compara cada proyecto
-- [[proyecto-solmate-northern-lights]] — otro proyecto externo del mismo reto
+- [[ADR-007-contrato-de-metrics-json]] — dónde quedaron la cobertura y "hasta dónde llega la Tierra"
+- [[referentes-externos-de-analogos]] — referentes de agencias y catálogos

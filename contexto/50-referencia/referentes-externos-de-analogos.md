@@ -75,5 +75,5 @@ Revisión de seis referentes externos de análogos planetarios (fuentes consulta
 
 ## Relaciones
 
-- [[proyecto-solmate-northern-lights]] — otro proyecto externo de análogos
+- [[I-01-proyectos-previos-de-analogos-en-github]] — proyectos públicos revisados e ideas de método anotadas
 - [[I-03-analogos-terrestres-documentados]] — catálogo de análogos terrestres documentados en la literatura

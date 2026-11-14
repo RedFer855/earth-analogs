@@ -49,7 +49,7 @@ _(vacía)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
 
-- _(9 notas: ver contexto/INDEX-referencia.md)_
+- _(8 notas: ver contexto/INDEX-referencia.md)_
 
 ## 55-investigaciones — I-NN y sus prompts
 
