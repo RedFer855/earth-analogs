@@ -28,14 +28,22 @@ BLOQUE = 1 << 24
 OCEANO = 1
 
 
+def esquina_tesela(nombre: str) -> tuple[int, int]:
+    """(lat_sur, lon_oeste) a partir de 'Copernicus_DSM_COG_30_N56_00_E094_00_WBM.tif'."""
+    partes = nombre.split("_")
+    lat = int(partes[4][1:]) * (1 if partes[4][0] == "N" else -1)
+    lon = int(partes[6][1:]) * (1 if partes[6][0] == "E" else -1)
+    return lat, lon
+
+
 def teselas_disponibles(dir_wbm: Path) -> dict[tuple[int, int], Path]:
-    """Mapa (lat_sur, lon_oeste) -> archivo WBM."""
+    """Mapa (lat_sur, lon_oeste) -> archivo WBM. Falla si dos archivos dan la misma esquina."""
     teselas = {}
     for ruta in dir_wbm.glob("*_WBM.tif"):
-        partes = ruta.name.split("_")
-        lat = int(partes[3][1:]) * (1 if partes[3][0] == "N" else -1)
-        lon = int(partes[5][1:]) * (1 if partes[5][0] == "E" else -1)
-        teselas[(lat, lon)] = ruta
+        clave = esquina_tesela(ruta.name)
+        if clave in teselas:
+            raise SystemExit(f"ERROR: esquina repetida {clave}: {ruta.name} y {teselas[clave].name}")
+        teselas[clave] = ruta
     return teselas
 
 
@@ -95,6 +103,9 @@ def main() -> int:
     ipix, lat, lon = ipix[tierra], lat[tierra].astype(np.float32), lon[tierra].astype(np.float32)
 
     fallos = []
+    archivos = len(list((datos / "tierra" / "glo90" / "wbm").glob("*_WBM.tif")))
+    if len(teselas) != archivos:
+        fallos.append(f"teselas leídas {len(teselas)} distintas de archivos WBM {archivos}")
     if ipix.size == 0:
         fallos.append("cero celdas")
     if not np.all(np.diff(ipix.astype(np.int64)) > 0):
