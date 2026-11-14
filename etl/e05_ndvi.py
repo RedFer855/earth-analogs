@@ -36,19 +36,39 @@ def main() -> int:
     if len(archivos) != 230:
         print(f"ERROR: se esperaban 230 periodos; hay {len(archivos)}")
         return 1
-    maximo = cuenta = geo = None
+    maximo = cuenta = geo = suma = None
+    max_anio: dict[int, np.ndarray] = {}
     for i, a in enumerate(archivos, 1):
+        anio = int(a.name.split(".")[1][1:5])
         ndvi, geo = _sub(str(a), '"CMG 0.05 Deg 16 days NDVI"')
         fiab, _ = _sub(str(a), '"CMG 0.05 Deg 16 days pixel reliability"')
         v = np.where((fiab >= 0) & (fiab <= 1) & (ndvi > -3000), ndvi.astype(np.float32) / 10000, np.nan)
         if maximo is None:
             maximo = np.full(v.shape, -np.inf, np.float32)
             cuenta = np.zeros(v.shape, np.uint16)
+            suma = np.zeros(v.shape, np.float64)
         maximo = np.fmax(maximo, v)
         cuenta += np.isfinite(v)
+        suma += np.nan_to_num(v)
+        if anio not in max_anio:
+            max_anio[anio] = [np.full(v.shape, -np.inf, np.float32), np.zeros(v.shape, np.uint8)]
+        max_anio[anio][0] = np.fmax(max_anio[anio][0], v)
+        max_anio[anio][1] += np.isfinite(v)
         if i % 46 == 0:
             print(f"  {i}/230 periodos, {time.time() - t0:.0f} s", flush=True)
     maximo = np.where(cuenta >= MIN_PERIODOS, maximo, np.nan)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        media = np.where(cuenta >= MIN_PERIODOS, suma / cuenta, np.nan).astype(np.float32)
+    # climatología del máximo: media de los máximos anuales (cada año con al menos 3 periodos válidos)
+    s_clim = np.zeros(maximo.shape, np.float64)
+    n_clim = np.zeros(maximo.shape, np.uint8)
+    for mx, n in max_anio.values():
+        ok = n >= MIN_PERIODOS
+        s_clim += np.where(ok, mx, 0)
+        n_clim += ok
+    del max_anio
+    with np.errstate(invalid="ignore", divide="ignore"):
+        clim = np.where(n_clim >= 5, s_clim / n_clim, np.nan).astype(np.float32)
     ipix, lat, lon = cargar_malla(run)
     col = muestrear(maximo, lat, lon, geo)
     n = muestrear(cuenta.astype(np.float32), lat, lon, geo)
@@ -62,6 +82,10 @@ def main() -> int:
     cols = [
         escribir_columna(run, "ndvi_max", col, {**meta, "unidad": "adimensional"}),
         escribir_columna(run, "ndvi_n_periodos", n, {**meta, "unidad": "periodos"}),
+        escribir_columna(run, "ndvi_max_clim", muestrear(clim, lat, lon, geo), {
+            **meta, "unidad": "adimensional", "metodo": "media de los máximos anuales; >= 3 periodos por año y >= 5 años"}),
+        escribir_columna(run, "ndvi_media", muestrear(media, lat, lon, geo), {
+            **meta, "unidad": "adimensional", "metodo": "media de los periodos válidos; >= 3 periodos"}),
     ]
     puntos = {"taiga (Siberia central)": (62.0, 100.0), "Amazonía": (-3.5, -62.0), "Sahara (Erg Chech)": (24.5, -2.5)}
     vals = {k: valor_en(ipix, col, *v) for k, v in puntos.items()}

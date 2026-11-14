@@ -48,7 +48,7 @@ def main() -> int:
     tr = osr.CoordinateTransformation(wgs, srs)
     ipix, lat, lon = cargar_malla(run)
     col = np.full(ipix.size, np.nan, np.float32)
-    norte = np.flatnonzero(lat > 25)
+    norte = np.flatnonzero(lat > -10)  # el raster polar llega hasta unos 7° S
     a = b.ReadAsArray()
     paso = 2_000_000
     for i in range(0, norte.size, paso):
@@ -66,7 +66,7 @@ def main() -> int:
         "url": "https://doi.org/10.1594/PANGAEA.888600",
         "licencia": "CC BY 3.0",
         "metodo": "extraído del zip con GDAL; centro de celda transformado a la proyección del raster",
-        "advertencias": ["solo hemisferio norte; los Andes y otras zonas del sur no están cubiertos"],
+        "advertencias": ["producto del hemisferio norte; su raster polar llega hasta unos 7° S", "los Andes y otras zonas del sur no están cubiertos"],
         "unidad": "°C",
     }
     cols = [escribir_columna(run, "magt_c", col, meta)]
@@ -77,8 +77,8 @@ def main() -> int:
         fallos.append(f"Yakutsk sin permafrost: {vals['Siberia (Yakutsk)']}")
     if not vals["Alaska norte (Prudhoe)"] < 0:
         fallos.append(f"Prudhoe sin permafrost: {vals['Alaska norte (Prudhoe)']}")
-    if np.isfinite(col[lat < 0]).any():
-        fallos.append("hay valores en el hemisferio sur")
+    if np.isfinite(col[lat < -10]).any():
+        fallos.append("hay valores al sur de 10° S, fuera del raster")
     r = {"puntos": vals, "sin_dato": sin_dato, "fallos": fallos, "segundos": round(time.time() - t0, 1)}
     (run / "columns" / "e07.json").write_text(json.dumps({**r, "columnas": cols}, indent=2, ensure_ascii=False),
                                                encoding="utf-8")
