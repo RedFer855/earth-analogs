@@ -1,5 +1,18 @@
 {
-  "integrantes": ["fernando", "guillermo"],
-  "agentes": ["claude-code", "antigravity", "ninguno"],
-  "eventos": ["inicio", "fin", "fallo", "verificacion"]
+  "integrantes": [
+    "fernando",
+    "guillermo",
+    "juanra"
+  ],
+  "agentes": [
+    "claude-code",
+    "antigravity",
+    "ninguno"
+  ],
+  "eventos": [
+    "inicio",
+    "fin",
+    "fallo",
+    "verificacion"
+  ]
 }
