@@ -60,11 +60,19 @@ comprobación por paso y cada corrida en el registro de auditoría.
 - E-11 comprobaba día y noche solo dentro de las regiones polares, donde la hora local no los separa: ahora en el
   mapa completo.
 
+## Mejoras de la tarde
+
+- E-07 lee el permafrost hasta 10° S: el raster polar de Obu llega hasta unos 7° S y antes se cortaba en 25° N.
+- E-05 agrega `ndvi_max_clim` (media de los máximos anuales) y `ndvi_media`.
+- `etl/e03_extras.py` agrega `slope_p90_deg`, `slope_p99_deg`, `slope_frac_gt15`, `elev_mean_m`, `elev_std_m` y
+  `relieve_m`: cada celda entera en la tesela de su centro, con halo en número par de píxeles para que los bloques
+  coincidan con E-03. Comprobación: la pendiente media recalculada coincide con `slope_mean_deg` (diferencia mediana
+  menor que 0.01°); solo difieren celdas en los límites de franja de latitud de GLO-90.
+
 ## Lo que no cambió
 
 - Mars Climate Database: no se usó (uso local, pendiente).
 - Dunas y arena a 30 m (GSDP30, GSDS30): no se corrieron.
-- Rugosidad y relieve para la ficha: no se calcularon.
 
 ## Pendientes
 
