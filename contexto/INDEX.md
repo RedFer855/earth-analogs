@@ -13,7 +13,10 @@ _(vacía)_
 
 ## 10-reto — El reto de NASA Space Apps 2026: enunciado, calendario, criterios del jurado
 
-_(vacía)_
+- [[criterios-del-jurado-y-demo]] · producto · vigente · 2026-11-13 — Rúbrica oficial de Space Apps 2026 (5 criterios, 3 fases, 10 premios), reglas del demo único.
+- [[dimensiones-innegociables]] · producto · vigente · 2026-11-13 — Lo que el enunciado oficial pide explícitamente, las ocho dimensiones de analogía y los diez principios del reto.
+- [[enunciado-oficial-clasificado]] · producto · vigente · 2026-11-13 — Texto del enunciado oficial ordenado en requisitos, qué evitar, ocho dimensiones y principios de análisis.
+- [[reto-oficial-y-calendario]] · producto · vigente · 2026-11-13 — Qué pide el enunciado oficial del reto de análogos terrestres, los 11 recursos publicados el 2026-11-13, el calendario completo y las reglas de participación, entrega única y Super Intelligence (SI).
 
 ## 20-casos-de-uso — CU-NN: qué hace con el visor el jurado, un científico o un ingeniero de misión
 
@@ -45,11 +48,11 @@ _(vacía)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
 
-_(vacía)_
+- _(9 notas: ver contexto/INDEX-referencia.md)_
 
 ## 55-investigaciones — I-NN y sus prompts
 
-_(vacía)_
+- _(41 notas: ver contexto/INDEX-investigaciones.md)_
 
 ## 60-qa — Validación de resultados contra análogos conocidos y pruebas del motor
 
