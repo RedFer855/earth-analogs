@@ -12,6 +12,7 @@ included).
 Creation phase (2026-11-14 and 2026-11-15).
 
 - Data pipeline plan: [docs/etl-plan.md](docs/etl-plan.md)
+- Data sources: [docs/data-sources.md](docs/data-sources.md)
 - Audit trail of every pipeline run: [audit/](audit/README.md)
 - Research notes, decisions and work log: [contexto/](contexto/INDEX.md) (in Spanish)
 
