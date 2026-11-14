@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import sys
 import time
+import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
@@ -122,11 +123,16 @@ def main() -> int:
     dems = sorted((datos / "tierra" / "glo90" / "dem").glob("*_DEM.tif"))
     hechas = set()
     for q in salida.glob("*.npz"):
-        try:
-            cargar_npz(q)
-            hechas.add(q.stem)
-        except Exception:  # noqa: BLE001 - un archivo cortado se rehace
-            q.unlink()
+        # Un corte deja archivos a medio escribir: se valida el zip sin abrirlo con numpy (que lo deja abierto al
+        # fallar y Windows no deja borrarlo).
+        if zipfile.is_zipfile(q):
+            try:
+                cargar_npz(q)
+                hechas.add(q.stem)
+                continue
+            except Exception:  # noqa: BLE001 - un archivo cortado se rehace
+                pass
+        q.unlink()
     todas = [d for d in dems if abs(esquina_tesela(d.name)[0] + 0.5) < LIMITE_POLAR]
     pendientes = [d for d in todas if d.stem not in hechas]
     errores = []
