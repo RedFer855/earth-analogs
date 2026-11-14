@@ -6,3 +6,5 @@ No se inyecta al arrancar: se abre cuando contexto/INDEX.md apunta aquí.
 
 - [[ADR-001-preprocesar-offline-y-servir-ligero]] · adr · vigente · 2026-11-14 — Los rasters pesados se procesan en la PC del equipo; la web solo carga archivos derivados de pocos MB.
 - [[ADR-002-malla-primero-y-una-columna-por-capa]] · adr · vigente · 2026-11-14 — El ETL construye primero una malla HEALPix de área igual, y cada capa escribe su propia columna alineada a ella; el manifiesto describe cada columna.
+- [[ADR-003-variables-por-proceso-fisico]] · adr · vigente · 2026-11-14 — Las columnas de la tabla describen procesos físicos agrupados en seis dimensiones; cada una exige un equivalente medible en la Luna o en Marte.
+- [[ADR-004-periodo-comun-y-climatologia]] · adr · vigente · 2026-11-14 — Las variables que cambian con el tiempo se promedian en una climatología mensual de 2013 a 2022, con filtros de calidad explícitos y huecos como NaN.
