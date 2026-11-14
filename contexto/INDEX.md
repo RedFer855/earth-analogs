@@ -44,7 +44,7 @@ _(vacía)_
 
 ## 45-decisiones — ADR-NNN, estándares E-NN y decisiones pendientes DP-NN
 
-- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]]
+- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]]
 - _(tipo, estado y summary: ver contexto/INDEX-decisiones.md)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
