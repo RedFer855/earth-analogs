@@ -12,6 +12,9 @@ solo puede venir de un píxel enmascarado o sin dato **dentro de la propia tesel
 Las teselas que no cumplen nada dan el mismo resultado con y sin la máscara del centro de Horn: sus sumas se pueden
 reutilizar. El índice se valida comparando, en una corrida completa, las sumas nuevas y viejas de las no marcadas.
 
+Solo vale para P-009 y para el método de bloques de 2x2 píxeles GLO-90. Con los bloques de 200 m en LAEA (ADR-005)
+los bloques ya no se alinean con el borde de la tesela: ese cambio exige una corrida completa de E-03, no este índice.
+
 Salida: $RUN/terreno/indice_mascara_horn.json (afectadas, sanas y motivo por tesela).
 Uso: python e03_indice_afectadas.py [procesos]
 """
