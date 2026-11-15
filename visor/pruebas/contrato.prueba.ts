@@ -17,6 +17,16 @@ import {
 } from '../src/datos/contrato';
 import { evaluarCondiciones } from '../src/datos/capas7';
 import { formatearAlturaM, parsearCoordenadas } from '../src/datos/coordenadas';
+import {
+  areaEsfericaM2,
+  construirCirculoPorPerimetro,
+  construirCuadroPorPerimetro,
+  destorcerPoligono,
+  distanciaGeodesicaM,
+  hayAutoInterseccion,
+  perimetroEsfericoM,
+  puntoEnPoligono,
+} from '../src/datos/geometria';
 import { ipixACentro, ipixAVertices } from '../src/datos/healpix';
 
 const metricsRaw = readFileSync(resolve('datos/metrics.json'), 'utf8');
@@ -207,3 +217,31 @@ assert.equal(parsearCoordenadas('texto'), null);
 assert.equal(formatearAlturaM(850), '850 m');
 assert.equal(formatearAlturaM(12500), '12.5 km');
 assert.equal(formatearAlturaM(-1), '—');
+
+// 9. Geometría esférica, Medir Pin y puntoEnPoligono
+const centroPrueba = { lat: 14.0, lon: -87.0 };
+const cuadro16 = construirCuadroPorPerimetro(centroPrueba, 16);
+assert.equal(cuadro16.length, 4);
+const perimCuadroKm = perimetroEsfericoM(cuadro16) / 1000;
+const areaCuadroKm2 = areaEsfericaM2(cuadro16) / 1_000_000;
+assert.ok(Math.abs(perimCuadroKm - 16) < 0.2, `perímetro esperado ~16 km, obtuvo ${perimCuadroKm}`);
+assert.ok(Math.abs(areaCuadroKm2 - 16) < 0.3, `área esperada ~16 km², obtuvo ${areaCuadroKm2}`);
+
+const circulo16 = construirCirculoPorPerimetro(centroPrueba, 16, 64);
+assert.equal(circulo16.length, 64);
+const perimCircKm = perimetroEsfericoM(circulo16) / 1000;
+assert.ok(Math.abs(perimCircKm - 16) < 0.2, `perímetro círculo ~16 km, obtuvo ${perimCircKm}`);
+
+assert.equal(puntoEnPoligono(14.0, -87.0, cuadro16), true);
+assert.equal(puntoEnPoligono(15.0, -87.0, cuadro16), false);
+assert.ok(distanciaGeodesicaM({ lat: 0, lon: 0 }, { lat: 0, lon: 1 }) > 110_000);
+
+const cruzado = [
+  { lat: 0, lon: 0 },
+  { lat: 1, lon: 1 },
+  { lat: 1, lon: 0 },
+  { lat: 0, lon: 1 },
+];
+assert.equal(hayAutoInterseccion(cruzado), true);
+const destorcido = destorcerPoligono(cruzado);
+assert.equal(hayAutoInterseccion(destorcido), false);

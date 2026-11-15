@@ -385,6 +385,31 @@ html, body, #globo {
   min-width: 52px;
   text-align: center;
 }
+.select-mini { width: auto; margin-top: 0; font-size: 11px; padding: 3px 5px; }
+.input-km {
+  width: 50px;
+  background: rgba(15, 23, 42, 0.95);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 5px;
+  padding: 3px 5px;
+  font-size: 11px;
+}
+.km-unidad { font-size: 11px; color: #94a3b8; }
+.barra-medida-resumen {
+  margin: 6px auto 0;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(249, 115, 22, 0.45);
+  font-size: 11px;
+  color: #f8fafc;
+}
+.barra-medida-resumen.oculto { display: none; }
 
 @media (max-width: 800px) {
   #ui {
