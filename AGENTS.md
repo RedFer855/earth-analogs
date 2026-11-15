@@ -24,7 +24,7 @@ Estamos en la **fase de creación**. Las investigaciones están en `contexto/55-
 4. **Seguridad:** nunca secretos en git. Van en `.env` (ignorado). Si gitleaks marca algo real: se rota y se quita.
 5. **Licencias:** cada dataset y librería lleva su licencia anotada en `contexto/50-referencia/` antes de usarse.
 6. **Flujo de git:** GitHub Flow sobre `main`, PR con *squash*, check `CI completo` en verde, ~500 líneas de código por
-   PR (tope 1000). Ramas `tipo/descripcion-corta`; Conventional Commits.
+   PR (tope 3000). Ramas `tipo/descripcion-corta`; Conventional Commits.
 7. **Revisión de contenido:** antes de cada commit y PR corre la revisión de contenido del equipo (ganchos instalados
    en cada PC). Si no pasa, se reescribe; no hay excepciones.
 8. **Auditoría:** cada paso del ETL se corre con `audit/audit.py` y su registro se commitea al cerrar el paso.
