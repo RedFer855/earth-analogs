@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   cargarCorrelacion,
+  cargarEstabilidad,
   cargarIndice,
   cargarPuntos,
   cargarResultado,
@@ -139,6 +140,21 @@ try {
         { status: 200 },
       );
     }
+    if (ruta.endsWith('ok/estabilidad.json')) {
+      return new Response(
+        JSON.stringify({
+          objetivos: {
+            JZ: {
+              n_escenarios: 10,
+              celdas: [
+                { ipix: 123, aparece_en: 8, fraccion: 0.8, s_min: 0.7, s_mediana: 0.85, s_max: 0.9 },
+              ],
+            },
+          },
+        }),
+        { status: 200 },
+      );
+    }
     return new Response('Not found', { status: 404 });
   }) as typeof fetch;
 
@@ -154,6 +170,9 @@ try {
   const okCorr = await cargarCorrelacion('ok/');
   assert.equal(okCorr?.resultados.tubo_lava?.sitios_usados, 50);
   assert.equal(await cargarCorrelacion('faltante/'), null);
+  const okEst = await cargarEstabilidad('ok/');
+  assert.equal(okEst?.objetivos.JZ?.celdas[0]?.fraccion, 0.8);
+  assert.equal(await cargarEstabilidad('faltante/'), null);
 } finally {
   globalThis.fetch = fetchOriginal;
 }

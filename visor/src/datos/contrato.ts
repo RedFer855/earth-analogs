@@ -333,6 +333,32 @@ export async function cargarCorrelacion(base = 'datos/'): Promise<CorrelacionJso
   return data;
 }
 
+export interface CeldaEstabilidad {
+  ipix: number;
+  aparece_en: number;
+  fraccion: number;
+  s_min: number;
+  s_mediana: number;
+  s_max: number;
+}
+
+export interface EstabilidadObjetivo {
+  n_escenarios: number;
+  celdas: CeldaEstabilidad[];
+}
+
+export interface EstabilidadJson {
+  objetivos: Record<string, EstabilidadObjetivo>;
+}
+
+export async function cargarEstabilidad(base = 'datos/'): Promise<EstabilidadJson | null> {
+  const data = await pedirOpcional<EstabilidadJson>(unirRuta(base, 'estabilidad.json'));
+  if (!data || !data.objetivos || typeof data.objetivos !== 'object') {
+    return null;
+  }
+  return data;
+}
+
 export function colorNota(n: number): [number, number, number] {
   const x = Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0;
   const rojo: [number, number, number] = [239, 68, 68];
