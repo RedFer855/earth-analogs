@@ -1,6 +1,18 @@
 import * as Cesium from 'cesium';
-import { formatearAlturaM, parsearCoordenadas } from '../datos/coordenadas';
+import { type Coordenada, formatearAlturaM, parsearCoordenadas } from '../datos/coordenadas';
+import {
+  areaEsfericaM2,
+  construirCirculoPorPerimetro,
+  construirCuadroPorPerimetro,
+  perimetroEsfericoM,
+} from '../datos/geometria';
 import { ajustarZoom, alternarVista3D, obtenerAlturaCamaraM } from '../globo';
+import {
+  DibujoTerritorio,
+  type EstadoDibujo,
+  type FormaDibujo,
+  type ModoDibujo,
+} from '../herramientas/dibujo';
 
 const ALTURA_SALTO_COORD_M = 12_000;
 
@@ -8,25 +20,48 @@ export class BarraNavegacion {
   private readonly raiz: HTMLElement;
   private readonly barra: HTMLElement;
   private readonly pildora: HTMLButtonElement;
+  private readonly resumenEl: HTMLElement;
   private readonly inputCoord: HTMLInputElement;
+  private readonly selectFormaPin: HTMLSelectElement;
+  private readonly inputPerimetroKm: HTMLInputElement;
   private readonly btnQuitarPin: HTMLButtonElement;
+  private readonly btnTerminar: HTMLButtonElement;
+  private readonly btnDeshacer: HTMLButtonElement;
+  private readonly btnCancelar: HTMLButtonElement;
   private readonly badgeAltura: HTMLElement;
   private readonly btn3D: HTMLButtonElement;
+  private readonly dibujo: DibujoTerritorio;
+  private readonly botonesModo = new Map<ModoDibujo, HTMLButtonElement>();
   private marcador: Cesium.Entity | null = null;
+  private zonaMedida: Cesium.Entity | null = null;
 
-  constructor(contenedor: HTMLElement, private readonly viewer: Cesium.Viewer) {
+  constructor(
+    contenedor: HTMLElement,
+    private readonly viewer: Cesium.Viewer,
+    private readonly alCompletarZona?: (coords: Coordenada[], forma: FormaDibujo) => void,
+  ) {
     this.raiz = document.createElement('div');
     this.raiz.className = 'barra-nav-contenedor';
 
     this.pildora = document.createElement('button');
     this.pildora.type = 'button';
     this.pildora.className = 'btn-mini barra-nav-pildora oculto';
-    this.pildora.textContent = 'Navegación';
-    this.pildora.title = 'Mostrar barra de navegación y coordenadas';
+    this.pildora.textContent = 'Navegación y Dibujo';
+    this.pildora.title = 'Mostrar barra de herramientas';
 
     this.barra = document.createElement('div');
     this.barra.className = 'barra-nav';
     this.barra.innerHTML = `
+      <div class="barra-nav-grupo">
+        <button type="button" class="btn-mini activo" data-modo="navegar" title="Explorar globo">Navegar</button>
+        <button type="button" class="btn-mini" data-modo="cuadro" title="Dibujar cuadro (2 clics)">Cuadro</button>
+        <button type="button" class="btn-mini" data-modo="circulo" title="Dibujar círculo (centro y borde)">Círculo</button>
+        <button type="button" class="btn-mini" data-modo="poligono" title="Dibujar polígono (doble clic para cerrar)">Polígono</button>
+        <button type="button" class="btn-mini btn-ir oculto" data-accion="terminar">Terminar</button>
+        <button type="button" class="btn-mini oculto" data-accion="deshacer" title="Deshacer último punto">Deshacer</button>
+        <button type="button" class="btn-mini oculto" data-accion="cancelar" title="Cancelar dibujo (Esc)">Cancelar</button>
+      </div>
+      <span class="barra-sep" aria-hidden="true"></span>
       <div class="barra-nav-grupo">
         <input
           type="text"
@@ -34,30 +69,57 @@ export class BarraNavegacion {
           data-coord-input
           placeholder="Lat, Lon (ej. 14.05, -87.25)"
           aria-label="Ir a coordenadas Lat, Lon"
-          title="Pega coordenadas tipo Google Maps: Latitud, Longitud"
         />
         <button type="button" class="btn-mini btn-ir" data-accion="ir">Ir</button>
         <button type="button" class="btn-mini oculto" data-accion="quitar-pin" title="Quitar marcador temporal">×</button>
+        <select class="select-coro select-mini" data-pin-forma aria-label="Forma de medición">
+          <option value="cuadro">Cuadro</option>
+          <option value="circulo">Círculo</option>
+        </select>
+        <input type="number" class="input-km" data-pin-km min="0.5" max="2000" step="0.5" value="16" title="Perímetro en km" aria-label="Perímetro en km" />
+        <span class="km-unidad">km</span>
+        <button type="button" class="btn-mini" data-accion="medir-pin" title="Trazar y medir zona alrededor de coordenadas o centro actual">Medir</button>
       </div>
       <span class="barra-sep" aria-hidden="true"></span>
       <div class="barra-nav-grupo">
         <button type="button" class="btn-mini" data-accion="zoom-in" title="Acercar (+50%)">+</button>
         <button type="button" class="btn-mini" data-accion="zoom-out" title="Alejar (-50%)">−</button>
-        <span class="altura-badge" data-altura title="Altura de cámara sobre suelo/elipsoide">—</span>
-        <button type="button" class="btn-mini" data-accion="vista-3d" aria-pressed="false" title="Alternar vista 3D inclinada / 2D cenital">2D</button>
+        <span class="altura-badge" data-altura title="Altura de cámara">—</span>
+        <button type="button" class="btn-mini" data-accion="vista-3d" aria-pressed="false" title="Alternar vista 3D / 2D">2D</button>
       </div>
       <span class="barra-sep" aria-hidden="true"></span>
       <button type="button" class="btn-mini" data-accion="minimizar" title="Ocultar barra">Ocultar</button>
     `;
 
+    this.resumenEl = document.createElement('div');
+    this.resumenEl.className = 'barra-medida-resumen oculto';
+
     this.raiz.appendChild(this.pildora);
     this.raiz.appendChild(this.barra);
+    this.raiz.appendChild(this.resumenEl);
     contenedor.appendChild(this.raiz);
 
     this.inputCoord = this.barra.querySelector<HTMLInputElement>('[data-coord-input]')!;
+    this.selectFormaPin = this.barra.querySelector<HTMLSelectElement>('[data-pin-forma]')!;
+    this.inputPerimetroKm = this.barra.querySelector<HTMLInputElement>('[data-pin-km]')!;
     this.btnQuitarPin = this.barra.querySelector<HTMLButtonElement>('[data-accion="quitar-pin"]')!;
+    this.btnTerminar = this.barra.querySelector<HTMLButtonElement>('[data-accion="terminar"]')!;
+    this.btnDeshacer = this.barra.querySelector<HTMLButtonElement>('[data-accion="deshacer"]')!;
+    this.btnCancelar = this.barra.querySelector<HTMLButtonElement>('[data-accion="cancelar"]')!;
     this.badgeAltura = this.barra.querySelector<HTMLElement>('[data-altura]')!;
     this.btn3D = this.barra.querySelector<HTMLButtonElement>('[data-accion="vista-3d"]')!;
+
+    for (const btn of this.barra.querySelectorAll<HTMLButtonElement>('[data-modo]')) {
+      const modo = btn.dataset.modo as ModoDibujo;
+      this.botonesModo.set(modo, btn);
+      btn.addEventListener('click', () => this.dibujo.establecerModo(modo));
+    }
+
+    this.dibujo = new DibujoTerritorio(
+      this.viewer,
+      (coords, forma) => this.mostrarZonaMedida(coords, forma),
+      (estado) => this.actualizarEstadoDibujo(estado),
+    );
 
     this.enlazarEventos();
     this.actualizarAltura();
@@ -76,6 +138,13 @@ export class BarraNavegacion {
     });
 
     this.btnQuitarPin.addEventListener('click', () => this.limpiarMarcador());
+    this.barra.querySelector('[data-accion="medir-pin"]')?.addEventListener('click', () => {
+      this.medirAlrededorDePin();
+    });
+    this.btnTerminar.addEventListener('click', () => this.dibujo.terminar());
+    this.btnDeshacer.addEventListener('click', () => this.dibujo.deshacerPunto());
+    this.btnCancelar.addEventListener('click', () => this.dibujo.cancelar());
+
     this.barra.querySelector('[data-accion="zoom-in"]')?.addEventListener('click', () => {
       ajustarZoom(this.viewer, 0.5);
     });
@@ -99,9 +168,88 @@ export class BarraNavegacion {
       this.barra.classList.remove('oculto');
     });
 
+    window.addEventListener('keydown', (ev) => {
+      if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement) return;
+      if (ev.key === 'Escape') this.dibujo.cancelar();
+      if (ev.key === 'Backspace') this.dibujo.deshacerPunto();
+    });
+
     this.viewer.camera.percentageChanged = 0.02;
     this.viewer.camera.changed.addEventListener(() => this.actualizarAltura());
     this.viewer.camera.moveEnd.addEventListener(() => this.actualizarAltura());
+  }
+
+  private actualizarEstadoDibujo(estado: EstadoDibujo): void {
+    for (const [modo, btn] of this.botonesModo) {
+      btn.classList.toggle('activo', modo === estado.modo);
+    }
+    const dibujando = estado.modo !== 'navegar';
+    this.btnCancelar.classList.toggle('oculto', !dibujando);
+    this.btnDeshacer.classList.toggle('oculto', !(estado.modo === 'poligono' && estado.vertices > 0));
+    this.btnTerminar.classList.toggle('oculto', !(estado.modo === 'poligono' && estado.vertices >= 3));
+  }
+
+  private medirAlrededorDePin(): void {
+    const perimKm = Number(this.inputPerimetroKm.value);
+    if (!Number.isFinite(perimKm) || perimKm <= 0) return;
+
+    let centro = parsearCoordenadas(this.inputCoord.value);
+    if (!centro) {
+      const carto = this.viewer.camera.positionCartographic;
+      centro = {
+        lat: Cesium.Math.toDegrees(carto.latitude),
+        lon: Cesium.Math.toDegrees(carto.longitude),
+      };
+    }
+
+    const forma = this.selectFormaPin.value === 'circulo' ? 'circulo' : 'cuadro';
+    const coords =
+      forma === 'circulo'
+        ? construirCirculoPorPerimetro(centro, perimKm)
+        : construirCuadroPorPerimetro(centro, perimKm);
+    this.mostrarZonaMedida(coords, forma);
+  }
+
+  private mostrarZonaMedida(coords: Coordenada[], forma: FormaDibujo): void {
+    this.limpiarZonaMedida();
+    const grados = coords.flatMap((c) => [c.lon, c.lat]);
+    this.zonaMedida = this.viewer.entities.add({
+      polygon: {
+        hierarchy: Cesium.Cartesian3.fromDegreesArray(grados),
+        material: Cesium.Color.fromCssColorString('#f97316').withAlpha(0.18),
+        outline: true,
+        outlineColor: Cesium.Color.fromCssColorString('#f97316'),
+      },
+    });
+    this.viewer.scene.requestRender();
+
+    const areaM2 = areaEsfericaM2(coords);
+    const perimM = perimetroEsfericoM(coords);
+    const areaKm2 = areaM2 / 1_000_000;
+    const areaHa = areaM2 / 10_000;
+    const perimKm = perimM / 1000;
+    const areaTxt = areaKm2 >= 1 ? `${areaKm2.toFixed(2)} km²` : `${areaHa.toFixed(1)} ha`;
+
+    this.resumenEl.innerHTML = `
+      <span>Zona (${forma}): <strong>${areaTxt}</strong> · Perímetro <strong>${perimKm.toFixed(2)} km</strong></span>
+      <button type="button" class="btn-mini" data-accion="limpiar-zona">Limpiar</button>
+    `;
+    this.resumenEl.classList.remove('oculto');
+    this.resumenEl.querySelector('[data-accion="limpiar-zona"]')?.addEventListener('click', () => {
+      this.limpiarZonaMedida();
+    });
+
+    this.alCompletarZona?.(coords, forma);
+  }
+
+  private limpiarZonaMedida(): void {
+    if (this.zonaMedida && !this.viewer.isDestroyed()) {
+      this.viewer.entities.remove(this.zonaMedida);
+      this.viewer.scene.requestRender();
+    }
+    this.zonaMedida = null;
+    this.resumenEl.classList.add('oculto');
+    this.resumenEl.innerHTML = '';
   }
 
   private irACoord(): void {
