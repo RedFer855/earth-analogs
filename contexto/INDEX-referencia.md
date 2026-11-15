@@ -5,6 +5,7 @@ Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas d
 No se inyecta al arrancar: se abre cuando contexto/INDEX.md apunta aquí.
 
 - [[capas-gibs-truecolor]] · referencia · vigente · 2026-11-11 — Catálogo WMTS de NASA GIBS en EPSG:3857: VIIRS NOAA-20 y MODIS Terra True Color llegan a nivel 9 (~250 m, diarios recientes), Blue Marble llega a nivel 8 (~500 m, sin nubes) y Landsat WELD llega a nivel 12 (~30 m, año 2000, océanos negros), frente a Sentinel-2 cloudless 2016 de EOX (~10 m, nivel 14, CC BY 4.0).
+- [[capas-tematicas-por-zona]] · referencia · vigente · 2026-11-15 — El botón Capas de una zona consulta en vivo cinco servicios abiertos (Macrostrat, SoilGrids, NASA POWER, JRC GSW con OSM, NASA GIBS); cada uno con su licencia o la mención de que no está verificada.
 - [[disponibilidad-crism-y-emit-por-sitio]] · referencia · vigente · 2026-11-13 — Qué son CRISM (Marte, producto MTRDR) y EMIT (Tierra, producto L2B MIN) y por dónde se consultan sus catálogos públicos (API ODE de WUSTL y CMR de Earthdata). Nota mínima: sin resultados de consultas.
 - [[eox-cloudless-licencias]] · referencia · vigente · 2026-11-15 — En el WMTS de EOX solo el mosaico 2016 (`s2cloudless_3857`) es CC BY 4.0; los mosaicos de 2017 y 2018 en adelante, hasta 2025, son CC BY-NC-SA 4.0 y el uso comercial necesita licencia propia de EOX.
 - [[fuentes-de-puntos-de-la-tierra]] · referencia · vigente · 2026-11-15 — Licencia, peso y estado de las fuentes de E-16 y E-17: Wikidata (cráteres), Natural Earth (playas), GLiM, RGI 7.0 y Weiss 2018.

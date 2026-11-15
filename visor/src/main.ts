@@ -7,6 +7,7 @@ import { CapaCapas7 } from './capas/capas7';
 import { CapaOverlaysZona } from './capas/overlaysZona';
 import { CapaPines } from './capas/pines';
 import { CapaPinesUsuario } from './capas/pinesUsuario';
+import { ZoneLayerManager } from './capas/gestorCapasZona';
 import { CapaZonas } from './capas/zonas';
 import {
   cargarCapas7,
@@ -31,6 +32,7 @@ import { BarraNavegacion } from './ui/barra';
 import { PanelBusqueda } from './ui/busqueda';
 import { PanelAnalogos } from './panel/panelAnalogos';
 import { PanelCatalogo } from './ui/catalogo';
+import { ZoneLayerPanel } from './ui/panelCapasZona';
 import { PanelZona } from './ui/panelZona';
 import { Asistente } from './ui/asistente';
 
@@ -173,8 +175,11 @@ async function iniciar(): Promise<void> {
     seleccionarCandidato(rango, true);
   });
   const capaPinesUsuario = new CapaPinesUsuario(viewer);
+  const panelCapas = new ZoneLayerPanel(ui, new ZoneLayerManager(viewer));
   const catalogo = new PanelCatalogo(ui, capaZonas, capaPinesUsuario, indice.sitios_objetivo, {
     medirEn: (coord) => barraNav.medirEn(coord),
+    abrirCapas: (z) => panelCapas.openForZone({ id: z.id, name: z.nombre, coordinates: z.coords }),
+    alBorrarZona: (id) => panelCapas.handleZoneDeleted(id),
   });
   const barraNav = new BarraNavegacion(
     ui,

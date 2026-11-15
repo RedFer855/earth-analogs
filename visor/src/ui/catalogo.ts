@@ -39,6 +39,10 @@ interface ResumenEtl {
 export interface AccionesCatalogo {
   /** Traza un cuadro o círculo alrededor de la coordenada con los valores de la barra. */
   medirEn: (coord: Coordenada) => void;
+  /** Abre el panel de capas temáticas (geología, suelos, radiación, agua, NDVI) para la zona. */
+  abrirCapas?: (zona: ZonaGuardada) => void;
+  /** Avisa que una zona se borró, para cerrar lo que dependa de ella. */
+  alBorrarZona?: (id: string) => void;
 }
 
 const COLUMNAS_TARJETA: { columna: string; etiqueta: string }[] = [
@@ -272,6 +276,7 @@ export class PanelCatalogo {
       <p class="cat-nota">${escaparHtml(nota)}</p>
       <div class="cat-acciones">
         <button type="button" class="cat-btn" data-a="volar" data-id="${id}">Volar</button>
+        <button type="button" class="cat-btn" data-a="capas" data-id="${id}" title="Geología, suelos, radiación, agua y NDVI recortados a esta zona">Capas</button>
         <button type="button" class="cat-btn" data-a="relleno" data-id="${id}" title="Alternar relleno para ver el terreno">${this.zonas.rellenoDeZona(z.id) ? 'Relleno' : 'Contorno'}</button>
         <button type="button" class="cat-btn" data-a="geojson-zona" data-id="${id}">GeoJSON</button>
         <button type="button" class="cat-btn cat-color" data-a="color" data-id="${id}" title="Cambiar color" aria-label="Cambiar color de la zona"><i style="background:${escaparHtml(z.color)}"></i></button>
@@ -362,6 +367,11 @@ export class PanelCatalogo {
       case 'volar':
         this.zonas.volarAZona(id);
         break;
+      case 'capas': {
+        const z = this.zonas.obtener(id);
+        if (z) this.acciones.abrirCapas?.(z);
+        break;
+      }
       case 'relleno':
         this.zonas.alternarRellenoZona(id);
         break;
@@ -379,6 +389,7 @@ export class PanelCatalogo {
         break;
       case 'borrar-zona':
         this.resumenes.delete(id);
+        this.acciones.alBorrarZona?.(id);
         this.zonas.eliminar(id);
         break;
       case 'volar-pin':
