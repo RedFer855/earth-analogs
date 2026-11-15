@@ -6,6 +6,8 @@ import { CapaAnalogos } from './capas/analogos';
 import { CapaCapas7 } from './capas/capas7';
 import { CapaOverlaysZona } from './capas/overlaysZona';
 import { CapaPines } from './capas/pines';
+import { CapaPinesUsuario } from './capas/pinesUsuario';
+import { ZoneLayerManager } from './capas/gestorCapasZona';
 import { CapaZonas } from './capas/zonas';
 import {
   cargarCapas7,
@@ -29,6 +31,8 @@ import { GloboObjetivo } from './globo-objetivo';
 import { BarraNavegacion } from './ui/barra';
 import { PanelBusqueda } from './ui/busqueda';
 import { PanelAnalogos } from './panel/panelAnalogos';
+import { PanelCatalogo } from './ui/catalogo';
+import { ZoneLayerPanel } from './ui/panelCapasZona';
 import { PanelZona } from './ui/panelZona';
 import { Asistente } from './ui/asistente';
 
@@ -170,9 +174,24 @@ async function iniciar(): Promise<void> {
   const panelZona = new PanelZona(ui, BASE_DATOS, capaZonas, overlaysZona, (rango) => {
     seleccionarCandidato(rango, true);
   });
-  new BarraNavegacion(ui, viewer, (coords, forma) => {
-    panelZona.mostrarAnalisis(coords, forma);
+  const capaPinesUsuario = new CapaPinesUsuario(viewer);
+  const panelCapas = new ZoneLayerPanel(ui, new ZoneLayerManager(viewer));
+  const catalogo = new PanelCatalogo(ui, capaZonas, capaPinesUsuario, indice.sitios_objetivo, {
+    medirEn: (coord) => barraNav.medirEn(coord),
+    abrirCapas: (z) => panelCapas.openForZone({ id: z.id, name: z.nombre, coordinates: z.coords }),
+    alBorrarZona: (id) => panelCapas.handleZoneDeleted(id),
   });
+  const barraNav = new BarraNavegacion(
+    ui,
+    viewer,
+    (coords, forma) => {
+      panelZona.mostrarAnalisis(coords, forma);
+    },
+    (coord) => {
+      capaPinesUsuario.agregar(coord);
+      catalogo.mostrarPestana('pines');
+    },
+  );
 
   let asistente: Asistente;
   let resultadoEsNuevo = false;
@@ -333,6 +352,7 @@ async function iniciar(): Promise<void> {
   void cargarCapas7(`${BASE_DATOS}capas7/`).then((datos7) => {
     if (!datos7) return;
     panelZona.configurarDatos7(datos7);
+    catalogo.configurarDatos7(datos7, BASE_DATOS);
     panel.configurarDatos7(datos7, `${BASE_DATOS}capas7/`);
     const divBusqueda = document.createElement('div');
     const panelBusqueda = new PanelBusqueda(divBusqueda, datos7, {
@@ -355,7 +375,7 @@ async function iniciar(): Promise<void> {
           soloTodas,
         );
         panelBusqueda.establecerEstado(
-          `${res.celdasTodas.toLocaleString('es-ES')} celdas cumplen todas (${pintadas.toLocaleString('es-ES')} dibujadas).`,
+          `${res.celdasTodas.toLocaleString('es-ES')} celdas cumplen todas; agrupadas en ${pintadas.toLocaleString('es-ES')} zonas (el punto es más grande si hay más celdas).`,
         );
       },
       alAplicarCoropletico: async (columna) => {
@@ -368,6 +388,17 @@ async function iniciar(): Promise<void> {
         if (meta) {
           capaCapas7.mostrarCoropletico(datos7.ipix, datos7.meta.nside, vals, meta);
         }
+      },
+      alElegirSitio: (sitioId) => {
+        const objetivo = indice.sitios_objetivo.find((s) => s.id === sitioId);
+        if (!objetivo) return;
+        const resMeta = indice.resultados.find((r) => r.sitio === objetivo.id);
+        void seleccionarSitio({
+          ...objetivo,
+          archivo: resMeta?.archivo ?? null,
+          n_candidatos: resMeta?.n_candidatos ?? 0,
+          mejor: resMeta?.mejor ?? null,
+        });
       },
       alCargarPresetSitio: async (sitioId) => {
         const meta = indice.resultados.find((r) => r.sitio === sitioId);

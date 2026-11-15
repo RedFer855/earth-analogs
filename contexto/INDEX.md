@@ -49,7 +49,7 @@ _(vacía)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
 
-- _(12 notas: ver contexto/INDEX-referencia.md)_
+- _(13 notas: ver contexto/INDEX-referencia.md)_
 
 ## 55-investigaciones — I-NN y sus prompts
 
@@ -68,7 +68,7 @@ _(vacía)_
 - [[2026-11-15-fernando-visor-pulido]] · sesion · fernando · antigravity · 2026-11-15 — Fase 5 del visor: segundo globo Luna/Marte con Moon Trek / Mars Trek WMTS sin token, lectura opcional de estabilidad.json en la ficha del candidato y medidor de FPS en vivo.
 - [[2026-11-15-fernando-visor-pines]] · sesion · fernando · antigravity · 2026-11-15 — Fase 3 del visor: capa de 332 pines agrupables (tubos de lava, cráteres, salares) con ficha de fuente y atribución, bloque cerca_de en la ficha del candidato y panel de correlación de entornos.
 - [[2026-11-15-fernando-visor-panel-analogos]] · sesion · fernando · claude-code · 2026-11-15 — Explicación del código del panel nuevo del visor: pestañas, solidez del ajuste con su rango, catálogo de análogos documentados, ficha con minerales y la normalización de estabilidad.json.
-- _(21 sesiones más: ver contexto/INDEX-bitacora.md)_
+- _(23 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

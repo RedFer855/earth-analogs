@@ -32,6 +32,8 @@ export interface BusquedaCallbacks {
   alAplicarBusqueda: (condiciones: CondicionBusqueda[], soloTodas: boolean) => Promise<void>;
   alAplicarCoropletico: (columna: string | null) => Promise<void>;
   alCargarPresetSitio: (sitioId: string) => Promise<ResultadoJson | null>;
+  /** Muestra en el mapa los candidatos ya calculados del sitio (lugares distintos, con nota). */
+  alElegirSitio?: (sitioId: string) => void;
 }
 
 export class PanelBusqueda {
@@ -166,6 +168,15 @@ export class PanelBusqueda {
     if (nuevas.length > 0) {
       this.filas = nuevas;
       this.coropleticoCol = '';
+      if (this.callbacks.alElegirSitio) {
+        // Los umbrales (valor del objetivo + tolerancia) se cumplen en decenas de miles de celdas: pintarlas todas
+        // no responde «dónde se parece». Se muestran los candidatos del motor y los umbrales quedan para afinar.
+        await this.callbacks.alAplicarBusqueda([], this.soloTodas);
+        this.resumenEstado = `Se muestran los candidatos del motor para ${sitioId}. Ajusta los umbrales y pulsa «Buscar en el globo» para ver dónde se cumplen.`;
+        this.render();
+        this.callbacks.alElegirSitio(sitioId);
+        return;
+      }
       this.render();
       await this.aplicarBusqueda();
     }

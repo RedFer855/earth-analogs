@@ -32,6 +32,8 @@ export class BarraNavegacion {
   private readonly btn3D: HTMLButtonElement;
   private readonly dibujo: DibujoTerritorio;
   private readonly botonesModo = new Map<ModoDibujo, HTMLButtonElement>();
+  private readonly btnMarcar: HTMLButtonElement;
+  private manejadorMarcar: Cesium.ScreenSpaceEventHandler | null = null;
   private marcador: Cesium.Entity | null = null;
   private zonaMedida: Cesium.Entity | null = null;
 
@@ -39,6 +41,7 @@ export class BarraNavegacion {
     contenedor: HTMLElement,
     private readonly viewer: Cesium.Viewer,
     private readonly alCompletarZona?: (coords: Coordenada[], forma: FormaDibujo) => void,
+    private readonly alGuardarPin?: (coord: Coordenada) => void,
   ) {
     this.raiz = document.createElement('div');
     this.raiz.className = 'barra-nav-contenedor';
@@ -63,6 +66,7 @@ export class BarraNavegacion {
       </div>
       <span class="barra-sep" aria-hidden="true"></span>
       <div class="barra-nav-grupo">
+        <button type="button" class="btn-mini" data-accion="marcar-pin" aria-pressed="false" title="Haz clic en el globo para marcar una coordenada">Marcar Pin</button>
         <input
           type="text"
           class="input-coord"
@@ -71,6 +75,7 @@ export class BarraNavegacion {
           aria-label="Ir a coordenadas Lat, Lon"
         />
         <button type="button" class="btn-mini btn-ir" data-accion="ir">Ir</button>
+        <button type="button" class="btn-mini" data-accion="guardar-pin" title="Guardar la coordenada como pin en el catálogo">Guardar Pin</button>
         <button type="button" class="btn-mini oculto" data-accion="quitar-pin" title="Quitar marcador temporal">×</button>
         <select class="select-coro select-mini" data-pin-forma aria-label="Forma de medición">
           <option value="cuadro">Cuadro</option>
@@ -108,11 +113,15 @@ export class BarraNavegacion {
     this.btnCancelar = this.barra.querySelector<HTMLButtonElement>('[data-accion="cancelar"]')!;
     this.badgeAltura = this.barra.querySelector<HTMLElement>('[data-altura]')!;
     this.btn3D = this.barra.querySelector<HTMLButtonElement>('[data-accion="vista-3d"]')!;
+    this.btnMarcar = this.barra.querySelector<HTMLButtonElement>('[data-accion="marcar-pin"]')!;
 
     for (const btn of this.barra.querySelectorAll<HTMLButtonElement>('[data-modo]')) {
       const modo = btn.dataset.modo as ModoDibujo;
       this.botonesModo.set(modo, btn);
-      btn.addEventListener('click', () => this.dibujo.establecerModo(modo));
+      btn.addEventListener('click', () => {
+        this.detenerMarcado();
+        this.dibujo.establecerModo(modo);
+      });
     }
 
     this.dibujo = new DibujoTerritorio(
@@ -138,6 +147,13 @@ export class BarraNavegacion {
     });
 
     this.btnQuitarPin.addEventListener('click', () => this.limpiarMarcador());
+    this.btnMarcar.addEventListener('click', () => {
+      if (this.manejadorMarcar) this.detenerMarcado();
+      else this.iniciarMarcado();
+    });
+    this.barra.querySelector('[data-accion="guardar-pin"]')?.addEventListener('click', () => {
+      this.guardarPin();
+    });
     this.barra.querySelector('[data-accion="medir-pin"]')?.addEventListener('click', () => {
       this.medirAlrededorDePin();
     });
@@ -190,9 +206,6 @@ export class BarraNavegacion {
   }
 
   private medirAlrededorDePin(): void {
-    const perimKm = Number(this.inputPerimetroKm.value);
-    if (!Number.isFinite(perimKm) || perimKm <= 0) return;
-
     let centro = parsearCoordenadas(this.inputCoord.value);
     if (!centro) {
       const carto = this.viewer.camera.positionCartographic;
@@ -201,13 +214,57 @@ export class BarraNavegacion {
         lon: Cesium.Math.toDegrees(carto.longitude),
       };
     }
+    this.medirEn(centro);
+  }
 
+  /** Traza el cuadro o círculo de la barra alrededor de una coordenada (lo usa el catálogo). */
+  medirEn(centro: Coordenada): void {
+    const perimKm = Number(this.inputPerimetroKm.value);
+    if (!Number.isFinite(perimKm) || perimKm <= 0) return;
     const forma = this.selectFormaPin.value === 'circulo' ? 'circulo' : 'cuadro';
     const coords =
       forma === 'circulo'
         ? construirCirculoPorPerimetro(centro, perimKm)
         : construirCuadroPorPerimetro(centro, perimKm);
     this.mostrarZonaMedida(coords, forma);
+  }
+
+  private iniciarMarcado(): void {
+    this.dibujo.establecerModo('navegar');
+    this.manejadorMarcar = new Cesium.ScreenSpaceEventHandler(this.viewer.scene.canvas);
+    this.manejadorMarcar.setInputAction((mov: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+      const punto = this.viewer.camera.pickEllipsoid(mov.position, this.viewer.scene.globe.ellipsoid);
+      if (!punto) return;
+      const c = Cesium.Cartographic.fromCartesian(punto);
+      const coord = { lat: Cesium.Math.toDegrees(c.latitude), lon: Cesium.Math.toDegrees(c.longitude) };
+      this.inputCoord.value = `${coord.lat.toFixed(5)}, ${coord.lon.toFixed(5)}`;
+      this.inputCoord.removeAttribute('aria-invalid');
+      this.ponerMarcador(coord, false);
+      this.detenerMarcado();
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    this.btnMarcar.classList.add('activo');
+    this.btnMarcar.setAttribute('aria-pressed', 'true');
+    this.viewer.scene.canvas.style.cursor = 'crosshair';
+  }
+
+  private detenerMarcado(): void {
+    if (this.manejadorMarcar && !this.manejadorMarcar.isDestroyed()) this.manejadorMarcar.destroy();
+    this.manejadorMarcar = null;
+    this.btnMarcar.classList.remove('activo');
+    this.btnMarcar.setAttribute('aria-pressed', 'false');
+    if (!this.viewer.isDestroyed()) this.viewer.scene.canvas.style.cursor = '';
+  }
+
+  private guardarPin(): void {
+    const coord = parsearCoordenadas(this.inputCoord.value);
+    if (!coord) {
+      this.inputCoord.setAttribute('aria-invalid', 'true');
+      this.inputCoord.focus();
+      return;
+    }
+    this.alGuardarPin?.(coord);
+    this.limpiarMarcador();
+    this.inputCoord.value = '';
   }
 
   private mostrarZonaMedida(coords: Coordenada[], forma: FormaDibujo): void {
@@ -258,7 +315,10 @@ export class BarraNavegacion {
       this.inputCoord.setAttribute('aria-invalid', 'true');
       return;
     }
+    this.ponerMarcador(coord, true);
+  }
 
+  private ponerMarcador(coord: Coordenada, volar: boolean): void {
     this.limpiarMarcador();
     this.marcador = this.viewer.entities.add({
       position: Cesium.Cartesian3.fromDegrees(coord.lon, coord.lat),
@@ -281,10 +341,12 @@ export class BarraNavegacion {
     });
     this.btnQuitarPin.classList.remove('oculto');
 
-    this.viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(coord.lon, coord.lat, ALTURA_SALTO_COORD_M),
-      duration: 1.0,
-    });
+    if (volar) {
+      this.viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(coord.lon, coord.lat, ALTURA_SALTO_COORD_M),
+        duration: 1.0,
+      });
+    }
     this.viewer.scene.requestRender();
   }
 

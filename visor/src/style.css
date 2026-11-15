@@ -346,9 +346,14 @@ html, body, #globo {
   transform: translateX(-50%);
   pointer-events: auto;
   z-index: 15;
+  /* deja libres los paneles de los lados: la barra se parte en filas en pantallas angostas */
+  max-width: calc(100vw - 770px);
+  min-width: min(480px, calc(100vw - 24px));
 }
 .barra-nav {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
@@ -414,7 +419,7 @@ html, body, #globo {
 .panel-zona {
   position: absolute;
   bottom: 28px;
-  left: 12px;
+  left: 360px;
   width: 310px;
   max-height: 62vh;
   display: flex;
@@ -495,6 +500,9 @@ html, body, #globo {
   color: #e6edf3;
   font: inherit;
 }
+/* La lista desplegable de Chrome es blanca por omisión: sin esto las opciones salen blanco sobre blanco. */
+select { color-scheme: dark; }
+select option, select optgroup { background: #0f172a; color: #e6edf3; }
 .asistente-chk { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #cbd5e1; }
 .asistente-acciones, .asistente-rapidas { display: flex; flex-wrap: wrap; gap: 6px; }
 .asistente-aviso { margin: 0; font-size: 11px; color: #86efac; }

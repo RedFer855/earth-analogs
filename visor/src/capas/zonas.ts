@@ -16,6 +16,8 @@ export class CapaZonas {
   private zonas: ZonaGuardada[] = [];
   private entidades = new Map<string, Cesium.Entity>();
   private rellenoVisible = true;
+  private readonly sinRelleno = new Set<string>();
+  private readonly oyentes = new Set<() => void>();
 
   constructor(private readonly viewer: Cesium.Viewer) {
     this.cargar();
@@ -30,6 +32,67 @@ export class CapaZonas {
     return this.rellenoVisible;
   }
 
+  /** Avisa cuando la lista o los datos de una zona cambian (para que el catálogo se repinte). */
+  alCambiar(cb: () => void): void {
+    this.oyentes.add(cb);
+  }
+
+  private notificar(): void {
+    for (const cb of this.oyentes) cb();
+  }
+
+  obtener(id: string): ZonaGuardada | undefined {
+    return this.zonas.find((z) => z.id === id);
+  }
+
+  rellenoDeZona(id: string): boolean {
+    return this.rellenoVisible && !this.sinRelleno.has(id);
+  }
+
+  alternarRellenoZona(id: string): void {
+    if (this.sinRelleno.has(id)) this.sinRelleno.delete(id);
+    else this.sinRelleno.add(id);
+    this.redibujar(id);
+    this.notificar();
+  }
+
+  actualizar(
+    id: string,
+    cambios: Partial<Pick<ZonaGuardada, 'nombre' | 'color' | 'cuerpo' | 'objetivo' | 'objetivoNombre' | 'notas'>>,
+  ): void {
+    const zona = this.obtener(id);
+    if (!zona) return;
+    for (const [k, v] of Object.entries(cambios)) {
+      if (v === undefined) delete (zona as unknown as Record<string, unknown>)[k];
+      else (zona as unknown as Record<string, unknown>)[k] = v;
+    }
+    this.guardar();
+    if (cambios.color !== undefined) this.redibujar(id);
+    this.notificar();
+  }
+
+  /** Suma zonas ya creadas (por ejemplo, importadas) al principio de la lista. */
+  agregarVarias(zonas: ZonaGuardada[]): void {
+    if (zonas.length === 0) return;
+    this.zonas.unshift(...zonas);
+    this.guardar();
+    for (const z of zonas) this.dibujarZona(z);
+    this.notificar();
+  }
+
+  exportarUna(id: string): string | null {
+    const zona = this.obtener(id);
+    return zona ? exportarZonasAGeoJson([zona]) : null;
+  }
+
+  private redibujar(id: string): void {
+    const zona = this.obtener(id);
+    const previa = this.entidades.get(id);
+    if (previa && !this.viewer.isDestroyed()) this.viewer.entities.remove(previa);
+    this.entidades.delete(id);
+    if (zona) this.dibujarZona(zona);
+  }
+
   agregar(coords: Coordenada[], forma: FormaDibujo, nombre?: string, color?: string): ZonaGuardada {
     const colorElegido = color ?? PALETA_ZONAS[this.zonas.length % PALETA_ZONAS.length];
     const zona = crearZonaGuardada(
@@ -41,6 +104,7 @@ export class CapaZonas {
     this.zonas.unshift(zona);
     this.guardar();
     this.dibujarZona(zona);
+    this.notificar();
     return zona;
   }
 
@@ -53,11 +117,14 @@ export class CapaZonas {
       this.viewer.scene.requestRender();
     }
     this.entidades.delete(id);
+    this.sinRelleno.delete(id);
+    this.notificar();
   }
 
   alternarRelleno(): boolean {
     this.rellenoVisible = !this.rellenoVisible;
     this.renderizarTodas();
+    this.notificar();
     return this.rellenoVisible;
   }
 
@@ -96,7 +163,7 @@ export class CapaZonas {
     const ent = this.viewer.entities.add({
       polygon: {
         hierarchy: Cesium.Cartesian3.fromDegreesArray(grados),
-        material: this.rellenoVisible ? base.withAlpha(0.2) : Cesium.Color.TRANSPARENT,
+        material: this.rellenoDeZona(zona.id) ? base.withAlpha(0.2) : Cesium.Color.TRANSPARENT,
         outline: true,
         outlineColor: base,
       },
