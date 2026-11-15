@@ -187,7 +187,6 @@ async function iniciar(): Promise<void> {
     capa.mostrar(res.candidatos);
     panelZona.configurarCandidatos(res.candidatos);
     panel.establecerResultado(res, estabilidad, true);
-    asistente.establecerContexto(indice, res, null);
     const mejor = res.candidatos[0];
     if (mejor) volarA(viewer, mejor.centro.lat, mejor.centro.lon);
   };
@@ -229,9 +228,23 @@ async function iniciar(): Promise<void> {
         return caja[2] - caja[0] > 170 ? null : caja;
       },
       alRecalcular: mostrarResultadoNuevo,
+      alSeleccionar: (rango) => seleccionarCandidato(rango, true),
+      alElegirSitio: async (sitioId) => {
+        const objetivo = indice.sitios_objetivo.find((x) => x.id === sitioId);
+        if (!objetivo) return;
+        const resMeta = indice.resultados.find((r) => r.sitio === objetivo.id);
+        await seleccionarSitio({
+          ...objetivo,
+          archivo: resMeta?.archivo ?? null,
+          n_candidatos: resMeta?.n_candidatos ?? 0,
+          mejor: resMeta?.mejor ?? null,
+        });
+      },
     },
     true,
   );
+  // el chat conoce el índice desde el inicio: puede cargar un sitio por petición aunque aún no haya ninguno elegido
+  asistente.establecerContexto(indice, null, null);
 
   capaPines.definirAlElegir((punto) => {
     panel.mostrarPin(punto);
