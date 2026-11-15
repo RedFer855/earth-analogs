@@ -2,8 +2,8 @@
 
 Un periodo de 16 días entra si la fiabilidad del píxel es 0 o 1 (se descartan nieve, nubes y valores estimados)
 y si "VI Quality" (UInt16, nodata 65535) marca tierra (código 1) o costa u orilla (código 2) en los bits 11-13. El
-agua (3 a 7) queda fuera. Aceptar solo el 1 dejaba sin NDVI a los píxeles de 0.05° con costa u orilla, que en el norte
-son la mayoría (de 60° a 70° N la cobertura de ndvi_max_clim bajaba de 93 % a 68 %).
+agua (3 a 7) queda fuera. Aceptar solo el 1 dejaba sin NDVI a los píxeles de 0.05° con costa u orilla,, que en el norte
+son la mayoría (medición en ADR-006).
 
 Códigos de máscara tierra/agua en VI Quality (bits 11-13, según la guía MOD13 C6.1):
   0 = océano somero (shallow ocean)
