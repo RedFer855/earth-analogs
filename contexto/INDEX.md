@@ -44,12 +44,12 @@ _(vacía)_
 
 ## 45-decisiones — ADR-NNN, estándares E-NN y decisiones pendientes DP-NN
 
-- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]]
+- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]]
 - _(tipo, estado y summary: ver contexto/INDEX-decisiones.md)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
 
-- _(8 notas: ver contexto/INDEX-referencia.md)_
+- _(9 notas: ver contexto/INDEX-referencia.md)_
 
 ## 55-investigaciones — I-NN y sus prompts
 
@@ -68,7 +68,7 @@ _(vacía)_
 - [[2026-11-15-fernando-etl-ndvi-y-e13-incremental]] · sesion · fernando · claude-code · 2026-11-15 — El NDVI recupera costas y latitudes altas (cobertura de 80.7 % a 88.15 %) y E-13 relee solo lo que cambió y abre cada fuente una sola vez (unos 10 minutos a menos de 3).
 - [[2026-11-15-fernando-etl-escala-200m]] · sesion · fernando · claude-code · 2026-11-15 — El terreno se calcula igual en los tres cuerpos (bloques cuadrados de 200 m, ventana de 1 km); el error de pendiente contra la relectura independiente de E-13 baja de 0.176° a 0.050°.
 - [[2026-11-15-fernando-e16-cuevas]] · sesion · fernando · antigravity · 2026-11-15 — Se curaron 57 entradas verificadas (55 sistemas únicos) de Pyroduct Digital Catalog v3.0 con fuentes abiertas, se implementó el paso E-16 (cueva_n_tubos y cueva_dist_km) y se regeneró el manifiesto E-13 con 78 columnas y cadena de auditoría íntegra.
-- _(4 sesiones más: ver contexto/INDEX-bitacora.md)_
+- _(5 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

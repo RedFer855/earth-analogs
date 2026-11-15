@@ -1,0 +1,494 @@
+{
+ "meta": {
+  "metodo": "What do the surroundings of impact craters, lava tubes and salt flats have in common?\n\nSite-level comparison (the site is the unit, not the cell, so neighbouring cells do not inflate significance):\nfor every site, the median of each variable over the cells around it is compared with the median of control\ncells in the same 2° latitude band and more than 200 km from any site of the same type.\n\nPer type and variable it reports the median paired difference, Cliff's delta between site and control medians,\na Wilcoxon signed-rank p-value and the Holm-corrected p-value. Results do NOT feed the similarity score (ADR-009).",
+  "banda_deg": 2.0,
+  "lejos_km": 200.0,
+  "n_control": 400,
+  "semilla": 20261115
+ },
+ "resultados": {
+  "crater_impacto": {
+   "sitios": 185,
+   "sitios_usados": 176,
+   "radio_km": 5.0,
+   "filas": [
+    {
+     "variable": "slope_mean_deg",
+     "etiqueta": "Mean slope (°)",
+     "n_sitios": 173,
+     "mediana_sitio": 1.4553351402282715,
+     "mediana_control": 1.5548635721206665,
+     "diferencia_mediana": -0.10195672512054443,
+     "cliff_delta": 0.04360319422633566,
+     "p": 0.09926293568532826,
+     "p_holm": 0.49631467842664134
+    },
+    {
+     "variable": "relieve_m",
+     "etiqueta": "Local relief (m)",
+     "n_sitios": 173,
+     "mediana_sitio": 33.83026885986328,
+     "mediana_control": 39.783592224121094,
+     "diferencia_mediana": -3.5230140686035156,
+     "cliff_delta": -0.006248120551973003,
+     "p": 0.25025189912605517,
+     "p_holm": 1.0
+    },
+    {
+     "variable": "elev_mean_m",
+     "etiqueta": "Elevation (m)",
+     "n_sitios": 173,
+     "mediana_sitio": 323.52313232421875,
+     "mediana_control": 410.85321044921875,
+     "diferencia_mediana": -85.67646789550781,
+     "cliff_delta": -0.24360987670820944,
+     "p": 0.015392351230321804,
+     "p_holm": 0.12313880984257443
+    },
+    {
+     "variable": "aridez_ai",
+     "etiqueta": "Aridity index",
+     "n_sitios": 176,
+     "mediana_sitio": 0.7217749953269958,
+     "mediana_control": 0.4465000033378601,
+     "diferencia_mediana": 0.025999993085861206,
+     "cliff_delta": 0.19795971074380164,
+     "p": 0.00019930326379835606,
+     "p_holm": 0.0019930326379835606
+    },
+    {
+     "variable": "lst_media_k",
+     "etiqueta": "Mean surface temperature (K)",
+     "n_sitios": 176,
+     "mediana_sitio": 285.4814147949219,
+     "mediana_control": 287.3084716796875,
+     "diferencia_mediana": 1.5088348388671875,
+     "cliff_delta": 0.08083677685950413,
+     "p": 7.155870116548613e-05,
+     "p_holm": 0.0007871457128203474
+    },
+    {
+     "variable": "rango_diurno_k",
+     "etiqueta": "Diurnal range (K)",
+     "n_sitios": 176,
+     "mediana_sitio": 14.594833374023438,
+     "mediana_control": 17.47699737548828,
+     "diferencia_mediana": -0.6209859848022461,
+     "cliff_delta": -0.1268724173553719,
+     "p": 0.004235121887177229,
+     "p_holm": 0.03811609698459506
+    },
+    {
+     "variable": "ndvi_max_clim",
+     "etiqueta": "NDVI max (climatology)",
+     "n_sitios": 160,
+     "mediana_sitio": 0.7106800079345703,
+     "mediana_control": 0.604640007019043,
+     "diferencia_mediana": -0.004092484712600708,
+     "cliff_delta": 0.161328125,
+     "p": 0.2673975554928065,
+     "p_holm": 1.0
+    },
+    {
+     "variable": "permafrost_prob",
+     "etiqueta": "Permafrost probability",
+     "n_sitios": 111,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": -0.10161512864215567,
+     "p": 0.8287587461882815,
+     "p_holm": 1.0
+    },
+    {
+     "variable": "polvo_frec_dod05_pct",
+     "etiqueta": "Dust frequency DOD>0.5 (%)",
+     "n_sitios": 137,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0447273850440979,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": -0.19921146571474238,
+     "p": 0.38364398067590977,
+     "p_holm": 1.0
+    },
+    {
+     "variable": "viento_tau_media_pa",
+     "etiqueta": "Wind stress (Pa)",
+     "n_sitios": 176,
+     "mediana_sitio": 0.14741958677768707,
+     "mediana_control": 0.12971371412277222,
+     "diferencia_mediana": 0.018692970275878906,
+     "cliff_delta": 0.26698088842975204,
+     "p": 3.129129311219003e-08,
+     "p_holm": 4.3807810357066046e-07
+    },
+    {
+     "variable": "aster_qi",
+     "etiqueta": "ASTER quartz index",
+     "n_sitios": 174,
+     "mediana_sitio": 1.0015640258789062,
+     "mediana_control": 1.0014045238494873,
+     "diferencia_mediana": 1.4007091522216797e-05,
+     "cliff_delta": -0.02292244682256573,
+     "p": 0.038302703398089194,
+     "p_holm": 0.2681189237866244
+    },
+    {
+     "variable": "arena_frac",
+     "etiqueta": "Sand fraction",
+     "n_sitios": 175,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.17714285714285713,
+     "p": 1.1735028812661596e-06,
+     "p_holm": 1.4082034575193916e-05
+    },
+    {
+     "variable": "roca_volcanica_frac",
+     "etiqueta": "Volcanic rock fraction",
+     "n_sitios": 176,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.2100335743801653,
+     "p": 1.9965153796874802e-07,
+     "p_holm": 2.595469993593724e-06
+    },
+    {
+     "variable": "roca_evaporita_frac",
+     "etiqueta": "Evaporite fraction",
+     "n_sitios": 176,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.022727272727272728,
+     "p": 0.06559969484806061,
+     "p_holm": 0.39359816908836365
+    }
+   ]
+  },
+  "tubo_lava": {
+   "sitios": 57,
+   "sitios_usados": 57,
+   "radio_km": 10.0,
+   "filas": [
+    {
+     "variable": "slope_mean_deg",
+     "etiqueta": "Mean slope (°)",
+     "n_sitios": 57,
+     "mediana_sitio": 3.3436784744262695,
+     "mediana_control": 1.8624939918518066,
+     "diferencia_mediana": 1.4686861038208008,
+     "cliff_delta": 0.4139735303170206,
+     "p": 2.3184034034784418e-06,
+     "p_holm": 2.550243743826286e-05
+    },
+    {
+     "variable": "relieve_m",
+     "etiqueta": "Local relief (m)",
+     "n_sitios": 57,
+     "mediana_sitio": 109.94320678710938,
+     "mediana_control": 54.147735595703125,
+     "diferencia_mediana": 59.378021240234375,
+     "cliff_delta": 0.4927670052323792,
+     "p": 9.53802157255268e-08,
+     "p_holm": 1.2399428044318483e-06
+    },
+    {
+     "variable": "elev_mean_m",
+     "etiqueta": "Elevation (m)",
+     "n_sitios": 57,
+     "mediana_sitio": 796.24560546875,
+     "mediana_control": 872.5230102539062,
+     "diferencia_mediana": 88.27203369140625,
+     "cliff_delta": 0.07602339181286549,
+     "p": 0.14267326891422272,
+     "p_holm": 0.7133663445711136
+    },
+    {
+     "variable": "aridez_ai",
+     "etiqueta": "Aridity index",
+     "n_sitios": 57,
+     "mediana_sitio": 0.4332999885082245,
+     "mediana_control": 0.31029999256134033,
+     "diferencia_mediana": 0.13715000450611115,
+     "cliff_delta": 0.2631578947368421,
+     "p": 0.0001346836652373895,
+     "p_holm": 0.0012121529871365055
+    },
+    {
+     "variable": "lst_media_k",
+     "etiqueta": "Mean surface temperature (K)",
+     "n_sitios": 57,
+     "mediana_sitio": 291.31591796875,
+     "mediana_control": 288.9667053222656,
+     "diferencia_mediana": -0.738067626953125,
+     "cliff_delta": -0.12465373961218837,
+     "p": 0.21077784895896912,
+     "p_holm": 0.8431113958358765
+    },
+    {
+     "variable": "rango_diurno_k",
+     "etiqueta": "Diurnal range (K)",
+     "n_sitios": 57,
+     "mediana_sitio": 16.112497329711914,
+     "mediana_control": 20.645036697387695,
+     "diferencia_mediana": -4.353704452514648,
+     "cliff_delta": -0.4342874730686365,
+     "p": 6.971647962927818e-05,
+     "p_holm": 0.0006971647962927818
+    },
+    {
+     "variable": "ndvi_max_clim",
+     "etiqueta": "NDVI max (climatology)",
+     "n_sitios": 57,
+     "mediana_sitio": 0.6242799758911133,
+     "mediana_control": 0.4336950182914734,
+     "diferencia_mediana": 0.19382500648498535,
+     "cliff_delta": 0.49584487534626037,
+     "p": 0.00017920948448590934,
+     "p_holm": 0.0014336758758872747
+    },
+    {
+     "variable": "permafrost_prob",
+     "etiqueta": "Permafrost probability",
+     "n_sitios": 36,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": -0.08333333333333333,
+     "p": 0.10247043485974937,
+     "p_holm": 0.6148226091584962
+    },
+    {
+     "variable": "polvo_frec_dod05_pct",
+     "etiqueta": "Dust frequency DOD>0.5 (%)",
+     "n_sitios": 36,
+     "mediana_sitio": 0.04162809997797012,
+     "mediana_control": 0.13626524806022644,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": -0.08641975308641975,
+     "p": 0.8651231811192681,
+     "p_holm": 1.0
+    },
+    {
+     "variable": "viento_tau_media_pa",
+     "etiqueta": "Wind stress (Pa)",
+     "n_sitios": 57,
+     "mediana_sitio": 0.09241154789924622,
+     "mediana_control": 0.08557236939668655,
+     "diferencia_mediana": 0.013254888355731964,
+     "cliff_delta": 0.08648815020006156,
+     "p": 0.0016517887124791741,
+     "p_holm": 0.011562520987354219
+    },
+    {
+     "variable": "aster_qi",
+     "etiqueta": "ASTER quartz index",
+     "n_sitios": 55,
+     "mediana_sitio": 1.000002145767212,
+     "mediana_control": 1.0017203092575073,
+     "diferencia_mediana": -0.0018595457077026367,
+     "cliff_delta": -0.7778512396694215,
+     "p": 2.3149199633018717e-09,
+     "p_holm": 3.24088794862262e-08
+    },
+    {
+     "variable": "arena_frac",
+     "etiqueta": "Sand fraction",
+     "n_sitios": 53,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.0,
+     "p": 1.0,
+     "p_holm": 1.0
+    },
+    {
+     "variable": "roca_volcanica_frac",
+     "etiqueta": "Volcanic rock fraction",
+     "n_sitios": 49,
+     "mediana_sitio": 0.5555555820465088,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.5555555820465088,
+     "cliff_delta": 0.673469387755102,
+     "p": 4.233188860592602e-07,
+     "p_holm": 5.079826632711122e-06
+    },
+    {
+     "variable": "roca_evaporita_frac",
+     "etiqueta": "Evaporite fraction",
+     "n_sitios": 49,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.0,
+     "p": 1.0,
+     "p_holm": 1.0
+    }
+   ]
+  },
+  "playa_salar": {
+   "sitios": 73,
+   "sitios_usados": 73,
+   "radio_km": 15.0,
+   "filas": [
+    {
+     "variable": "slope_mean_deg",
+     "etiqueta": "Mean slope (°)",
+     "n_sitios": 73,
+     "mediana_sitio": 0.17844334244728088,
+     "mediana_control": 1.5797553062438965,
+     "diferencia_mediana": -1.2493126392364502,
+     "cliff_delta": -0.7733158191030212,
+     "p": 2.024165210445794e-11,
+     "p_holm": 2.6314147735795324e-10
+    },
+    {
+     "variable": "relieve_m",
+     "etiqueta": "Local relief (m)",
+     "n_sitios": 73,
+     "mediana_sitio": 5.232743263244629,
+     "mediana_control": 39.60669708251953,
+     "diferencia_mediana": -31.43851089477539,
+     "cliff_delta": -0.7335334959654719,
+     "p": 6.898382559628047e-11,
+     "p_holm": 7.588220815590851e-10
+    },
+    {
+     "variable": "elev_mean_m",
+     "etiqueta": "Elevation (m)",
+     "n_sitios": 73,
+     "mediana_sitio": 762.8319091796875,
+     "mediana_control": 552.3951416015625,
+     "diferencia_mediana": 145.98095703125,
+     "cliff_delta": 0.20022518296115593,
+     "p": 0.005735673941671848,
+     "p_holm": 0.022942695766687393
+    },
+    {
+     "variable": "aridez_ai",
+     "etiqueta": "Aridity index",
+     "n_sitios": 73,
+     "mediana_sitio": 0.07805000245571136,
+     "mediana_control": 0.3861500024795532,
+     "diferencia_mediana": -0.2661000192165375,
+     "cliff_delta": -0.8123475323700506,
+     "p": 2.9450240857098464e-11,
+     "p_holm": 3.5340289028518157e-10
+    },
+    {
+     "variable": "lst_media_k",
+     "etiqueta": "Mean surface temperature (K)",
+     "n_sitios": 73,
+     "mediana_sitio": 298.3507385253906,
+     "mediana_control": 290.0651550292969,
+     "diferencia_mediana": 4.100921630859375,
+     "cliff_delta": 0.3282041658847814,
+     "p": 1.637193349779409e-07,
+     "p_holm": 1.473474014801468e-06
+    },
+    {
+     "variable": "rango_diurno_k",
+     "etiqueta": "Diurnal range (K)",
+     "n_sitios": 73,
+     "mediana_sitio": 28.106830596923828,
+     "mediana_control": 19.782499313354492,
+     "diferencia_mediana": 7.759836196899414,
+     "cliff_delta": 0.6397072621504972,
+     "p": 1.9661126060555034e-09,
+     "p_holm": 1.9661126060555034e-08
+    },
+    {
+     "variable": "ndvi_max_clim",
+     "etiqueta": "NDVI max (climatology)",
+     "n_sitios": 72,
+     "mediana_sitio": 0.10646499693393707,
+     "mediana_control": 0.5248500108718872,
+     "diferencia_mediana": -0.38496747612953186,
+     "cliff_delta": -0.8676697530864198,
+     "p": 3.8746822496977e-12,
+     "p_holm": 5.4245551495767796e-11
+    },
+    {
+     "variable": "permafrost_prob",
+     "etiqueta": "Permafrost probability",
+     "n_sitios": 51,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.0196078431372549,
+     "p": 0.31731050786291415,
+     "p_holm": 0.3235492408275604
+    },
+    {
+     "variable": "polvo_frec_dod05_pct",
+     "etiqueta": "Dust frequency DOD>0.5 (%)",
+     "n_sitios": 63,
+     "mediana_sitio": 0.43830811977386475,
+     "mediana_control": 0.041618116199970245,
+     "diferencia_mediana": 0.3166266456246376,
+     "cliff_delta": 0.3867472915091963,
+     "p": 3.6594846725892046e-07,
+     "p_holm": 2.9275877380713637e-06
+    },
+    {
+     "variable": "viento_tau_media_pa",
+     "etiqueta": "Wind stress (Pa)",
+     "n_sitios": 73,
+     "mediana_sitio": 0.08364997059106827,
+     "mediana_control": 0.09744475781917572,
+     "diferencia_mediana": -0.020430773496627808,
+     "cliff_delta": -0.3488459373240758,
+     "p": 0.00024289947759825736,
+     "p_holm": 0.0014573968655895442
+    },
+    {
+     "variable": "aster_qi",
+     "etiqueta": "ASTER quartz index",
+     "n_sitios": 73,
+     "mediana_sitio": 1.0000743865966797,
+     "mediana_control": 1.002103567123413,
+     "diferencia_mediana": -0.0025884509086608887,
+     "cliff_delta": -0.27716269468943516,
+     "p": 0.1617746204137802,
+     "p_holm": 0.3235492408275604
+    },
+    {
+     "variable": "arena_frac",
+     "etiqueta": "Sand fraction",
+     "n_sitios": 73,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.1232876712328767,
+     "p": 0.0076857926324009895,
+     "p_holm": 0.02305737789720297
+    },
+    {
+     "variable": "roca_volcanica_frac",
+     "etiqueta": "Volcanic rock fraction",
+     "n_sitios": 72,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.4027777777777778,
+     "p": 2.1087635567800864e-06,
+     "p_holm": 1.4761344897460604e-05
+    },
+    {
+     "variable": "roca_evaporita_frac",
+     "etiqueta": "Evaporite fraction",
+     "n_sitios": 72,
+     "mediana_sitio": 0.0,
+     "mediana_control": 0.0,
+     "diferencia_mediana": 0.0,
+     "cliff_delta": 0.2222222222222222,
+     "p": 0.00036501150725454294,
+     "p_holm": 0.0018250575362727148
+    }
+   ]
+  }
+ }
+}
