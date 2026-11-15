@@ -23,6 +23,7 @@ import {
 } from './datos/contrato';
 import { cambiarMapaBase, crearGlobo, type TipoMapaBase } from './globo';
 import { GloboObjetivo } from './globo-objetivo';
+import { BarraNavegacion } from './ui/barra';
 import { PanelBusqueda } from './ui/busqueda';
 import { FichaCandidato } from './ui/ficha';
 import { PanelLateral } from './ui/panel';
@@ -156,6 +157,7 @@ async function iniciar(): Promise<void> {
 
   const capa = new CapaCandidatos(viewer);
   const capaPines = new CapaPines(viewer);
+  new BarraNavegacion(ui, viewer);
   let panel: PanelLateral;
 
   const ficha = new FichaCandidato(

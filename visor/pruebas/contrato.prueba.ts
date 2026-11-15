@@ -16,6 +16,7 @@ import {
   type ResultadoJson,
 } from '../src/datos/contrato';
 import { evaluarCondiciones } from '../src/datos/capas7';
+import { formatearAlturaM, parsearCoordenadas } from '../src/datos/coordenadas';
 import { ipixACentro, ipixAVertices } from '../src/datos/healpix';
 
 const metricsRaw = readFileSync(resolve('datos/metrics.json'), 'utf8');
@@ -195,3 +196,14 @@ const evalRes = evaluarCondiciones(4, cols, [
 assert.deepEqual(Array.from(evalRes.conteos), [2, 1, 1, 1]);
 assert.equal(evalRes.celdasTodas, 1);
 assert.equal(evalRes.celdasAlguna, 4);
+
+// 8. parsearCoordenadas y formatearAlturaM
+assert.deepEqual(parsearCoordenadas('14.0540, -87.2489'), { lat: 14.054, lon: -87.2489 });
+assert.deepEqual(parsearCoordenadas('14.0540° N; 87.2489° W'), { lat: 14.054, lon: -87.2489 });
+assert.deepEqual(parsearCoordenadas('-23.5 45.25'), { lat: -23.5, lon: 45.25 });
+assert.equal(parsearCoordenadas('95, 10'), null);
+assert.equal(parsearCoordenadas('10, 190'), null);
+assert.equal(parsearCoordenadas('texto'), null);
+assert.equal(formatearAlturaM(850), '850 m');
+assert.equal(formatearAlturaM(12500), '12.5 km');
+assert.equal(formatearAlturaM(-1), '—');
