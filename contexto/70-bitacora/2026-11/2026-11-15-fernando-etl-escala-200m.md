@@ -34,7 +34,7 @@ la latitud en la Tierra (bloques de grados) y no coincidía con la de la Luna y 
 | Error mediano de `slope_mean_deg` contra la relectura de E-13 | 0.176° (p90 0.84°) | 0.050° (p90 0.30°) |
 
 E-03 completo a 200 m: 118 min, cobertura 98.7 %. Corrió en un RUN aparte y luego se copió al compartido; las
-columnas anteriores se reemplazaron. E-13 se corrió después con `audit/audit.py`.
+columnas anteriores se reemplazaron. E-13 se corrió después con `audit/audit.py` (su registro está en la rama de E-13).
 
 ## Pendiente
 
