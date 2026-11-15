@@ -9,7 +9,7 @@ import {
 } from '../datos/contrato';
 import { etiquetaTipoPunto } from '../capas/pines';
 
-export type CuerpoTab = 'luna' | 'marte';
+export type CuerpoTab = 'luna' | 'marte' | 'buscar';
 
 export interface PanelCallbacks {
   alElegirSitio: (sitio: Sitio) => void;
@@ -29,6 +29,7 @@ export class PanelLateral {
   private conteosPines: Record<TipoPunto, number> | null = null;
   private pinesVisibles = new Set<TipoPunto>(['tubo_lava', 'crater_impacto', 'playa_salar']);
   private correlacion: CorrelacionJson | null = null;
+  private contenedorBusqueda: HTMLElement | null = null;
 
   constructor(contenedor: HTMLElement, indice: Indice, callbacks: PanelCallbacks) {
     this.grupos = sitiosPorCuerpo(indice);
@@ -45,7 +46,7 @@ export class PanelLateral {
       const tabBtn = target.closest<HTMLButtonElement>('[data-tab]');
       if (tabBtn) {
         const tab = tabBtn.dataset.tab as CuerpoTab | undefined;
-        if (tab === 'luna' || tab === 'marte') {
+        if (tab === 'luna' || tab === 'marte' || tab === 'buscar') {
           this.tabActiva = tab;
           this.render();
         }
@@ -100,6 +101,11 @@ export class PanelLateral {
     this.render();
   }
 
+  configurarBusqueda(contenedor: HTMLElement): void {
+    this.contenedorBusqueda = contenedor;
+    this.render();
+  }
+
   activarTab(tab: CuerpoTab): void {
     this.tabActiva = tab;
     this.render();
@@ -140,7 +146,13 @@ export class PanelLateral {
   }
 
   private render(): void {
-    const sitios = this.grupos[this.tabActiva];
+    const esBuscar = this.tabActiva === 'buscar';
+    const sitios =
+      this.tabActiva === 'luna'
+        ? this.grupos.luna
+        : this.tabActiva === 'marte'
+          ? this.grupos.marte
+          : [];
     const itemsSitios = sitios
       .map((s) => {
         const activo = s.id === this.sitioActivoId ? ' activo' : '';
@@ -157,9 +169,9 @@ export class PanelLateral {
       .join('');
 
     let bloqueCandidatos = '';
-    if (this.mensajeEstado) {
+    if (!esBuscar && this.mensajeEstado) {
       bloqueCandidatos = `<p class="estado-lista">${escaparHtml(this.mensajeEstado)}</p>`;
-    } else if (this.candidatosActuales.length > 0) {
+    } else if (!esBuscar && this.candidatosActuales.length > 0) {
       const itemsCand = this.candidatosActuales
         .map((c) => {
           const activo = c.rango === this.candidatoActivoRango ? ' activo' : '';
@@ -174,9 +186,13 @@ export class PanelLateral {
         .join('');
       bloqueCandidatos = `<div class="subtitulo">Primeros ${this.candidatosActuales.length} candidatos</div>
         <div class="lista-scroll lista-candidatos">${itemsCand}</div>`;
-    } else if (this.sitioActivoId) {
+    } else if (!esBuscar && this.sitioActivoId) {
       bloqueCandidatos = `<p class="estado-lista">Sin candidatos disponibles.</p>`;
     }
+
+    const tabBuscar = this.contenedorBusqueda
+      ? `<button type="button" class="tab${esBuscar ? ' activa' : ''}" data-tab="buscar">Buscar</button>`
+      : '';
 
     this.raiz.innerHTML = `
       <header class="panel-cabecera">
@@ -190,12 +206,18 @@ export class PanelLateral {
         <button type="button" class="tab${this.tabActiva === 'marte' ? ' activa' : ''}" data-tab="marte">
           Marte (${this.grupos.marte.length})
         </button>
+        ${tabBuscar}
       </div>
-      <div class="lista-scroll lista-sitios">${itemsSitios}</div>
+      ${esBuscar ? '<div class="busqueda-slot"></div>' : `<div class="lista-scroll lista-sitios">${itemsSitios}</div>`}
       ${this.renderPines()}
-      ${this.renderCorrelacion()}
+      ${esBuscar ? '' : this.renderCorrelacion()}
       ${bloqueCandidatos}
     `;
+
+    if (esBuscar && this.contenedorBusqueda) {
+      const slot = this.raiz.querySelector('.busqueda-slot');
+      if (slot) slot.appendChild(this.contenedorBusqueda);
+    }
   }
 
   private renderPines(): string {
