@@ -63,14 +63,13 @@ representar toda una celda costera, y no hay un umbral estándar de fracción v�
 
 ### Medición de la regla de NDVI (2026-11-15)
 
-Aceptar solo el código 1 y pedir 3 periodos por año durante 5 años o más dejaba `ndvi_max_clim` en 80.7 % de las celdas
-(de 60° a 70° N, 67.5 %; más allá de 70° N, 35.5 %), contra 88.4 % del ETL privado (93.5 % y 59.5 %). Se recalculó la
-columna con cada máscara y cada regla sobre los 230 periodos y se cruzó por coordenada: en un periodo de
-referencia, la costa u orilla (código 2) explicaba el 57 % de las celdas que el privado tenía y el nuevo no, y el 31 %
-venía sin dato de VI Quality; la regla de 3 periodos por año en 5 años quitaba unos 3 puntos más. Con la regla
-elegida (tierra y costa; máximo de la curva climatológica) la cobertura es 88.15 % (de 60° a 70° N, 93.3 %; más allá de
-70° N, 61.7 %), y Isla Devon pasa de 16 424 a 24 972 celdas con NDVI. Las variantes con agua somera (código 3) suman
-menos de 0.5 puntos y mezclan píxeles con agua, así que no se aceptan.
+Aceptar solo el código 1 y pedir 3 periodos por año durante 5 años o más dejaba `ndvi_max_clim` en 80.7 % de las
+celdas (de 60° a 70° N, 67.5 %; más allá de 70° N, 35.5 %). Se recalculó la columna con cada máscara y cada regla
+sobre los 230 periodos. Sin máscara de agua la cobertura sería 88.7 %, así que la máscara de solo tierra quitaba 8
+puntos, casi todos en costas y orillas de píxeles de 0.05°; aceptar también el código 2 los devuelve (87.7 % con la
+regla por año). Cambiar la regla a «máximo de la curva climatológica» recupera medio punto más y llega a 88.15 % (de 60°
+a 70° N, 93.3 %; más allá de 70° N, 61.7 %), y Isla Devon pasa de 16 424 a 24 972 celdas con NDVI. Las variantes con
+agua somera (código 3) suman menos de 0.5 puntos y mezclan píxeles con agua, así que no se aceptan.
 
 ## 5. Consecuencias
 
