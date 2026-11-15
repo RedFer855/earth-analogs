@@ -349,3 +349,47 @@ const unidades = parsearUnidadesMacrostrat({
 assert.equal(unidades.length, 1);
 assert.equal(unidades[0].nombre, 'Basaltos');
 assert.deepEqual(parsearUnidadesMacrostrat({}), []);
+
+// 12. Esquinas HEALPix de nivel 7: finitas, del ancho de una celda y como las de cdshealpix
+//     (la fórmula anterior daba celdas de 20° a 325° de ancho, y en el polo dividía
+//     entre cero; Cesium detenía el render con "normalized result is not a number").
+{
+  const nside = 128;
+  let malas = 0;
+  let anchoMax = 0;
+  for (let i = 0; i < 12 * nside * nside; i += 1) {
+    const v = ipixAVertices(i, nside);
+    for (const [lat, lon] of v) {
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90) malas += 1;
+    }
+    const c = ipixACentro(i, nside);
+    if (!Number.isFinite(c[0]) || !Number.isFinite(c[1]) || Math.abs(c[1]) > 180) malas += 1;
+    if (v.every(([lat]) => Math.abs(lat) < 80)) {
+      const lons = v.map(([, lon]) => lon);
+      anchoMax = Math.max(anchoMax, Math.max(...lons) - Math.min(...lons));
+    }
+  }
+  assert.equal(malas, 0, `${malas} esquinas o centros no finitos`);
+  // Cerca de 80° de latitud una celda legítima mide ~3.1° de longitud.
+  assert.ok(anchoMax < 5, `una celda abarca ${anchoMax}° de longitud`);
+
+  // Referencia: cdshealpix.nested.vertices([10942], 7), en (lat, lon).
+  const ref10942: [number, number][] = [
+    [43.804488, 0.731707],
+    [44.20153, 0.737705],
+    [44.597991, 0.0],
+    [44.20153, 0.0],
+  ];
+  const v10942 = ipixAVertices(10942, nside);
+  for (const [la, lo] of ref10942) {
+    assert.ok(
+      v10942.some(([a, b]) => Math.abs(a - la) < 1e-5 && Math.abs(b - lo) < 1e-5),
+      `falta el vértice (${la}, ${lo}) en ${JSON.stringify(v10942)}`,
+    );
+  }
+  // La celda que toca el polo norte tiene un vértice en lat 90.
+  const polo = ipixAVertices(nside * nside - 1, nside);
+  assert.ok(polo.some(([lat]) => lat === 90), 'la última celda de la cara 0 toca el polo norte');
+  const poloSur = ipixAVertices(8 * nside * nside, nside);
+  assert.ok(poloSur.some(([lat]) => lat === -90), 'la primera celda de la cara 8 toca el polo sur');
+}

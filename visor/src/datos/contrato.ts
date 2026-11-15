@@ -314,7 +314,15 @@ async function pedirOpcional<T>(url: string): Promise<T | null> {
   if (!res.ok) {
     throw new Error(`No se pudo cargar ${url} (HTTP ${res.status}).`);
   }
-  return (await res.json()) as T;
+  // Un servidor con respaldo de SPA (Vite en desarrollo, varios hostings) responde
+  // 200 con index.html cuando el archivo opcional no existe: eso cuenta como ausente.
+  const texto = await res.text();
+  if (texto.trimStart().startsWith('<')) return null;
+  try {
+    return JSON.parse(texto) as T;
+  } catch {
+    return null;
+  }
 }
 
 export async function cargarPuntos(base = 'datos/'): Promise<PuntosGeoJson | null> {
