@@ -33,6 +33,8 @@ Opciones (todas con valor por omisión):
                        caja geográfica [lat1,lon1,lat2,lon2] (si lon1 > lon2 cruza ±180°)
   --k-area X           factor provisional k en (0, 1] para radio_efectivo = min(radio, k*sqrt(área)) [0.15]
   --min-area-km2 X     piso de tierra elegible del área en km² [40000, provisional; 0 lo desactiva]
+  --puntos DIR         carpeta extra con columnas de distancia sobre la misma malla (cueva_dist_km,
+                       dist_crater_km, dist_playa_km); se informan como cerca_de, no puntúan (ADR-009)
   --ayuda
 ";
 
@@ -83,6 +85,7 @@ fn leer_opciones() -> Result<Option<Opciones>> {
             "--min-area-km2" => {
                 o.min_area_km2 = Some(valor.parse().context("--min-area-km2 debe ser un número")?);
             }
+            "--puntos" => o.puntos = Some(PathBuf::from(valor)),
             otra => bail!("opción desconocida: {otra} (usa --ayuda)"),
         }
     }

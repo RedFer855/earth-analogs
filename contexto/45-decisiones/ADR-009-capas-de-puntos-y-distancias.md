@@ -7,7 +7,7 @@ date: 2026-11-15
 updated: 2026-11-15
 summary: "Cráteres de impacto, tubos de lava y salares entran como pines y como columnas de distancia al más cercano; las distancias filtran y explican, no puntúan."
 autor: fernando
-scope: [etl/e17_puntos.py, etl/e18_roca.py, etl/e19_export.py]
+scope: [etl/e17_puntos.py, etl/e18_roca.py, etl/e19_export.py, motor/pipeline/src/salida.rs]
 tablas: [dist_crater_km, crater_diam_km_cercano, dentro_crater, cueva_dist_km, dist_playa_km, roca_volcanica_frac, roca_evaporita_frac]
 cu: []
 supersedes: []
@@ -28,6 +28,9 @@ se promedia, desaparece en la celda que lo contiene y no dice nada a las demás.
 2. Lo que cubre un área se guarda como **columna por celda** (`roca_volcanica_frac`, `roca_evaporita_frac`, E-18).
 3. Las distancias **no entran al puntaje de similitud**. El motor las usa como filtro opcional ("a menos de 50 km de
    un tubo") y como dato en `metrics.json` (`cerca_de`). Las columnas de área sí pueden ser variables del perfil.
+   Estado al 2026-11-15: el motor ya escribe `cerca_de` (`tubo_lava_km`, `crater_km`, `salar_km`, a 0.1 km, `null`
+   sin dato) en cada candidato de `resultados/<perfil>/<sitio>.json`, y las columnas aparecen en `fuentes` de
+   `metrics.json` con su licencia. El filtro por distancia sigue sin implementar.
 4. Los pines salen al visor como GeoJSON (`$RUN/export/puntos.geojson`, E-19), con fuente, licencia y atribución en
    cada uno.
 

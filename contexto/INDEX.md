@@ -66,9 +66,9 @@ _(vacía)_
 ## 70-bitacora — Notas de sesión por mes
 
 - [[2026-11-15-fernando-motor-sobre-etl]] · sesion · fernando · claude-code · 2026-11-15 — Se conectó el motor en Rust con $RUN sin adaptador, se corrigió la fórmula, se agregó E-20 para los perfiles y se corrigió la latitud autálica frente a la geodésica; los 21 sitios corren y 57 pruebas pasan, 5 de ellas contra la tabla real.
+- [[2026-11-15-fernando-motor-cerca-de]] · sesion · fernando · claude-code · 2026-11-15 — El motor escribe cerca_de (distancia al tubo de lava, cráter y salar más cercanos) en cada candidato, con las columnas opcionales de $RUN o de --puntos; no puntúan. Los 21 sitios corren y la distancia coincide con la columna.
 - [[2026-11-15-fernando-etl-ndvi-y-e13-incremental]] · sesion · fernando · claude-code · 2026-11-15 — El NDVI recupera costas y latitudes altas (cobertura de 80.7 % a 88.15 %) y E-13 relee solo lo que cambió y abre cada fuente una sola vez (unos 10 minutos a menos de 3).
-- [[2026-11-15-fernando-etl-escala-200m]] · sesion · fernando · claude-code · 2026-11-15 — El terreno se calcula igual en los tres cuerpos (bloques cuadrados de 200 m, ventana de 1 km); el error de pendiente contra la relectura independiente de E-13 baja de 0.176° a 0.050°.
-- _(6 sesiones más: ver contexto/INDEX-bitacora.md)_
+- _(7 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

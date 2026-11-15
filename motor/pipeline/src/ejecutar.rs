@@ -14,7 +14,9 @@ use crate::area::{
 use crate::barrido::{barrer_en_rangos, s_por_fila, Barrido, Config, Cuentas, Filtros};
 use crate::entrada::{cargar, Cargado};
 use crate::indice::{cargar_y_validar, FiltroIndice, IndiceExclusion};
-use crate::salida::{escribir, indice, iso_utc, resultado, Fuentes, Sitios};
+use crate::salida::{
+    escribir, indice, iso_utc, resultado, Cercanas, ColumnaCerca, Fuentes, Sitios, COLUMNAS_CERCA,
+};
 use crate::tabla::{Columna, Tabla};
 
 pub(crate) const OBLIGATORIAS: [&str; 4] = [
@@ -59,6 +61,9 @@ pub struct Opciones {
     pub k_area: Option<f64>,
 
     pub min_area_km2: Option<f64>,
+
+    /// Carpeta extra con columnas de distancia (`cerca_de`) sobre la misma malla, p. ej. otra corrida del ETL.
+    pub puntos: Option<PathBuf>,
 }
 
 impl Opciones {
@@ -86,6 +91,7 @@ impl Opciones {
             bbox: None,
             k_area: None,
             min_area_km2: None,
+            puntos: None,
         }
     }
 }
@@ -372,6 +378,20 @@ fn escribir_candidatos(
 ) -> Result<(u64, f64, f64)> {
     let t0 = Instant::now();
     let sitios = Sitios::leer(&opc.sitios)?;
+    let extra = opc
+        .puntos
+        .as_deref()
+        .map(|d| Tabla::abrir_extra(d, tabla))
+        .transpose()?;
+    let abiertas = abrir_cercanas(tabla, extra.as_ref())?;
+    let cercanas = Cercanas {
+        columnas: abiertas.each_ref().map(|c| {
+            c.as_ref().map(|(col, t)| ColumnaCerca {
+                datos: col.f32s(),
+                tabla: t,
+            })
+        }),
+    };
     let fuentes = Fuentes {
         perfil_nucleo: perfil,
         entrada: &c.perfil,
@@ -380,6 +400,7 @@ fn escribir_candidatos(
         columnas,
         diagnostico,
         tabla,
+        cercanas: &cercanas,
         nivel_healpix: tabla.nivel_healpix,
         excluidos_por_indice: opc
             .indice
@@ -403,6 +424,22 @@ fn escribir_candidatos(
     let t1 = Instant::now();
     let bytes = escribir(&opc.salida, &idx, &res)?;
     Ok((bytes, armar, t1.elapsed().as_secs_f64()))
+}
+
+type Abierta<'t> = Option<(Columna, &'t Tabla)>;
+
+/// Abre cada columna de `cerca_de`: primero en la tabla principal y, si no está, en la extra (`--puntos`).
+fn abrir_cercanas<'t>(tabla: &'t Tabla, extra: Option<&'t Tabla>) -> Result<[Abierta<'t>; 3]> {
+    let abrir = |(_, col): (&str, &str)| -> Result<Abierta<'t>> {
+        for t in std::iter::once(tabla).chain(extra) {
+            if t.tiene_f32(col) {
+                return Ok(Some((t.f32(col)?, t)));
+            }
+        }
+        Ok(None)
+    };
+    let [a, b, c] = COLUMNAS_CERCA;
+    Ok([abrir(a)?, abrir(b)?, abrir(c)?])
 }
 
 #[expect(
