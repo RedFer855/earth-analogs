@@ -31,10 +31,10 @@ through `?embed=1`.
 
 - [x] C1 — Scaffold `copilot-workspace/` (Vite + TS), types (`copilot.types.ts`), synthetic sample data generator and
   files. Route: delegated writer.
-- [ ] C2 — Search: `siteIndexStore.ts`, `queryParser.ts` (Spanish and English, < 5 ms), `siteRecommender.ts` (P-015
+- [x] C2 — Search: `siteIndexStore.ts`, `queryParser.ts` (Spanish and English, < 5 ms), `siteRecommender.ts` (P-015
   polar filter, Haversine pin bonus, `combinedScore = 0.45·(similarity·100) + 0.55·suitability + bonusPin`).
   Test-first.
-- [ ] C3 — Engine and adapter: `deterministicRules.ts` (green/yellow/red + `testSuitabilityScore`),
+- [x] C3 — Engine and adapter: `deterministicRules.ts` (green/yellow/red + `testSuitabilityScore`),
   `fallbackTemplates.ts`, `etlToCopilotMapper.ts` (N1, N2, N3, N5 from the published fields; N4, N6, N7 and
   `surfaceTempK` as missing). Test-first.
 - [ ] C4 — Buses: `copilotEventBus.ts` (`nasa:visor-focus-sites`, `nasa:visor-select-cell`, `nasa:visor-tour-step`),
@@ -64,6 +64,9 @@ through `?embed=1`.
   5/5, build OK.
 - 2026-11-15: C3 committed before C2 because the recommender consumes the rules and the mapper. RED: both test files
   failed with "Cannot find module"; GREEN: 21/21 after implementation. Thresholds restated from the sandbox solvers.
+  Commit `22b8149`.
+- 2026-11-15: C2 RED: three search test files failed with "Cannot find module"; GREEN: 38/38, then the T1 sample
+  test (39/39). T1 offline on the sample: parse 0.53 ms, parse + rank 2.7 ms (warm cache); top 5 all Mars, lat <= 60.
 
 ## Next step
 
