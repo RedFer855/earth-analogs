@@ -6,6 +6,7 @@ use std::process::ExitCode;
 use anyhow::{bail, Context, Result};
 use pipeline::area::parsear_bbox;
 use pipeline::ejecutar::{correr, Opciones};
+use pipeline::escenarios::correr_escenarios;
 
 const AYUDA: &str = "\
 pipeline: busca en la Tierra las celdas que se parecen a un sitio de la Luna o Marte y escribe metrics.json.
@@ -22,6 +23,8 @@ Opciones (todas con valor por omisión):
   --perfil-json FILE   toma el perfil de este archivo (p. ej. con los números sin redondear)
   --volcar-s FILE      escribe la S de cada fila (f32) para validación
   --solo-barrido       solo mide el barrido: no elige candidatos ni escribe archivos
+  --escenarios FILE    barre de una pasada los escenarios de FILE (sitio × variables × tolerancias × pesos × NDVI)
+                       y escribe estabilidad.json: en qué fracción de escenarios aparece cada candidato y con qué S
   --indice FILE        índice JSON de análogos ya hallados a excluir por celda (arreglo de entradas)
   --excluir-km N       sustituye el radio_km de todas las entradas del índice
   --separacion-km N    distancia mínima en km entre candidatos (sobre el orden total, antes de recortar)
@@ -60,6 +63,7 @@ fn leer_opciones() -> Result<Option<Opciones>> {
             "--hilos" => o.hilos = Some(valor.parse().context("--hilos debe ser un entero")?),
             "--perfil-json" => o.perfil_json = Some(PathBuf::from(valor)),
             "--volcar-s" => o.volcar_s = Some(PathBuf::from(valor)),
+            "--escenarios" => o.escenarios = Some(PathBuf::from(valor)),
             "--indice" => o.indice = Some(PathBuf::from(valor)),
             "--excluir-km" => {
                 o.excluir_km = Some(valor.parse().context("--excluir-km debe ser un número")?);
@@ -90,6 +94,11 @@ fn ejecutar() -> Result<()> {
         print!("{AYUDA}");
         return Ok(());
     };
+    if let Some(archivo) = &opciones.escenarios {
+        let informe = correr_escenarios(&opciones, archivo)?;
+        println!("{}", serde_json::to_string_pretty(&informe.medicion)?);
+        return Ok(());
+    }
     let informe = correr(&opciones)?;
     println!("{}", serde_json::to_string_pretty(&informe)?);
     Ok(())
