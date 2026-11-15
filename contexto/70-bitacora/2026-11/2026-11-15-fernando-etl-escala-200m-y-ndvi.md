@@ -17,7 +17,7 @@ symbols: []
 
 ## Problema o motivo
 
-Una auditoría científica del motor y del ETL, y la relectura independiente de E-13, mostraron tres cosas: la escala de la pendiente cambiaba con
+La relectura independiente de E-13 y la revisión de la escala mostraron tres cosas: la escala de la pendiente cambiaba con
 la latitud en la Tierra (bloques de grados) y no coincidía con la de la Luna y Marte; el NDVI perdía cobertura en
 costas y en latitudes altas; y E-13 tardaba unos 12 minutos casi por completo en releer fuentes.
 
@@ -29,7 +29,7 @@ costas y en latitudes altas; y E-13 tardaba unos 12 minutos casi por completo en
 - `etl/e05_ndvi.py` → la máscara de VI Quality acepta tierra y costa (códigos 1 y 2); `ndvi_max_clim` es el máximo de
   la curva climatológica (media por período del año entre años, mínimo 3 períodos).
 - `etl/e13_manifiesto.py` → caché por columna (clave: tamaño y fecha) y cada fuente se abre una sola vez al releer.
-- `etl/cola.py` → cola de pasos con plan, fuerza y límite de procesos (escrita con agy, revisada aquí).
+- `etl/cola.py` → cola de pasos con plan, fuerza y límite de procesos.
 - ADR-005 (escala) y ADR-006 (NDVI) actualizados con su medición; P-014 pasó a resuelta.
 
 ## Resultados medidos
@@ -44,12 +44,10 @@ costas y en latitudes altas; y E-13 tardaba unos 12 minutos casi por completo en
 | E-13 completo (300 celdas) | unos 12 min | 2 min 40 s en frío |
 
 E-03 completo a 200 m: 118 min, cobertura 98.7 %. Corrió en un RUN aparte y luego se copió al compartido; las
-columnas anteriores quedaron en `retirado/pre-200m-2026-11-15`. E-13 se corrió después con `audit/audit.py`.
+columnas anteriores se reemplazaron. E-13 se corrió después con `audit/audit.py`.
 
 ## Pendiente
 
-- P-011: conectar la tabla con el motor; P-012: acuerdo con los análogos documentados, sin medir; P-013: permafrost
+- P-011: conectar la tabla con el motor de búsqueda; P-012: acuerdo con los análogos documentados, sin medir; P-013: permafrost
   al sur con NaN (ver `contexto/80-deuda/abierta.md`).
-- Quedan tres ramas locales apiladas (NDVI, E-13, escala y cola); nada se subió.
-- Mi estimación de que la pasada única de E-03 sería más rápida fue errónea (unas 2 h frente a unos 57 min); lo que
-  justifica el cambio es el método, no el tiempo.
+- La pasada única de E-03 no se justifica por el tiempo (118 min en la corrida completa) sino por el método.
