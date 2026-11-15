@@ -56,8 +56,8 @@ un relieve de 91 m a 0° y 53 m a 60° de latitud; con bloques cuadrados la dife
 (`etl/test_e12_bloques.py`). En la Tierra, una prueba con una superficie sintética (`etl/test_e03_escala.py`) da una
 pendiente de 10° ± 0.2° a 0°, 45° y 70° de latitud y, medida con el estimador de los objetivos, la misma pendiente y
 el mismo relieve (±2 %). Contra la relectura independiente de E-13 (GLO-90 a UTM de 200 m y `gdaldem slope`), el error
-mediano de `slope_mean_deg` antes del cambio fue de 0.176° (p90 0.84°); el valor de después está en la nota de sesión
-del cambio.
+mediano de `slope_mean_deg` (40 celdas sin agua) pasó de 0.176° (p90 0.84°) antes del cambio a 0.050° (p90 0.30°)
+después, medido el 2026-11-15 con la corrida completa de E-03 a 200 m (E-13, 300 celdas de muestra).
 
 ## 3. Diseño
 
