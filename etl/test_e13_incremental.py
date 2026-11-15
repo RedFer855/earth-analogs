@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from comun_tabla import cargar_malla
-from e13_manifiesto import revisar_columnas
+from e13_manifiesto import _pixel, revisar_columnas
 
 N = 12
 
@@ -72,6 +72,24 @@ class CacheE13(unittest.TestCase):
         (self.run / "cache" / "e13_columnas.json").write_text("{roto", encoding="utf-8")
         _, _, rel = revisar_columnas(self.run, *self.malla)
         self.assertEqual(rel, 3)
+
+
+class PixelDatasetAbierto(unittest.TestCase):
+    def test_ruta_y_dataset_dan_lo_mismo(self) -> None:
+        from osgeo import gdal
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = str(Path(tmp) / "t.tif")
+            ds = gdal.GetDriverByName("GTiff").Create(ruta, 10, 10, 1, gdal.GDT_UInt16)
+            ds.SetGeoTransform((0.0, 1.0, 0.0, 10.0, 0.0, -1.0))
+            ds.GetRasterBand(1).WriteArray(np.arange(100, dtype=np.uint16).reshape(10, 10))
+            ds = None
+            abierto = gdal.Open(ruta)
+            for lat, lon in ((9.5, 0.5), (0.5, 9.5), (5.5, 3.5)):
+                self.assertEqual(_pixel(ruta, lat, lon, "<H"), _pixel(abierto, lat, lon, "<H"))
+            self.assertIsNone(_pixel(abierto, 20.0, 0.5, "<H"))
+            self.assertEqual(_pixel(abierto, 9.5, 0.5, "<H"), 0)
+            abierto = None  # Windows no borra la carpeta temporal con el archivo abierto
 
 
 if __name__ == "__main__":
