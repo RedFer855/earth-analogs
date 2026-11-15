@@ -3,7 +3,9 @@ import type { Celda, PuntoFeature, PuntosGeoJson } from './contrato';
 import type { Coordenada } from './coordenadas';
 import {
   areaEsfericaM2,
+  desenrollarLongitudes,
   distanciaGeodesicaM,
+  normalizarLon,
   perimetroEsfericoM,
   puntoEnPoligono,
 } from './geometria';
@@ -34,15 +36,17 @@ export interface SeleccionCeldasZona {
   aproximacionPorCercania: boolean;
 }
 
+/** Promedio de vértices con longitudes desenrolladas: una zona que cruza 180° no cae en el meridiano 0. */
 export function centroPoligono(coords: Coordenada[]): Coordenada {
   if (coords.length === 0) return { lat: 0, lon: 0 };
+  const anillo = desenrollarLongitudes(coords);
   let sumLat = 0;
   let sumLon = 0;
-  for (const c of coords) {
+  for (const c of anillo) {
     sumLat += c.lat;
     sumLon += c.lon;
   }
-  return { lat: sumLat / coords.length, lon: sumLon / coords.length };
+  return { lat: sumLat / anillo.length, lon: normalizarLon(sumLon / anillo.length) };
 }
 
 export function seleccionarCeldasEnZona(

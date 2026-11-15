@@ -18,7 +18,9 @@ import {
 import { evaluarCondiciones } from '../src/datos/capas7';
 import { calcularBboxZona, parsearUnidadesMacrostrat } from '../src/capas/overlaysZona';
 import { formatearAlturaM, parsearCoordenadas } from '../src/datos/coordenadas';
+import { creditoEox } from '../src/globo';
 import {
+  centroPoligono,
   crearZonaGuardada,
   exportarZonasAGeoJson,
   filtrarCandidatosEnZona,
@@ -308,6 +310,33 @@ assert.equal(gj.features[0].geometry.coordinates[0].length, 5);
 const bbox = calcularBboxZona(zonaDemo.coords);
 assert.deepEqual(bbox, { west: -10, south: -10, east: 10, north: 10 });
 assert.equal(calcularBboxZona([{ lat: 0, lon: 0 }]), null);
+
+// 11b. Zona que cruza el antimeridiano (Fiyi): west > east, como pide Cesium.Rectangle
+const fiyi = [
+  { lat: -16, lon: 177 },
+  { lat: -16, lon: -178 },
+  { lat: -19, lon: -178 },
+  { lat: -19, lon: 177 },
+];
+assert.deepEqual(calcularBboxZona(fiyi), { west: 177, south: -19, east: -178, north: -16 });
+const centroFiyi = centroPoligono(fiyi);
+assert.ok(Math.abs(Math.abs(centroFiyi.lon) - 179.5) < 1e-9, `centro en 179.5°, no en 0°: ${centroFiyi.lon}`);
+assert.ok(Math.abs(centroFiyi.lat + 17.5) < 1e-9);
+
+// 11c. Zona que rodea el polo sur: todas las longitudes y hasta -90
+const antartida = [
+  { lat: -80, lon: 0 },
+  { lat: -80, lon: 90 },
+  { lat: -80, lon: 180 },
+  { lat: -80, lon: -90 },
+];
+assert.deepEqual(calcularBboxZona(antartida), { west: -180, south: -90, east: 180, north: -80 });
+
+// 11d. Crédito de EOX con la licencia correcta por año
+assert.match(creditoEox(2016), /CC BY 4\.0/);
+assert.ok(!creditoEox(2016).includes('NC-SA'), '2016 no es NC-SA');
+assert.match(creditoEox(2025), /CC BY-NC-SA 4\.0/);
+assert.match(creditoEox(2025), /Copernicus Sentinel data 2025/);
 
 const unidades = parsearUnidadesMacrostrat({
   success: {

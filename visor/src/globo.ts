@@ -6,12 +6,15 @@ const EOX_ULTIMO_ANIO = 2025;
 
 export type TipoMapaBase = 'sentinel2-eox' | 'gibs-bluemarble' | 'naturalearth';
 
+// Solo el mosaico 2016 es CC BY 4.0; los de 2017 a 2025 son CC BY-NC-SA 4.0
+// (contexto/50-referencia/eox-cloudless-licencias.md). Por eso 2016 es el
+// predeterminado y los otros años solo se piden con ?imagen=AAAA.
 function anioEoxSolicitado(): number {
   const raw = new URLSearchParams(window.location.search).get('imagen');
-  const anio = raw === null ? EOX_ULTIMO_ANIO : Number(raw);
+  const anio = raw === null ? EOX_PRIMER_ANIO : Number(raw);
   return Number.isInteger(anio) && anio >= EOX_PRIMER_ANIO && anio <= EOX_ULTIMO_ANIO
     ? anio
-    : EOX_ULTIMO_ANIO;
+    : EOX_PRIMER_ANIO;
 }
 
 function plantillaEox(anio: number): string {
@@ -19,12 +22,16 @@ function plantillaEox(anio: number): string {
   return `https://tiles.maps.eox.at/wmts/1.0.0/${capa}_3857/default/g/{z}/{y}/{x}.jpg`;
 }
 
-function creditoEox(anio: number): string {
-  const datos = anio === EOX_PRIMER_ANIO ? '2016 &amp; 2017' : String(anio);
+/** Texto de atribución oficial de EOX con la licencia de ese año. */
+export function creditoEox(anio: number): string {
+  const licencia =
+    anio === EOX_PRIMER_ANIO
+      ? '<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener license">CC BY 4.0</a>'
+      : '<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener license">CC BY-NC-SA 4.0</a>';
   return (
-    '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless - https://s2maps.eu</a> ' +
+    '<a href="https://cloudless.eox.at" target="_blank" rel="noopener">EOxCloudless</a> ' +
     'by <a href="https://eox.at" target="_blank" rel="noopener">EOX IT Services GmbH</a> ' +
-    `(Contains modified Copernicus Sentinel data ${datos})`
+    `(Contains modified Copernicus Sentinel data ${anio}) · ${licencia}`
   );
 }
 
