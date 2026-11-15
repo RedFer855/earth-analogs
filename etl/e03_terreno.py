@@ -47,15 +47,39 @@ def _ruta(tipo: str, lat: int, lon: int) -> Path:
     return _DATOS / "tierra" / "glo90" / tipo / nombre
 
 
-def _vecinas(tipo: str, lat: int, lon: int) -> list[str]:
+def _desplazada(ruta: str, dx: float):
+    """La tesela vecina del otro lado del antimeridiano, corrida dx grados (VRT en memoria), para que el halo la use."""
+    ds = gdal.Open(ruta)
+    x0, px, _, y0, _, py = ds.GetGeoTransform()
+    limites = [x0 + dx, y0, x0 + dx + px * ds.RasterXSize, y0 + py * ds.RasterYSize]
+    return gdal.Translate("", ds, format="VRT", outputBounds=limites)
+
+
+def _vecinas(tipo: str, lat: int, lon: int) -> list:
     rutas = []
     for dla in (-1, 0, 1):
         for dlo in (-1, 0, 1):
             lo = ((lon + dlo + 180) % 360) - 180
             r = _ruta(tipo, lat + dla, lo)
             if r.exists():
-                rutas.append(str(r))
+                corrimiento = (lon + dlo) - lo  # 0, o ±360 si la vecina está del otro lado del antimeridiano
+                rutas.append(str(r) if corrimiento == 0 else _desplazada(str(r), corrimiento))
     return rutas
+
+
+def horn(z: np.ndarray, sx: np.ndarray, sy: np.ndarray) -> np.ndarray:
+    """Pendiente de Horn en grados para el interior de z (forma z.shape - 2).
+
+    Horn solo usa los 8 vecinos; si el bloque central es agua o no tiene dato, la pendiente también es NaN.
+    """
+    a_, b_, c_ = z[:-2, :-2], z[:-2, 1:-1], z[:-2, 2:]
+    d_, f_ = z[1:-1, :-2], z[1:-1, 2:]
+    g_, h_, i_ = z[2:, :-2], z[2:, 1:-1], z[2:, 2:]
+    dzdx = ((c_ + 2 * f_ + i_) - (a_ + 2 * d_ + g_)) / (8 * sx)
+    dzdy = ((g_ + 2 * h_ + i_) - (a_ + 2 * b_ + c_)) / (8 * sy)
+    pend = np.degrees(np.arctan(np.hypot(dzdx, dzdy)))
+    pend[~np.isfinite(z[1:-1, 1:-1])] = np.nan
+    return pend
 
 
 def _ventana(fuentes, limites, dx, dy, alg, tipo, nodata):
@@ -101,12 +125,7 @@ def procesar_tesela(ruta_dem: str, salida: str) -> dict:
     m, n = _metros_por_grado(lat_fila)
     sx = (n * dxg)[1:-1, None]
     sy = (m * dyg)[1:-1, None]
-    a_, b_, c_ = z[:-2, :-2], z[:-2, 1:-1], z[:-2, 2:]
-    d_, f_ = z[1:-1, :-2], z[1:-1, 2:]
-    g_, h_, i_ = z[2:, :-2], z[2:, 1:-1], z[2:, 2:]
-    dzdx = ((c_ + 2 * f_ + i_) - (a_ + 2 * d_ + g_)) / (8 * sx)
-    dzdy = ((g_ + 2 * h_ + i_) - (a_ + 2 * b_ + c_)) / (8 * sy)
-    pend = np.degrees(np.arctan(np.hypot(dzdx, dzdy)))
+    pend = horn(z, sx, sy)
     la = lat_fila[1:-1, None] * np.ones((1, pend.shape[1]))
     lo = lon_col[None, 1:-1] * np.ones((pend.shape[0], 1))
     dentro = (la >= lat0) & (la < lat0 + 1) & (lo >= lon0) & (lo < lon0 + 1) & np.isfinite(pend)
@@ -152,7 +171,6 @@ def unir(run: Path, sumas: Path) -> dict:
         "(~180 m), pendiente de Horn con espaciado métrico por fila, agregado por celda",
         "advertencias": [
             "teselas a menos de 2° de los polos no se calculan",
-            "el halo no cruza el antimeridiano",
             "GLO-90 es un DSM: bosque y edificios agregan rugosidad",
         ],
     }
