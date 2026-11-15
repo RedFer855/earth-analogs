@@ -168,6 +168,71 @@ struct Celda {
     marcas: Vec<&'static str>,
     analogo_conocido: Option<String>,
     region: Option<String>,
+    /// Distancias a puntos de interés (ADR-009 §2.3). No puntúan: solo se informan. Se omite si la corrida no
+    /// tiene ninguna de las columnas.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    cerca_de: Option<CercaDe>,
+}
+
+/// Distancia en km, redondeada a 0.1, desde el centro de la celda al punto más cercano de cada catálogo.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct CercaDe {
+    pub tubo_lava_km: Option<f64>,
+    pub crater_km: Option<f64>,
+    pub salar_km: Option<f64>,
+}
+
+/// Campo de `cerca_de` y la columna de la tabla de la que sale, en el orden de [`Cercanas::columnas`].
+pub const COLUMNAS_CERCA: [(&str, &str); 3] = [
+    ("tubo_lava_km", "cueva_dist_km"),
+    ("crater_km", "dist_crater_km"),
+    ("salar_km", "dist_playa_km"),
+];
+
+/// Una columna de distancia ya abierta y la tabla que dice su origen.
+pub struct ColumnaCerca<'a> {
+    pub datos: &'a [f32],
+    pub tabla: &'a Tabla,
+}
+
+/// Las columnas de [`COLUMNAS_CERCA`] que hay en la corrida (`None` si falta).
+#[derive(Default)]
+pub struct Cercanas<'a> {
+    pub columnas: [Option<ColumnaCerca<'a>>; 3],
+}
+
+impl Cercanas<'_> {
+    /// `cerca_de` de la fila: `None` si no hay ninguna columna; cada distancia no finita queda en `null`.
+    #[must_use]
+    pub fn de_fila(&self, fila: usize) -> Option<CercaDe> {
+        if self.columnas.iter().all(Option::is_none) {
+            return None;
+        }
+        let d = |i: usize| {
+            self.columnas
+                .get(i)?
+                .as_ref()?
+                .datos
+                .get(fila)
+                .copied()
+                .map(f64::from)
+                .filter(|v| v.is_finite())
+                .map(|v| redondear(v, 1))
+        };
+        Some(CercaDe {
+            tubo_lava_km: d(0),
+            crater_km: d(1),
+            salar_km: d(2),
+        })
+    }
+
+    /// Nombre de cada columna presente y la tabla que dice su origen.
+    fn origenes(&self) -> impl Iterator<Item = (String, &Tabla)> + '_ {
+        self.columnas
+            .iter()
+            .zip(COLUMNAS_CERCA)
+            .filter_map(|(c, (_, col))| Some((col.to_owned(), c.as_ref()?.tabla)))
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -345,6 +410,8 @@ pub struct Fuentes<'a> {
     /// Columnas de diagnóstico, en el orden de `entrada.diagnostico`.
     pub diagnostico: &'a [&'a [f32]],
     pub tabla: &'a Tabla,
+    /// Columnas de distancia de `cerca_de`; no puntúan.
+    pub cercanas: &'a Cercanas<'a>,
     pub nivel_healpix: u8,
     pub excluidos_por_indice: Option<u64>,
     pub excluidos_por_separacion: Option<u64>,
@@ -469,6 +536,7 @@ fn celda(f: &Fuentes<'_>, rango: usize, m: &Mejor) -> Result<Celda> {
         marcas: vec![MARCA_NDVI_BAJO],
         analogo_conocido: analogo_conocido(f.sitios, lat, lon, f.parametros.radio_documentado_km),
         region: None,
+        cerca_de: f.cercanas.de_fila(fila),
     })
 }
 
@@ -627,10 +695,10 @@ struct Contrato {
 }
 
 /// Agrupa por fuente las columnas que usa la corrida, con lo que dice el manifiesto.
-fn fuentes_de(columnas: &[String], tabla: &Tabla) -> Vec<FuenteCat> {
+fn fuentes_de<'t>(columnas: impl IntoIterator<Item = (String, &'t Tabla)>) -> Vec<FuenteCat> {
     let mut por_fuente: BTreeMap<String, FuenteCat> = BTreeMap::new();
-    for c in columnas {
-        let o: OrigenColumna = tabla.columnas.get(c).cloned().unwrap_or_default();
+    for (c, tabla) in columnas {
+        let o: OrigenColumna = tabla.columnas.get(&c).cloned().unwrap_or_default();
         let nombre = o
             .fuente
             .unwrap_or_else(|| "no declarada en el manifiesto".to_owned());
@@ -643,7 +711,7 @@ fn fuentes_de(columnas: &[String], tabla: &Tabla) -> Vec<FuenteCat> {
                 columnas: Vec::new(),
             })
             .columnas
-            .push(c.clone());
+            .push(c);
     }
     por_fuente.into_values().collect()
 }
@@ -776,7 +844,12 @@ pub fn indice(f: &Fuentes<'_>, res: &ResultadoJson, generado: String) -> Result<
                 region: c.region.clone(),
             }),
         }],
-        fuentes: fuentes_de(&usadas, f.tabla),
+        fuentes: fuentes_de(
+            usadas
+                .into_iter()
+                .map(|c| (c, f.tabla))
+                .chain(f.cercanas.origenes()),
+        ),
     })
 }
 
@@ -974,6 +1047,112 @@ mod pruebas {
             "la celda de ~1,6 km no puede medir {} grados de ancho",
             max - min
         );
+    }
+
+    fn tabla_vacia() -> Result<Tabla> {
+        static N: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+        let n = N.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let dir = std::env::temp_dir().join(format!("motor-cerca-{}-{n}", std::process::id()));
+        fs::create_dir_all(&dir)?;
+        fs::write(
+            dir.join("manifest.json"),
+            r#"{"n_celdas":3,"nivel_healpix":12}"#,
+        )?;
+        let t = Tabla::abrir(&dir);
+        let _ = fs::remove_dir_all(&dir);
+        t
+    }
+
+    #[test]
+    fn cerca_de_se_omite_sin_columnas() {
+        let c = Cercanas::default();
+        assert_eq!(c.de_fila(0), None);
+        assert_eq!(c.origenes().count(), 0);
+    }
+
+    #[test]
+    fn cerca_de_redondea_y_deja_null_lo_que_falta() -> Result<()> {
+        let tabla = tabla_vacia()?;
+        let cueva = [12.345_f32, f32::NAN, 0.04];
+        let playa = [f32::INFINITY, 7.25, 1500.0];
+        let c = Cercanas {
+            columnas: [
+                Some(ColumnaCerca {
+                    datos: &cueva,
+                    tabla: &tabla,
+                }),
+                None,
+                Some(ColumnaCerca {
+                    datos: &playa,
+                    tabla: &tabla,
+                }),
+            ],
+        };
+        ensure!(
+            c.de_fila(0)
+                == Some(CercaDe {
+                    tubo_lava_km: Some(12.3),
+                    crater_km: None,
+                    salar_km: None,
+                }),
+            "{:?}",
+            c.de_fila(0)
+        );
+        let f1 = c.de_fila(1).context("fila 1")?;
+        ensure!(f1.tubo_lava_km.is_none(), "NaN debe ser null");
+        ensure!(f1.salar_km == Some(7.3), "{f1:?}");
+        ensure!(
+            c.de_fila(2)
+                == Some(CercaDe {
+                    tubo_lava_km: Some(0.0),
+                    crater_km: None,
+                    salar_km: Some(1500.0),
+                }),
+            "{:?}",
+            c.de_fila(2)
+        );
+        // fila fuera de la columna: null, no error
+        ensure!(
+            c.de_fila(9).map(|x| x.tubo_lava_km) == Some(None),
+            "{:?}",
+            c.de_fila(9).map(|x| x.tubo_lava_km)
+        );
+        let json = serde_json::to_value(c.de_fila(1))?;
+        ensure!(
+            json["tubo_lava_km"].is_null() && json["crater_km"].is_null(),
+            "{json}"
+        );
+        let cols: Vec<String> = c.origenes().map(|(n, _)| n).collect();
+        ensure!(cols == ["cueva_dist_km", "dist_playa_km"], "{cols:?}");
+        Ok(())
+    }
+
+    #[test]
+    fn fuentes_juntan_columnas_de_dos_tablas() -> Result<()> {
+        let mut a = tabla_vacia()?;
+        let mut b = tabla_vacia()?;
+        let origen = |f: &str| OrigenColumna {
+            fuente: Some(f.to_owned()),
+            licencia: Some("CC0 1.0".to_owned()),
+            ..OrigenColumna::default()
+        };
+        a.columnas
+            .insert("slope_mean_deg".to_owned(), origen("GLO-90"));
+        b.columnas
+            .insert("dist_crater_km".to_owned(), origen("Wikidata"));
+        let f = fuentes_de([
+            ("slope_mean_deg".to_owned(), &a),
+            ("dist_crater_km".to_owned(), &b),
+        ]);
+        let nombres: Vec<&str> = f.iter().map(|x| x.nombre.as_str()).collect();
+        ensure!(nombres == ["GLO-90", "Wikidata"], "{nombres:?}");
+        ensure!(f[1].columnas == ["dist_crater_km"], "{:?}", f[1].columnas);
+        ensure!(
+            f[1].licencia.as_deref() == Some("CC0 1.0"),
+            "{:?}",
+            f[1].licencia.as_deref()
+        );
+        Ok(())
     }
 
     #[test]
