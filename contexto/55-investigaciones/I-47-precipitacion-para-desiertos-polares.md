@@ -57,3 +57,4 @@ Sin resultado todavía.
 ## Relaciones
 
 - [[sensores-tierra]] — fuente del índice de aridez
+- [[resumen-cientifico-2026-11-14]] — resumen del avance del ETL y decisiones para aprobar

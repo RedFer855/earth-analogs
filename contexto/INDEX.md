@@ -49,11 +49,11 @@ _(vacía)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
 
-- _(9 notas: ver contexto/INDEX-referencia.md)_
+- _(8 notas: ver contexto/INDEX-referencia.md)_
 
 ## 55-investigaciones — I-NN y sus prompts
 
-- _(41 notas: ver contexto/INDEX-investigaciones.md)_
+- _(42 notas: ver contexto/INDEX-investigaciones.md)_
 
 ## 60-qa — Validación de resultados contra análogos conocidos y pruebas del motor
 
@@ -66,6 +66,8 @@ _(vacía)_
 ## 70-bitacora — Notas de sesión por mes
 
 - [[2026-11-14-fernando-etl-e01-a-e13]] · sesion · fernando · claude-code · 2026-11-14 — Se escribió y corrió el ETL completo (malla, terreno, temperatura, NDVI, aridez, permafrost, viento y polvo, material, agua, objetivos de la Luna y Marte, manifiesto), cada paso con su comprobación y su registro de auditoría; los errores encontrados quedaron corregidos y registrados.
+- [[2026-11-14-fernando-etl-corridas-finales]] · sesion · fernando · claude-code · 2026-11-14 — E-03 por celda (retomado tras una pausa), E-04, E-07, E-08, E-09, E-11, E-12 y E-13 corrieron con los métodos corregidos, sin fallos y con la cadena de auditoría íntegra (79 líneas); se anotan tiempos y cobertura de cada paso.
+- [[2026-11-14-fernando-e03-por-celda-corregido]] · sesion · fernando · claude-code · 2026-11-14 — Una revisión externa del ETL se verificó punto por punto; E-03 por celda se corrigió (centro de Horn, cuantiles lineales, rugosidad y relieve en 5x5, fracción válida exacta, halo en el antimeridiano) y el resto quedó como deuda P-001 a P-010.
 
 ## 80-deuda — Deuda técnica P-NNN
 

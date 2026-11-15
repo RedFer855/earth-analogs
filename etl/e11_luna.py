@@ -2,8 +2,10 @@
 
 Polígonos: paquete del USGS (doi 10.5066/P1MEQ6UK) en $DATOS/luna/artemis-regiones-usgs; sus vértices lon/lat se pasan
 a la estereográfica polar de cada producto y el polígono se rasteriza sobre una ventana del producto.
-  Relieve:      LOLA LDEM_80S_20M V2.1 (km sobre 1737.4 km) -> bloques de 10x10 (200 m) -> pendiente de Horn;
-                media y desviación dentro del polígono (misma escala que la Tierra, ADR-005).
+  Relieve:      LOLA LDEM_80S_20M V2.1 (km sobre 1737.4 km; sin dato y |z| > 20 km -> NaN) -> bloques de 10x10
+                (200 m, media si >= 50/100 píxeles válidos) -> parches de ~1.6 km (8x8) con pendiente de Horn,
+                cuantiles lineales, rugosidad y relieve en ventana 5x5; resumen por región con mediana y MAD
+                (misma escala que la celda terrestre, ADR-005).
   Temperatura:  Diviner GDR L3 polar tbol (240 m): `d` = 6-18 h y `n` = 18-6 h locales; media de todos los periodos
                 por píxel, luego media en el polígono. rango_diurno_k = media de (d - n).
 Comprobación: en casi todos los píxeles con dato el día es más cálido que la noche.
@@ -24,6 +26,7 @@ import numpy as np
 from osgeo import gdal, ogr, osr
 
 from comun import ruta_env
+from objetivos_comun import parches, resumir_parches
 
 gdal.UseExceptions()
 MARGEN_M = 2000
@@ -67,23 +70,30 @@ def _mascara(xy, ancho, alto, geo, srs_wkt):
     return mem.ReadAsArray().astype(bool)
 
 
-def pendiente_lola(ds, xy):
+def terreno_lola(ds, xy):
+    """Calcula métricas de terreno en parches de ~1.6 km sobre bloques de 10x10 (200 m) de LOLA."""
     c0, f0, w, h, geo = _ventana(ds, xy)
-    z = ds.GetRasterBand(1).ReadAsArray(c0, f0, w, h).astype(np.float64) * 1000  # km -> m
+    banda = ds.GetRasterBand(1)
+    nodata = banda.GetNoDataValue()
+    z_km = banda.ReadAsArray(c0, f0, w, h).astype(np.float64)
+    if nodata is not None:
+        z_km[z_km == nodata] = np.nan
+    z_km[~np.isfinite(z_km) | (np.abs(z_km) > 20.0)] = np.nan
+    z_m = z_km * 1000.0
     k = 10
     h2, w2 = (h // k) * k, (w // k) * k
-    z = z[:h2, :w2].reshape(h2 // k, k, w2 // k, k).mean(axis=(1, 3))
-    paso = geo[1] * k
-    a_, b_, c_ = z[:-2, :-2], z[:-2, 1:-1], z[:-2, 2:]
-    d_, f_ = z[1:-1, :-2], z[1:-1, 2:]
-    g_, hh, i_ = z[2:, :-2], z[2:, 1:-1], z[2:, 2:]
-    dzdx = ((c_ + 2 * f_ + i_) - (a_ + 2 * d_ + g_)) / (8 * paso)
-    dzdy = ((g_ + 2 * hh + i_) - (a_ + 2 * b_ + c_)) / (8 * paso)
-    pend = np.degrees(np.arctan(np.hypot(dzdx, dzdy)))
-    geo_g = (geo[0] + paso, paso, 0, geo[3] - paso, 0, -paso)
-    m = _mascara(xy, pend.shape[1], pend.shape[0], geo_g, ds.GetProjection())
-    p = pend[m]
-    return float(np.mean(p)), float(np.std(p)), int(p.size)
+    b = z_m[:h2, :w2].reshape(h2 // k, k, w2 // k, k)
+    ok = np.isfinite(b)
+    cnt = ok.sum(axis=(1, 3))
+    suma = np.where(ok, b, 0.0).sum(axis=(1, 3))
+    z = np.where(cnt >= 50, suma / np.maximum(cnt, 1), np.nan)
+    geo_g = (geo[0], geo[1] * k, 0, geo[3], 0, geo[5] * k)
+    m = _mascara(xy, z.shape[1], z.shape[0], geo_g, ds.GetProjection())
+    ps = parches(z, abs(geo[1] * k), abs(geo[5] * k), m)
+    terreno = resumir_parches(ps)
+    sm = terreno["slope_mean_deg"]["mediana"] if terreno["slope_mean_deg"] else None
+    ss = terreno["slope_std_deg"]["mediana"] if terreno["slope_std_deg"] else None
+    return sm, ss, int(m.sum()), terreno
 
 
 def temperatura_diviner(rutas_d, rutas_n, xy_por_region):
@@ -153,11 +163,13 @@ def main() -> int:
         if r and (abs(lat_c - r["lat"]) > 0.5):
             fallos.append(f"{k}: centro del polígono ({lat_c:.3f}) lejos del centroide de referencia ({r['lat']})")
         xy = _proyectar(lola, anillo)
-        sm, ss, n = pendiente_lola(lola, xy)
+        sm, ss, n, terreno = terreno_lola(lola, xy)
         regiones[k] = {"nombre": p["Region"], "area_km2": p["Area_km2"], "slope_mean_deg": sm, "slope_std_deg": ss,
-                       "pixeles_200m": n}
+                       "pixeles_200m": n, "terreno": terreno}
         xy_div[k] = _proyectar(div_ref, anillo)
-        print(f"  {k}: pendiente {sm:.2f} ± {ss:.2f}° ({n} px)", flush=True)
+        sm_txt = f"{sm:.2f}" if sm is not None else "nan"
+        ss_txt = f"{ss:.2f}" if ss is not None else "nan"
+        print(f"  {k}: pendiente {sm_txt} ± {ss_txt}° ({n} px)", flush=True)
     temp, frac_dia, frac_regiones = temperatura_diviner(rutas_d, rutas_n, xy_div)
     for k, v in temp.items():
         regiones[k].update(v)
@@ -174,7 +186,9 @@ def main() -> int:
             "relieve": "LOLA LDEM_80S_20M FLOAT V2.1, PDS Geosciences Node",
             "temperatura": f"Diviner GDR L3 polar tbol avg, {len(rutas_d)} periodos de día y {len(rutas_n)} de noche",
         },
-        "metodo": "pendiente a 200 m (bloques 10x10 de 20 m, Horn); temperatura media por píxel y luego por polígono",
+        "metodo": ("bloques 10x10 de 20 m (200 m, >= 50/100 válidos, sin dato y |z|>20 km a NaN) -> parches de ~1.6 km "
+                   "(Horn, cuantiles lineales, ventana 5x5) resumidos con mediana y MAD; temperatura media por píxel "
+                   "y luego por polígono"),
         "ausentes": ["agua y aridez", "hielo en el suelo (sin columna comparable)", "viento y polvo (sin atmósfera)",
                      "amplitud anual (sin estaciones comparables)"],
         "fraccion_dia_mayor_que_noche_mapa": frac_dia,
@@ -188,7 +202,8 @@ def main() -> int:
     (salida / "objetivos_luna.json").write_text(json.dumps(r, indent=2, ensure_ascii=False), encoding="utf-8")
     print(json.dumps({k: v for k, v in r.items() if k != "regiones"}, indent=2, ensure_ascii=False))
     for k, v in regiones.items():
-        print(f"{k}: pend {v['slope_mean_deg']:.2f}  día {v.get('lst_dia_k', float('nan')):.1f} K  "
+        pend_txt = f"{v['slope_mean_deg']:.2f}" if v["slope_mean_deg"] is not None else "nan"
+        print(f"{k}: pend {pend_txt}  día {v.get('lst_dia_k', float('nan')):.1f} K  "
               f"noche {v.get('lst_noche_k', float('nan')):.1f} K  DTR {v.get('rango_diurno_k', float('nan')):.1f} K")
     return 1 if fallos else 0
 

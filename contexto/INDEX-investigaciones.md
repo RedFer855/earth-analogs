@@ -4,7 +4,7 @@
 I-NN y sus prompts. Una línea por nota vigente: `tipo · estado · actualizado` — resumen.
 No se inyecta al arrancar: se abre cuando contexto/INDEX.md apunta aquí.
 
-- [[I-01-proyectos-previos-de-analogos-en-github]] · investigacion · vigente · 2026-11-05 — Qué proyectos públicos (Space Apps anteriores, universidades, agencias) ya comparan sitios terrestres con la Luna o Marte o seleccionan sitios de base, qué datos y métodos usan y qué es reutilizable según sus licencias.
+- [[I-01-proyectos-previos-de-analogos-en-github]] · investigacion · vigente · 2026-11-14 — Qué proyectos públicos (Space Apps anteriores, universidades, agencias) ya comparan sitios terrestres con la Luna o Marte o seleccionan sitios de base, qué datos y métodos usan y qué es reutilizable según sus licencias.
 - [[I-02-indice-de-similitud-analoga]] · investigacion · borrador · 2026-11-05 — Qué métodos publicados existen para medir la similitud entre sitios planetarios y terrestres con distancia ponderada: normalización, métrica de distancia, ponderación y agregación espacial.
 - [[I-03-analogos-terrestres-documentados]] · investigacion · vigente · 2026-11-05 — Qué sitios de la Tierra usan NASA, ESA y otras agencias como análogos de la Luna y de Marte, para qué los usan y con qué variables.
 - [[I-05-datasets-planetarios-formato-y-procesamiento]] · investigacion · vigente · 2026-11-04 — Para los datasets lunares y marcianos que NASA probablemente recomiende, qué producto exacto usar, en qué formato, proyección, resolución y tamaño vienen, cómo se baja un recorte y qué hay que hacerles antes de calcular métricas.
@@ -45,3 +45,4 @@ No se inyecta al arrancar: se abre cuando contexto/INDEX.md apunta aquí.
 - [[I-40-relieve-de-la-tierra-sin-cesium-ion]] · investigacion · vigente · 2026-11-10 — Compara formas de convertir Copernicus DEM en terreno que CesiumJS cargue sin Cesium ion (quantized-mesh, heightmap, 3D Tiles o en el navegador): datum vertical, peso, Windows, mantenimiento, licencia y si sirve para medir alturas.
 - [[I-46-coordenadas-de-bocas-de-tubos-de-lava]] · investigacion · borrador · 2026-11-13 — Qué segunda fuente independiente existe para las coordenadas de bocas de tubos de lava del Pyroduct Digital Catalog v3.0 (Zenodo, doi 10.5281/zenodo.14535885) y cómo se contrastan.
 - [[I-47-precipitacion-para-desiertos-polares]] · investigacion · borrador · 2026-11-13 — Qué climatología de precipitación abierta (preferente NASA) sirve a 1–50 km en el Ártico, qué umbral define un desierto polar y cuánto llueve en los análogos árticos conocidos.
+- [[resumen-cientifico-2026-11-14]] · informe · borrador · 2026-11-14 — Qué se investigó, qué ya se construyó del ETL (malla y comprobación de fuentes), por qué se diseñó así y 7 decisiones para aprobar.
