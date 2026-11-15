@@ -1,10 +1,15 @@
 // Pruebas unitarias de solidez, analógos documentados, lectura de ficha, HEALPix ang2pix y contexto de análogo.
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { DatosCapas7 } from '../src/datos/capas7';
 import { validarCatalogo } from '../src/datos/analogos';
-import type { Indice, ResultadoJson, VariableParametro } from '../src/datos/contrato';
+import {
+  normalizarEstabilidad,
+  type Indice,
+  type ResultadoJson,
+  type VariableParametro,
+} from '../src/datos/contrato';
 import { indiceCapas7, lectura } from '../src/datos/ficha';
 import { ang2pixNested, buscarIpix, geodesicaAAutalica, ipixACentro } from '../src/datos/healpix';
 import { construirContextoAnalogo, respuestaLocal } from '../src/datos/iaCliente';
@@ -16,13 +21,16 @@ import {
   topMultivariable,
 } from '../src/datos/solidez';
 
-const rutaDatos = (rel: string): string => {
-  const local = resolve('datos', rel);
-  return existsSync(local) ? local : resolve('../public/datos', rel);
+const leerDato = (rel: string): string => {
+  try {
+    return readFileSync(resolve('datos', rel), 'utf8');
+  } catch {
+    return readFileSync(resolve('../public/datos', rel), 'utf8');
+  }
 };
 
-const indice = JSON.parse(readFileSync(rutaDatos('metrics.json'), 'utf8')) as Indice;
-const resultadoJZ = JSON.parse(readFileSync(rutaDatos('resultados/terreno/JZ.json'), 'utf8')) as ResultadoJson;
+const indice = JSON.parse(leerDato('metrics.json')) as Indice;
+const resultadoJZ = JSON.parse(leerDato('resultados/terreno/JZ.json')) as ResultadoJson;
 
 // --- Solidez ---------------------------------------------------------------------------------------------------
 
@@ -54,9 +62,10 @@ assert.ok(conSinDato.alto - conSinDato.bajo > sinSinDato.alto - sinSinDato.bajo,
 
 const vp: VariableParametro = {
   id: 'slope_mean_deg',
+  peso: 1,
   tolerancia: 2,
   escala: 5,
-  origen: { fuente: 'MERIT', url: 'https://example.com', fecha: '2026-11-15' },
+  origen: { columna: 'slope_mean_deg', fuente: 'MERIT', url: 'https://example.com', licencia: 'CC-BY-4.0' },
 };
 assert.deepEqual(leerVariable(vp, 5, 6), {
   id: 'slope_mean_deg',
@@ -81,6 +90,17 @@ const sol0 = solidezDeCandidato(resultadoJZ, resultadoJZ.candidatos[0], { aparec
 assert.ok(sol0.razones.length >= 3);
 assert.ok(sol0.bajo <= sol0.alto);
 
+const estNorm = normalizarEstabilidad({
+  escenarios: [{ objetivo: 'JZ' }, { objetivo: 'JZ' }, { objetivo: 'SH' }],
+  robustez: {
+    JZ: [{ ipix: 1, aparece_en: 2, fraccion: 1, s_min: 0.7, s_mediana: 0.8, s_max: 0.9 }],
+    SH: [{ ipix: 2, aparece_en: 1, fraccion: 1, s_min: 0.5, s_mediana: 0.5, s_max: 0.5 }],
+  },
+});
+assert.equal(estNorm?.objetivos.JZ.n_escenarios, 2);
+assert.equal(estNorm?.objetivos.SH.n_escenarios, 1);
+assert.equal(normalizarEstabilidad(null), null);
+
 // --- topMultivariable y percentil ------------------------------------------------------------------------------
 
 const copiaR2: ResultadoJson = {
@@ -96,7 +116,7 @@ assert.equal(percentil(new Float32Array([Number.NaN]), 10), null);
 
 // --- Análogos y contexto de IA ---------------------------------------------------------------------------------
 
-const catRaw = JSON.parse(readFileSync(rutaDatos('analogos-tierra.json'), 'utf8')) as unknown;
+const catRaw = JSON.parse(leerDato('analogos-tierra.json')) as unknown;
 const cat = validarCatalogo(catRaw);
 assert.ok(cat !== null && cat.sitios.length > 0, 'catálogo publicado válido');
 assert.equal(validarCatalogo(null), null);
@@ -137,10 +157,11 @@ assert.equal(buscarIpix(lista, ipPrueba + 1), -1);
 
 const datosMock: DatosCapas7 = {
   meta: {
-    version: 1,
+    nivel: 7,
     nside,
+    esquema: 'nested',
     n_celdas: lista.length,
-    endianness: 'little',
+    archivos: { ipix: 'ipix.u32', n_hijas: 'n_hijas.u16' },
     columnas: {},
   },
   ipix: lista,
