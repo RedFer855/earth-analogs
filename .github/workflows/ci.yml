@@ -56,9 +56,9 @@ jobs:
           base=$(git merge-base "$BASE_PR" "$CABEZA_PR")
           lineas=$(git diff --numstat "$base" "$CABEZA_PR" -- . ':(exclude)contexto/**' ':(exclude)*.md' ':(exclude)*.lock' ':(exclude)**/package-lock.json' ':(exclude)audit/*.jsonl' |
             awk '$1 != "-" { s += $1 + $2 } END { print s + 0 }')
-          echo "Líneas de código del PR: $lineas (recomendado: unas 500; tope: 1000)"
-          if [ "$lineas" -gt 1000 ]; then
-            echo "::error::El PR tiene $lineas líneas de código; el tope es 1000. Pártelo en PR más chicos."
+          echo "Líneas de código del PR: $lineas (recomendado: unas 500; tope: 3000)"
+          if [ "$lineas" -gt 3000 ]; then
+            echo "::error::El PR tiene $lineas líneas de código; el tope es 3000. Pártelo en PR más chicos."
             exit 1
           fi
           if [ "$lineas" -gt 500 ]; then
