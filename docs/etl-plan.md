@@ -50,6 +50,7 @@ the input of the similarity engine; the website only loads light derived files (
 | E-16 | Lava tubes: `cueva_n_tubos`, `cueva_dist_km` | Known caves (`29.1604,-13.4394`, `43.8949,-121.3695`, `41.7312,-121.5061`) verified; non-cave cells remain `NaN` |
 | E-13 | Manifest and independent verification | See section 6 |
 | E-20 | Search profiles for the engine (`perfiles.json`), one per lunar and Martian target | Every target has the four terrain variables; correlation symmetric with unit diagonal (ADR-010) |
+| E-21 | Web layers (`web/capas7/`): 12 variables aggregated to HEALPix level 7 nested (parent = `ipix >> 10`); median of children with data, minimum for distances; `n_hijas.u16` and `capas7.json` with unit, source, license and p1/p50/p99 | Children counts add up to the level-12 cell count; no `local_only` column; total size measured (3.47 MB, 64,211 cells, 2026-11-15) |
 
 **Gates (local time, Tegucigalpa):**
 
