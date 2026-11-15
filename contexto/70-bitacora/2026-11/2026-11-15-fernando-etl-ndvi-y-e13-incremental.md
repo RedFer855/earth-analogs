@@ -35,4 +35,4 @@ fuentes.
 | NDVI 60–70° N / >70° N | 67.5 % / 35.5 % | 93.3 % / 61.7 % |
 | E-13, relectura de aridez (60 celdas) | 191 s | 5 s (resultado idéntico) |
 | E-13, relectura de NDVI (60 celdas) | 18.3 s | 2.2 s (resultado idéntico) |
-| E-13 completo (300 celdas) | unos 10 min | 2 min 40 s en frío |
+| E-13 completo (300 celdas) | unos 10 min | 2 min 40 s (primera corrida, sin caché); 78 s en la corrida registrada |
