@@ -65,10 +65,10 @@ _(vacía)_
 
 ## 70-bitacora — Notas de sesión por mes
 
+- [[2026-11-15-fernando-visor-pines]] · sesion · fernando · antigravity · 2026-11-15 — Fase 3 del visor: capa de 332 pines agrupables (tubos de lava, cráteres, salares) con ficha de fuente y atribución, bloque cerca_de en la ficha del candidato y panel de correlación de entornos.
 - [[2026-11-15-fernando-visor-base]] · sesion · fernando · antigravity · 2026-11-15 — Visor web ligero (CesiumJS + Vite + TypeScript) que lee metrics.json y resultados/terreno/<sitio>.json, pinta 200 candidatos en un Primitive coloreado por nota y muestra la ficha de coincidencias, diferencias, temperatura y contexto planetario.
 - [[2026-11-15-fernando-motor-sobre-etl]] · sesion · fernando · claude-code · 2026-11-15 — Se conectó el motor en Rust con $RUN sin adaptador, se corrigió la fórmula, se agregó E-20 para los perfiles y se corrigió la latitud autálica frente a la geodésica; los 21 sitios corren y 57 pruebas pasan, 5 de ellas contra la tabla real.
-- [[2026-11-15-fernando-motor-cerca-de]] · sesion · fernando · claude-code · 2026-11-15 — El motor escribe cerca_de (distancia al tubo de lava, cráter y salar más cercanos) en cada candidato, con las columnas opcionales de $RUN o de --puntos; no puntúan. Los 21 sitios corren y la distancia coincide con la columna.
-- _(9 sesiones más: ver contexto/INDEX-bitacora.md)_
+- _(10 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

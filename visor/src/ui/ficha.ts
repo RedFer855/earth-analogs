@@ -6,9 +6,11 @@ import {
   type CuerpoJson,
   type Indice,
   type Origen,
+  type PuntoFeature,
   type ResultadoJson,
   type VariableCat,
 } from '../datos/contrato';
+import { etiquetaTipoPunto } from '../capas/pines';
 
 function formatoNum(v: number | null | undefined, decimales = 2): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Sin dato';
@@ -36,15 +38,19 @@ export class FichaCandidato {
   private raiz: HTMLElement;
   private alVerEnGlobo: (candidato: Celda) => void;
   private alCerrar: () => void;
+  private alVerPinEnGlobo?: (lat: number, lon: number) => void;
   private candidatoActual: Celda | null = null;
+  private pinActual: PuntoFeature | null = null;
 
   constructor(
     contenedor: HTMLElement,
     alVerEnGlobo: (candidato: Celda) => void,
     alCerrar: () => void,
+    alVerPinEnGlobo?: (lat: number, lon: number) => void,
   ) {
     this.alVerEnGlobo = alVerEnGlobo;
     this.alCerrar = alCerrar;
+    this.alVerPinEnGlobo = alVerPinEnGlobo;
 
     this.raiz = document.createElement('aside');
     this.raiz.className = 'panel panel-der oculto';
@@ -54,9 +60,14 @@ export class FichaCandidato {
       const target = ev.target as HTMLElement | null;
       if (!target) return;
 
-      if (target.closest('[data-accion="ver-globo"]') && this.candidatoActual) {
+      if (target.closest('[data-accion="ver-globo"]')) {
         ev.preventDefault();
-        this.alVerEnGlobo(this.candidatoActual);
+        if (this.candidatoActual) {
+          this.alVerEnGlobo(this.candidatoActual);
+        } else if (this.pinActual && this.alVerPinEnGlobo) {
+          const [lon, lat] = this.pinActual.geometry.coordinates;
+          this.alVerPinEnGlobo(lat, lon);
+        }
         return;
       }
 
@@ -188,6 +199,23 @@ export class FichaCandidato {
       ? `<p class="aviso-hielo">Puede caer sobre hielo: el filtro de vegetación no lo distingue.</p>`
       : '';
 
+    const cd = candidato.cerca_de;
+    const formatoKm = (v: number | null | undefined): string =>
+      v === null || v === undefined || !Number.isFinite(v) ? 'Sin dato' : `${v.toFixed(1)} km`;
+    const bloqueCercaDe = cd
+      ? `<section class="bloque">
+          <h2>Entorno cercano (no puntúa)</h2>
+          <table>
+            <tbody>
+              <tr><td>Tubo de lava más cercano</td><td class="num">${escaparHtml(formatoKm(cd.tubo_lava_km))}</td></tr>
+              <tr><td>Cráter de impacto más cercano</td><td class="num">${escaparHtml(formatoKm(cd.crater_km))}</td></tr>
+              <tr><td>Salar más cercano</td><td class="num">${escaparHtml(formatoKm(cd.salar_km))}</td></tr>
+            </tbody>
+          </table>
+        </section>`
+      : '';
+
+    this.pinActual = null;
     this.raiz.innerHTML = `
       <header class="ficha-cabecera">
         <div>
@@ -217,10 +245,61 @@ export class FichaCandidato {
         <p>${candidato.cobertura.usadas} / ${candidato.cobertura.total} variables usadas. ${textoFaltan}</p>
       </section>
       ${bloqueDiagnostico}
+      ${bloqueCercaDe}
       ${bloqueCuerpos}
       <section class="bloque">
         <h2>Fuentes</h2>
         <ul class="lista-fuentes">${listaFuentes}</ul>
+      </section>
+    `;
+  }
+
+  mostrarPin(punto: PuntoFeature): void {
+    this.candidatoActual = null;
+    this.pinActual = punto;
+    this.raiz.classList.remove('oculto');
+
+    const p = punto.properties;
+    const [lon, lat] = punto.geometry.coordinates;
+    const href = urlSegura(p.url ?? null);
+    const enlaceFuente = href
+      ? `<a href="${escaparHtml(href)}" target="_blank" rel="noopener">${escaparHtml(p.fuente)}</a>`
+      : escaparHtml(p.fuente);
+
+    const filas: string[] = [
+      `<tr><td>Tipo</td><td>${escaparHtml(etiquetaTipoPunto(p.tipo))}</td></tr>`,
+      `<tr><td>ID</td><td>${escaparHtml(p.id)}</td></tr>`,
+    ];
+    if (p.diametro_km !== null && p.diametro_km !== undefined && Number.isFinite(p.diametro_km)) {
+      filas.push(`<tr><td>Diámetro</td><td>${p.diametro_km.toFixed(2)} km</td></tr>`);
+    }
+    if (p.confirmado !== undefined) {
+      filas.push(`<tr><td>Confirmado</td><td>${p.confirmado ? 'Sí' : 'No'}</td></tr>`);
+    }
+
+    this.raiz.innerHTML = `
+      <header class="ficha-cabecera">
+        <div>
+          <div class="ficha-titulo">
+            <span class="rango-grande">${escaparHtml(p.nombre || p.id)}</span>
+          </div>
+          <div class="ficha-meta">
+            <span>${lat.toFixed(3)}, ${lon.toFixed(3)}</span>
+            <a href="#" class="accion-link" data-accion="ver-globo">Ver en el globo</a>
+          </div>
+        </div>
+        <button type="button" class="btn-cerrar" data-accion="cerrar" aria-label="Cerrar ficha">×</button>
+      </header>
+      <section class="bloque">
+        <h2>Detalles del sitio de referencia</h2>
+        <table><tbody>${filas.join('')}</tbody></table>
+      </section>
+      <section class="bloque">
+        <h2>Fuente y atribución</h2>
+        <ul class="lista-fuentes">
+          <li>${enlaceFuente} <span class="licencia">(${escaparHtml(p.licencia)})</span></li>
+          <li>${escaparHtml(p.atribucion)}</li>
+        </ul>
       </section>
     `;
   }
