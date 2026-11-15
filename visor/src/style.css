@@ -500,6 +500,9 @@ html, body, #globo {
   color: #e6edf3;
   font: inherit;
 }
+/* La lista desplegable de Chrome es blanca por omisión: sin esto las opciones salen blanco sobre blanco. */
+select { color-scheme: dark; }
+select option, select optgroup { background: #0f172a; color: #e6edf3; }
 .asistente-chk { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #cbd5e1; }
 .asistente-acciones, .asistente-rapidas { display: flex; flex-wrap: wrap; gap: 6px; }
 .asistente-aviso { margin: 0; font-size: 11px; color: #86efac; }
