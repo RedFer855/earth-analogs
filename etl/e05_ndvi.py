@@ -1,7 +1,19 @@
 """E-05: NDVI máximo (MOD13C1 V061, 2013-2022; ADR-004).
 
-Un periodo de 16 días entra si la fiabilidad del píxel es 0 o 1 (se descartan nieve, nubes y valores estimados).
-El máximo exige al menos 3 periodos válidos. Columnas: ndvi_max y ndvi_n_periodos.
+Un periodo de 16 días entra si la fiabilidad del píxel es 0 o 1 (se descartan nieve, nubes y valores estimados)
+y si "VI Quality" (UInt16, nodata 65535) marca tierra en los bits 11-13 (código 1).
+
+Códigos de máscara tierra/agua en VI Quality (bits 11-13, según la guía MOD13 C6.1):
+  0 = océano somero (shallow ocean)
+  1 = tierra (land)
+  2 = líneas de costa oceánica y orillas de lagos (ocean coastlines and lake shorelines)
+  3 = agua interior somera (shallow inland water)
+  4 = agua efímera (ephemeral water)
+  5 = agua interior profunda (deep inland water)
+  6 = océano moderado o continental (moderate or continental ocean)
+  7 = océano profundo (deep ocean)
+
+El máximo exige al menos 3 periodos válidos. Columnas: ndvi_max, ndvi_n_periodos, ndvi_max_clim y ndvi_media.
 
 Uso: python e05_ndvi.py
 """
@@ -20,6 +32,20 @@ from comun_tabla import cargar_malla, escribir_columna, muestrear, valor_en
 
 gdal.UseExceptions()
 MIN_PERIODOS = 3
+TIERRA_VI_QUALITY = 1
+VI_QUALITY_NODATA = 65535
+
+
+def es_tierra_vi_quality(vi_quality: np.ndarray) -> np.ndarray:
+    """True donde VI Quality (UInt16, nodata 65535) marca código 1 (tierra) en los bits 11-13."""
+    viq = np.asarray(vi_quality)
+    return (viq != VI_QUALITY_NODATA) & (((viq >> 11) & 0b111) == TIERRA_VI_QUALITY)
+
+
+def filtrar_ndvi(ndvi: np.ndarray, fiab: np.ndarray, vi_quality: np.ndarray) -> np.ndarray:
+    """Filtra un periodo MOD13C1 a tierra (VI Quality bits 11-13 == 1), fiabilidad 0 o 1 y NDVI > -3000."""
+    ok = (fiab >= 0) & (fiab <= 1) & (ndvi > -3000) & es_tierra_vi_quality(vi_quality)
+    return np.where(ok, np.asarray(ndvi, dtype=np.float32) / 10000, np.nan)
 
 
 def _sub(ruta: str, clave: str):
@@ -42,7 +68,8 @@ def main() -> int:
         anio = int(a.name.split(".")[1][1:5])
         ndvi, geo = _sub(str(a), '"CMG 0.05 Deg 16 days NDVI"')
         fiab, _ = _sub(str(a), '"CMG 0.05 Deg 16 days pixel reliability"')
-        v = np.where((fiab >= 0) & (fiab <= 1) & (ndvi > -3000), ndvi.astype(np.float32) / 10000, np.nan)
+        viq, _ = _sub(str(a), '"CMG 0.05 Deg 16 days VI Quality"')
+        v = filtrar_ndvi(ndvi, fiab, viq)
         if maximo is None:
             maximo = np.full(v.shape, -np.inf, np.float32)
             cuenta = np.zeros(v.shape, np.uint16)
@@ -72,20 +99,23 @@ def main() -> int:
     ipix, lat, lon = cargar_malla(run)
     col = muestrear(maximo, lat, lon, geo)
     n = muestrear(cuenta.astype(np.float32), lat, lon, geo)
+    filtro = "VI Quality bits 11-13 == 1 (solo tierra); fiabilidad 0 o 1"
     meta = {
         "fuente": "MODIS Terra MOD13C1 V061, 2013-2022 (230 periodos de 16 días)",
         "url": "https://lpdaac.usgs.gov/products/mod13c1v061/",
         "licencia": "NASA open data",
-        "metodo": "fiabilidad 0 o 1; máximo con >= 3 periodos válidos; centro de celda",
+        "metodo": f"{filtro}; máximo con >= 3 periodos válidos; centro de celda",
         "advertencias": ["columna de contexto de la Tierra: no puntúa la semejanza (ADR-003)"],
     }
     cols = [
         escribir_columna(run, "ndvi_max", col, {**meta, "unidad": "adimensional"}),
         escribir_columna(run, "ndvi_n_periodos", n, {**meta, "unidad": "periodos"}),
         escribir_columna(run, "ndvi_max_clim", muestrear(clim, lat, lon, geo), {
-            **meta, "unidad": "adimensional", "metodo": "media de los máximos anuales; >= 3 periodos por año y >= 5 años"}),
+            **meta, "unidad": "adimensional",
+            "metodo": f"{filtro}; media de los máximos anuales; >= 3 periodos por año y >= 5 años; centro de celda"}),
         escribir_columna(run, "ndvi_media", muestrear(media, lat, lon, geo), {
-            **meta, "unidad": "adimensional", "metodo": "media de los periodos válidos; >= 3 periodos"}),
+            **meta, "unidad": "adimensional",
+            "metodo": f"{filtro}; media de los periodos válidos; >= 3 periodos; centro de celda"}),
     ]
     puntos = {"taiga (Siberia central)": (62.0, 100.0), "Amazonía": (-3.5, -62.0), "Sahara (Erg Chech)": (24.5, -2.5)}
     vals = {k: valor_en(ipix, col, *v) for k, v in puntos.items()}
