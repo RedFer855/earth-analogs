@@ -3,6 +3,7 @@ name: ci
 # - cambios: tamaño del PR y búsqueda de secretos con gitleaks. Corre siempre.
 # - auditoria: pruebas del registro de auditoría y verificación de su cadena.
 # - motor: formato, clippy y pruebas del motor en Rust (las que no necesitan la tabla real).
+# - visor: tipos, pruebas y build del visor web.
 # - CI completo: el único check obligatorio. Falla si un job falló o se canceló.
 # Las acciones van fijadas por SHA, con la versión en un comentario; Dependabot las actualiza.
 on:
@@ -117,10 +118,31 @@ jobs:
       - name: Pruebas
         run: cargo test --workspace --locked
 
+  visor:
+    name: Visor (web)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: visor
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Dependencias
+        run: npm ci --no-audit --no-fund
+      - name: Tipos y pruebas
+        run: npm run prueba
+      - name: Build
+        run: npm run build
+
   ci-completo:
     name: CI completo
     if: always()
-    needs: [cambios, auditoria, motor]
+    needs: [cambios, auditoria, motor, visor]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

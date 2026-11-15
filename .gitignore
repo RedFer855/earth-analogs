@@ -1,6 +1,8 @@
 # --- Datos crudos: se descargan y procesan offline, nunca van a git ---
 datos/
 !scripts/datos/
+!visor/src/datos/
+!visor/pruebas/datos/
 scripts/datos/fuentes-glo90.json
 *.tif
 *.tiff

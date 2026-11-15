@@ -44,7 +44,7 @@ _(vacía)_
 
 ## 45-decisiones — ADR-NNN, estándares E-NN y decisiones pendientes DP-NN
 
-- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]] · [[ADR-010-motor-de-busqueda-sobre-la-tabla-del-etl]]
+- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]] · [[ADR-010-motor-de-busqueda-sobre-la-tabla-del-etl]] · [[ADR-011-visor-web-sobre-el-contrato]]
 - _(tipo, estado y summary: ver contexto/INDEX-decisiones.md)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
@@ -65,10 +65,10 @@ _(vacía)_
 
 ## 70-bitacora — Notas de sesión por mes
 
+- [[2026-11-15-fernando-visor-base]] · sesion · fernando · antigravity · 2026-11-15 — Visor web ligero (CesiumJS + Vite + TypeScript) que lee metrics.json y resultados/terreno/<sitio>.json, pinta 200 candidatos en un Primitive coloreado por nota y muestra la ficha de coincidencias, diferencias, temperatura y contexto planetario.
 - [[2026-11-15-fernando-motor-sobre-etl]] · sesion · fernando · claude-code · 2026-11-15 — Se conectó el motor en Rust con $RUN sin adaptador, se corrigió la fórmula, se agregó E-20 para los perfiles y se corrigió la latitud autálica frente a la geodésica; los 21 sitios corren y 57 pruebas pasan, 5 de ellas contra la tabla real.
 - [[2026-11-15-fernando-motor-cerca-de]] · sesion · fernando · claude-code · 2026-11-15 — El motor escribe cerca_de (distancia al tubo de lava, cráter y salar más cercanos) en cada candidato, con las columnas opcionales de $RUN o de --puntos; no puntúan. Los 21 sitios corren y la distancia coincide con la columna.
-- [[2026-11-15-fernando-etl-ndvi-y-e13-incremental]] · sesion · fernando · claude-code · 2026-11-15 — El NDVI recupera costas y latitudes altas (cobertura de 80.7 % a 88.15 %) y E-13 relee solo lo que cambió y abre cada fuente una sola vez (unos 10 minutos a menos de 3).
-- _(8 sesiones más: ver contexto/INDEX-bitacora.md)_
+- _(9 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

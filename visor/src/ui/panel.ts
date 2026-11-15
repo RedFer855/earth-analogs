@@ -1,0 +1,163 @@
+import { escaparHtml, sitiosPorCuerpo, type Celda, type Indice, type Sitio } from '../datos/contrato';
+
+export type CuerpoTab = 'luna' | 'marte';
+
+export interface PanelCallbacks {
+  alElegirSitio: (sitio: Sitio) => void;
+  alElegirCandidato: (rango: number) => void;
+}
+
+export class PanelLateral {
+  private raiz: HTMLElement;
+  private grupos: { luna: Sitio[]; marte: Sitio[] };
+  private callbacks: PanelCallbacks;
+  private tabActiva: CuerpoTab = 'luna';
+  private sitioActivoId: string | null = null;
+  private candidatoActivoRango: number | null = null;
+  private candidatosActuales: Celda[] = [];
+  private mensajeEstado: string | null = null;
+
+  constructor(contenedor: HTMLElement, indice: Indice, callbacks: PanelCallbacks) {
+    this.grupos = sitiosPorCuerpo(indice);
+    this.callbacks = callbacks;
+
+    this.raiz = document.createElement('aside');
+    this.raiz.className = 'panel panel-izq';
+    contenedor.appendChild(this.raiz);
+
+    this.raiz.addEventListener('click', (ev) => {
+      const target = ev.target as HTMLElement | null;
+      if (!target) return;
+
+      const tabBtn = target.closest<HTMLButtonElement>('[data-tab]');
+      if (tabBtn) {
+        const tab = tabBtn.dataset.tab as CuerpoTab | undefined;
+        if (tab === 'luna' || tab === 'marte') {
+          this.tabActiva = tab;
+          this.render();
+        }
+        return;
+      }
+
+      const sitioBtn = target.closest<HTMLButtonElement>('[data-sitio]');
+      if (sitioBtn) {
+        const id = sitioBtn.dataset.sitio;
+        if (id) {
+          const encontrado =
+            this.grupos.luna.find((s) => s.id === id) ??
+            this.grupos.marte.find((s) => s.id === id);
+          if (encontrado) {
+            this.callbacks.alElegirSitio(encontrado);
+          }
+        }
+        return;
+      }
+
+      const candBtn = target.closest<HTMLButtonElement>('[data-candidato]');
+      if (candBtn) {
+        const rango = Number(candBtn.dataset.candidato);
+        if (Number.isInteger(rango)) {
+          this.callbacks.alElegirCandidato(rango);
+        }
+      }
+    });
+
+    this.render();
+  }
+
+  activarTab(tab: CuerpoTab): void {
+    this.tabActiva = tab;
+    this.render();
+  }
+
+  establecerSitio(sitioId: string, cuerpo?: string): void {
+    this.sitioActivoId = sitioId;
+    this.candidatoActivoRango = null;
+    this.candidatosActuales = [];
+    this.mensajeEstado = 'Cargando candidatos...';
+    if (cuerpo === 'luna' || cuerpo === 'marte') {
+      this.tabActiva = cuerpo;
+    }
+    this.render();
+  }
+
+  mostrarCandidatos(candidatos: Celda[]): void {
+    this.candidatosActuales = candidatos.slice(0, 50);
+    this.mensajeEstado = null;
+    this.render();
+  }
+
+  marcarCandidato(rango: number | null): void {
+    this.candidatoActivoRango = rango;
+    const botones = this.raiz.querySelectorAll<HTMLButtonElement>('[data-candidato]');
+    for (const btn of botones) {
+      const activo = Number(btn.dataset.candidato) === rango;
+      btn.classList.toggle('activo', activo);
+      if (activo) {
+        btn.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }
+
+  mostrarError(mensaje: string): void {
+    this.mensajeEstado = mensaje;
+    this.render();
+  }
+
+  private render(): void {
+    const sitios = this.grupos[this.tabActiva];
+    const itemsSitios = sitios
+      .map((s) => {
+        const activo = s.id === this.sitioActivoId ? ' activo' : '';
+        const notaTxt =
+          s.mejor !== null ? `${(s.mejor.nota * 100).toFixed(1)}%` : '—';
+        return `<button type="button" class="item-lista${activo}" data-sitio="${escaparHtml(s.id)}">
+          <span class="item-principal">
+            <span class="codigo">${escaparHtml(s.id)}</span>
+            <span class="nombre">${escaparHtml(s.nombre)}</span>
+          </span>
+          <span class="nota-pill">${escaparHtml(notaTxt)}</span>
+        </button>`;
+      })
+      .join('');
+
+    let bloqueCandidatos = '';
+    if (this.mensajeEstado) {
+      bloqueCandidatos = `<p class="estado-lista">${escaparHtml(this.mensajeEstado)}</p>`;
+    } else if (this.candidatosActuales.length > 0) {
+      const itemsCand = this.candidatosActuales
+        .map((c) => {
+          const activo = c.rango === this.candidatoActivoRango ? ' activo' : '';
+          return `<button type="button" class="item-lista${activo}" data-candidato="${c.rango}">
+            <span class="item-principal">
+              <span class="codigo">#${c.rango}</span>
+              <span class="coords">${c.centro.lat.toFixed(3)}, ${c.centro.lon.toFixed(3)}</span>
+            </span>
+            <span class="nota-pill">${(c.nota * 100).toFixed(1)}%</span>
+          </button>`;
+        })
+        .join('');
+      bloqueCandidatos = `<div class="subtitulo">Primeros ${this.candidatosActuales.length} candidatos</div>
+        <div class="lista-scroll lista-candidatos">${itemsCand}</div>`;
+    } else if (this.sitioActivoId) {
+      bloqueCandidatos = `<p class="estado-lista">Sin candidatos disponibles.</p>`;
+    }
+
+    this.raiz.innerHTML = `
+      <header class="panel-cabecera">
+        <h1>Análogos terrestres</h1>
+        <p class="bajada">Busca en la Tierra lugares parecidos a sitios de la Luna y Marte</p>
+      </header>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab${this.tabActiva === 'luna' ? ' activa' : ''}" data-tab="luna">
+          Luna (${this.grupos.luna.length})
+        </button>
+        <button type="button" class="tab${this.tabActiva === 'marte' ? ' activa' : ''}" data-tab="marte">
+          Marte (${this.grupos.marte.length})
+        </button>
+      </div>
+      <div class="lista-scroll lista-sitios">${itemsSitios}</div>
+      ${bloqueCandidatos}
+    `;
+  }
+}

@@ -1,0 +1,322 @@
+export const VERSION_CONTRATO = '1.0.0';
+
+export interface Centro {
+  lat: number;
+  lon: number;
+}
+
+export type EtiquetaVariable = 'coincide' | 'difiere' | 'sin_dato';
+
+export interface VarCelda {
+  valor: number | null;
+  diferencia: number | null;
+  nota: number | null;
+  etiqueta: EtiquetaVariable;
+}
+
+export interface Cobertura {
+  usadas: number;
+  total: number;
+  faltan: string[];
+}
+
+export interface Diagnostico {
+  valor: number | null;
+  objetivo: number;
+  diferencia: number | null;
+}
+
+export type VerticesCelda = [
+  [number, number],
+  [number, number],
+  [number, number],
+  [number, number],
+];
+
+export interface Celda {
+  rango: number;
+  ipix: number;
+  centro: Centro;
+  vertices: VerticesCelda;
+  nota: number;
+  nota_exacta: number;
+  variables: Record<string, VarCelda>;
+  cobertura: Cobertura;
+  diagnostico?: Record<string, Diagnostico>;
+  marcas: string[];
+  analogo_conocido: string | null;
+  region: string | null;
+}
+
+export interface ValorObjetivo {
+  valor: number;
+  valor_real?: number | null;
+}
+
+export interface ObjetivoJson {
+  variables: Record<string, ValorObjetivo>;
+  diagnostico?: Record<string, number>;
+}
+
+export interface Origen {
+  columna: string;
+  fuente: string | null;
+  url: string | null;
+  licencia: string | null;
+}
+
+export interface VariableParametro {
+  id: string;
+  peso: number;
+  tolerancia: number;
+  escala: number;
+  origen: Origen;
+}
+
+export interface ParametrosJson {
+  variables: VariableParametro[];
+  diagnostico: Origen[];
+  filtros: string[];
+  ndvi_max: number;
+  gamma: number;
+  lambda_contraccion: number;
+  fraccion_minima: number;
+  correlacion: number[][];
+}
+
+export interface Healpix {
+  esquema: string;
+  nivel: number;
+}
+
+export interface ResultadoJson {
+  version_contrato: string;
+  es_ejemplo: boolean;
+  perfil: string;
+  sitio: string;
+  healpix: Healpix;
+  objetivo: ObjetivoJson;
+  parametros: ParametrosJson;
+  excluidos_por_indice?: number | null;
+  excluidos_por_separacion?: number | null;
+  celdas_en_area?: number | null;
+  regiones_con_tierra?: number | null;
+  sin_celdas_por_ndvi?: number | null;
+  candidatos: Celda[];
+}
+
+export interface VariableCat {
+  id: string;
+  codigo: string;
+  nombre: string;
+  unidad: string;
+  aplica_a: string[];
+  descripcion: string;
+}
+
+export interface MarcaCat {
+  id: string;
+  nombre: string;
+  tipo: string;
+}
+
+export interface PerfilCat {
+  id: string;
+  nombre: string;
+  contra: string[];
+  variables: string[];
+  descripcion: string;
+}
+
+export interface SitioObjetivoCat {
+  id: string;
+  nombre: string;
+  cuerpo: string;
+  centro: Centro;
+}
+
+export interface AnalogoCat {
+  id: string;
+  nombre: string;
+  centro: Centro;
+}
+
+export interface Mejora {
+  nota: number;
+  centro: Centro;
+  region: string | null;
+}
+
+export interface ResumenResultado {
+  perfil: string;
+  sitio: string;
+  archivo: string;
+  n_candidatos: number;
+  mejor: Mejora | null;
+}
+
+export interface FuenteCat {
+  nombre: string;
+  url: string | null;
+  licencia: string | null;
+  columnas: string[];
+}
+
+export interface TablaCat {
+  generado: string | null;
+  commit: string | null;
+  n_celdas: number;
+}
+
+export interface Contrato {
+  version: string;
+  tabla: TablaCat;
+}
+
+export interface CuerpoJson {
+  nombre: string;
+  radio_m: number;
+  gravedad_ms2: number;
+  presion_superficie_pa: number;
+  atmosfera: string;
+  radiacion: string;
+  fuente: string;
+}
+
+export interface Indice {
+  version_contrato: string;
+  contrato: Contrato;
+  generado: string;
+  es_ejemplo: boolean;
+  healpix: Healpix;
+  cuerpos: Record<string, CuerpoJson>;
+  variables: VariableCat[];
+  marcas: MarcaCat[];
+  perfiles: PerfilCat[];
+  sitios_objetivo: SitioObjetivoCat[];
+  analogos_conocidos: AnalogoCat[];
+  resultados: ResumenResultado[];
+  fuentes: FuenteCat[];
+}
+
+export interface Sitio extends SitioObjetivoCat {
+  archivo: string | null;
+  n_candidatos: number;
+  mejor: Mejora | null;
+}
+
+function unirRuta(base: string, ruta: string): string {
+  const limpiaBase = base.replace(/\/+$/, '');
+  const limpiaRuta = ruta.replace(/^\/+/, '');
+  return limpiaBase ? `${limpiaBase}/${limpiaRuta}` : limpiaRuta;
+}
+
+function validarContrato(
+  datos: { version_contrato?: unknown; es_ejemplo?: unknown },
+  etiqueta: string,
+): void {
+  if (datos.version_contrato !== VERSION_CONTRATO) {
+    throw new Error(
+      `Versión de contrato incompatible en ${etiqueta}: se esperaba ${VERSION_CONTRATO} y llegó ${String(datos.version_contrato ?? 'desconocida')}.`,
+    );
+  }
+  if (datos.es_ejemplo === true) {
+    throw new Error(
+      `Los datos de ${etiqueta} están marcados como ejemplo y no pueden mostrarse como resultados reales.`,
+    );
+  }
+}
+
+async function pedirJson<T extends { version_contrato?: unknown; es_ejemplo?: unknown }>(
+  url: string,
+  etiqueta: string,
+): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`No se pudo cargar ${etiqueta} (HTTP ${res.status}).`);
+  }
+  const datos = (await res.json()) as T;
+  validarContrato(datos, etiqueta);
+  return datos;
+}
+
+export function cargarIndice(base = 'datos/'): Promise<Indice> {
+  return pedirJson<Indice>(unirRuta(base, 'metrics.json'), 'el índice principal');
+}
+
+export function cargarResultado(base: string, archivo: string): Promise<ResultadoJson> {
+  return pedirJson<ResultadoJson>(unirRuta(base, archivo), `el resultado ${archivo}`);
+}
+
+export function colorNota(n: number): [number, number, number] {
+  const x = Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0;
+  const rojo: [number, number, number] = [239, 68, 68];
+  const amarillo: [number, number, number] = [250, 204, 21];
+  const verde: [number, number, number] = [34, 197, 94];
+
+  if (x <= 0.5) {
+    const t = x * 2;
+    return [
+      Math.round(rojo[0] + (amarillo[0] - rojo[0]) * t),
+      Math.round(rojo[1] + (amarillo[1] - rojo[1]) * t),
+      Math.round(rojo[2] + (amarillo[2] - rojo[2]) * t),
+    ];
+  }
+  const t = (x - 0.5) * 2;
+  return [
+    Math.round(amarillo[0] + (verde[0] - amarillo[0]) * t),
+    Math.round(amarillo[1] + (verde[1] - amarillo[1]) * t),
+    Math.round(amarillo[2] + (verde[2] - amarillo[2]) * t),
+  ];
+}
+
+export function sitiosPorCuerpo(indice: Indice): { luna: Sitio[]; marte: Sitio[] } {
+  const porSitio = new Map<string, ResumenResultado>();
+  for (const r of indice.resultados) {
+    if (!porSitio.has(r.sitio)) {
+      porSitio.set(r.sitio, r);
+    }
+  }
+
+  const enriquecer = (s: SitioObjetivoCat): Sitio => {
+    const res = porSitio.get(s.id);
+    return {
+      ...s,
+      archivo: res?.archivo ?? null,
+      n_candidatos: res?.n_candidatos ?? 0,
+      mejor: res?.mejor ?? null,
+    };
+  };
+
+  const ordenar = (a: Sitio, b: Sitio): number => a.id.localeCompare(b.id);
+
+  return {
+    luna: indice.sitios_objetivo
+      .filter((s) => s.cuerpo === 'luna')
+      .map(enriquecer)
+      .sort(ordenar),
+    marte: indice.sitios_objetivo
+      .filter((s) => s.cuerpo === 'marte')
+      .map(enriquecer)
+      .sort(ordenar),
+  };
+}
+
+export function objetivoDe(resultado: ResultadoJson, v: string): number | null {
+  const entry = resultado.objetivo.variables[v];
+  if (!entry) return null;
+  return entry.valor_real ?? entry.valor;
+}
+
+export function pareceHielo(lat: number, lon: number): boolean {
+  return lat > 60 && lon > -75 && lon < -10;
+}
+
+export function escaparHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}

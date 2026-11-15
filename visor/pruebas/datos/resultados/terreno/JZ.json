@@ -1,0 +1,193 @@
+{
+  "version_contrato": "1.0.0",
+  "es_ejemplo": false,
+  "perfil": "terreno",
+  "sitio": "JZ",
+  "healpix": {
+    "esquema": "nested",
+    "nivel": 12
+  },
+  "objetivo": {
+    "variables": {
+      "relieve_mean_m": {
+        "valor": 55.4389
+      },
+      "rug_rms_mean_m": {
+        "valor": 15.3565
+      },
+      "slope_mean_deg": {
+        "valor": 3.1343
+      },
+      "slope_std_deg": {
+        "valor": 1.2988
+      }
+    },
+    "diagnostico": {
+      "amp_anual_k": 15.6362,
+      "rango_diurno_k": 85.4782
+    }
+  },
+  "parametros": {
+    "variables": [
+      {
+        "id": "slope_mean_deg",
+        "peso": 0.25,
+        "tolerancia": 1.9169,
+        "escala": 2.7161,
+        "origen": {
+          "columna": "slope_mean_deg",
+          "fuente": "Copernicus DEM GLO-90 release 2024_1 (DEM y WBM); JRC GSW v1.5 occurrence",
+          "url": "https://registry.opendata.aws/copernicus-dem/",
+          "licencia": "Copernicus DEM license; JRC GSW: Copernicus open license"
+        }
+      },
+      {
+        "id": "slope_std_deg",
+        "peso": 0.25,
+        "tolerancia": 0.7536,
+        "escala": 1.4242,
+        "origen": {
+          "columna": "slope_std_deg",
+          "fuente": "Copernicus DEM GLO-90 release 2024_1 (DEM y WBM); JRC GSW v1.5 occurrence",
+          "url": "https://registry.opendata.aws/copernicus-dem/",
+          "licencia": "Copernicus DEM license; JRC GSW: Copernicus open license"
+        }
+      },
+      {
+        "id": "rug_rms_mean_m",
+        "peso": 0.25,
+        "tolerancia": 9.3335,
+        "escala": 13.1837,
+        "origen": {
+          "columna": "rug_rms_mean_m",
+          "fuente": "Copernicus DEM GLO-90 release 2024_1 (DEM y WBM); JRC GSW v1.5 occurrence",
+          "url": "https://registry.opendata.aws/copernicus-dem/",
+          "licencia": "Copernicus DEM license; JRC GSW: Copernicus open license"
+        }
+      },
+      {
+        "id": "relieve_mean_m",
+        "peso": 0.25,
+        "tolerancia": 33.3234,
+        "escala": 47.4368,
+        "origen": {
+          "columna": "relieve_mean_m",
+          "fuente": "Copernicus DEM GLO-90 release 2024_1 (DEM y WBM); JRC GSW v1.5 occurrence",
+          "url": "https://registry.opendata.aws/copernicus-dem/",
+          "licencia": "Copernicus DEM license; JRC GSW: Copernicus open license"
+        }
+      }
+    ],
+    "diagnostico": [
+      {
+        "columna": "amp_anual_k",
+        "fuente": "MODIS Aqua MYD11C3 V061, 2013-2022 (120 meses)",
+        "url": "https://lpdaac.usgs.gov/products/myd11c3v061/",
+        "licencia": "NASA open data"
+      },
+      {
+        "columna": "rango_diurno_k",
+        "fuente": "MODIS Aqua MYD11C3 V061, 2013-2022 (120 meses)",
+        "url": "https://lpdaac.usgs.gov/products/myd11c3v061/",
+        "licencia": "NASA open data"
+      }
+    ],
+    "filtros": [
+      "ndvi_bajo"
+    ],
+    "ndvi_max": 0.2,
+    "gamma": 0.5,
+    "lambda_contraccion": 0.5,
+    "fraccion_minima": 0.7,
+    "correlacion": [
+      [1.0, 0.909375, 0.997508, 0.996659],
+      [0.909375, 1.0, 0.90681, 0.902123],
+      [0.997508, 0.90681, 1.0, 0.998976],
+      [0.996659, 0.902123, 0.998976, 1.0]
+    ]
+  },
+  "excluidos_por_separacion": 2625,
+  "candidatos": [
+    {
+      "rango": 1,
+      "ipix": 83282940,
+      "centro": { "lat": 31.12002, "lon": 2.46094 },
+      "vertices": [
+        [2.46094, 31.13093],
+        [2.47192, 31.12002],
+        [2.46094, 31.10912],
+        [2.44995, 31.12002]
+      ],
+      "nota": 1.0,
+      "nota_exacta": 1.0,
+      "variables": {
+        "relieve_mean_m": { "valor": 55.7682, "diferencia": 0.3293, "nota": 1.0, "etiqueta": "coincide" },
+        "rug_rms_mean_m": { "valor": 15.3641, "diferencia": 0.0076, "nota": 1.0, "etiqueta": "coincide" },
+        "slope_mean_deg": { "valor": 3.1251, "diferencia": -0.0092, "nota": 1.0, "etiqueta": "coincide" },
+        "slope_std_deg": { "valor": 1.3085, "diferencia": 0.0097, "nota": 1.0, "etiqueta": "coincide" }
+      },
+      "cobertura": { "usadas": 4, "total": 4, "faltan": [] },
+      "diagnostico": {
+        "amp_anual_k": { "valor": 27.614, "objetivo": 15.6362, "diferencia": 11.9778 },
+        "rango_diurno_k": { "valor": 26.6503, "objetivo": 85.4782, "diferencia": -58.8279 }
+      },
+      "marcas": ["ndvi_bajo"],
+      "analogo_conocido": null,
+      "region": null
+    },
+    {
+      "rango": 2,
+      "ipix": 66889069,
+      "centro": { "lat": 81.28125, "lon": -53.1658 },
+      "vertices": [
+        [-53.17647, 81.29265],
+        [-53.10705, 81.28125],
+        [-53.15515, 81.26984],
+        [-53.22454, 81.28125]
+      ],
+      "nota": 1.0,
+      "nota_exacta": 1.0,
+      "variables": {
+        "relieve_mean_m": { "valor": 55.2972, "diferencia": -0.1417, "nota": 1.0, "etiqueta": "coincide" },
+        "rug_rms_mean_m": { "valor": 15.4419, "diferencia": 0.0855, "nota": 1.0, "etiqueta": "coincide" },
+        "slope_mean_deg": { "valor": 3.1349, "diferencia": 0.0006, "nota": 1.0, "etiqueta": "coincide" },
+        "slope_std_deg": { "valor": 1.31, "diferencia": 0.0112, "nota": 1.0, "etiqueta": "coincide" }
+      },
+      "cobertura": { "usadas": 4, "total": 4, "faltan": [] },
+      "diagnostico": {
+        "amp_anual_k": { "valor": 38.79, "objetivo": 15.6362, "diferencia": 23.1538 },
+        "rango_diurno_k": { "valor": 1.3088, "objetivo": 85.4782, "diferencia": -84.1694 }
+      },
+      "marcas": ["ndvi_bajo"],
+      "analogo_conocido": null,
+      "region": null
+    },
+    {
+      "rango": 3,
+      "ipix": 83047511,
+      "centro": { "lat": 26.55625, "lon": 0.50537 },
+      "vertices": [
+        [0.50537, 26.56669],
+        [0.51636, 26.55625],
+        [0.50537, 26.5458],
+        [0.49438, 26.55625]
+      ],
+      "nota": 1.0,
+      "nota_exacta": 1.0,
+      "variables": {
+        "relieve_mean_m": { "valor": 55.2423, "diferencia": -0.1966, "nota": 1.0, "etiqueta": "coincide" },
+        "rug_rms_mean_m": { "valor": 15.3422, "diferencia": -0.0142, "nota": 1.0, "etiqueta": "coincide" },
+        "slope_mean_deg": { "valor": 3.124, "diferencia": -0.0103, "nota": 1.0, "etiqueta": "coincide" },
+        "slope_std_deg": { "valor": 1.2805, "diferencia": -0.0183, "nota": 1.0, "etiqueta": "coincide" }
+      },
+      "cobertura": { "usadas": 4, "total": 4, "faltan": [] },
+      "diagnostico": {
+        "amp_anual_k": { "valor": 21.3837, "objetivo": 15.6362, "diferencia": 5.7475 },
+        "rango_diurno_k": { "valor": 25.8019, "objetivo": 85.4782, "diferencia": -59.6763 }
+      },
+      "marcas": ["ndvi_bajo"],
+      "analogo_conocido": null,
+      "region": null
+    }
+  ]
+}
