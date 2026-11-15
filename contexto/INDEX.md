@@ -67,8 +67,8 @@ _(vacía)_
 
 - [[2026-11-15-fernando-visor-pulido]] · sesion · fernando · antigravity · 2026-11-15 — Fase 5 del visor: segundo globo Luna/Marte con Moon Trek / Mars Trek WMTS sin token, lectura opcional de estabilidad.json en la ficha del candidato y medidor de FPS en vivo.
 - [[2026-11-15-fernando-visor-pines]] · sesion · fernando · antigravity · 2026-11-15 — Fase 3 del visor: capa de 332 pines agrupables (tubos de lava, cráteres, salares) con ficha de fuente y atribución, bloque cerca_de en la ficha del candidato y panel de correlación de entornos.
-- [[2026-11-15-fernando-visor-busqueda]] · sesion · fernando · antigravity · 2026-11-15 — Fase 4 del visor: pestaña Buscar con deslizadores y presets (Como Jezero / Como Shackleton) sobre las 12 capas nivel 7 de E-21, mapa coroplético con p1-p99 y geometría HEALPix nested en TypeScript.
-- _(12 sesiones más: ver contexto/INDEX-bitacora.md)_
+- [[2026-11-15-fernando-visor-mapa-2025]] · sesion · fernando · antigravity · 2026-11-15 — Actualiza globo.ts para usar EOX Sentinel-2 cloudless 2025 por defecto (con respaldo a 2016, NASA GIBS Blue Marble y NaturalEarthII) y agrega selector de mapa base en la barra superior.
+- _(13 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

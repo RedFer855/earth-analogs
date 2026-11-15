@@ -296,6 +296,7 @@ html, body, #globo {
   z-index: 15;
 }
 .fps-badge { font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+.barra-estado .select-coro { width: auto; margin-top: 0; font-size: 11px; padding: 3px 6px; }
 .panel-objetivo {
   position: absolute;
   bottom: 12px;

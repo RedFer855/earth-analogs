@@ -21,7 +21,7 @@ import {
   type ResultadoJson,
   type Sitio,
 } from './datos/contrato';
-import { crearGlobo } from './globo';
+import { cambiarMapaBase, crearGlobo, type TipoMapaBase } from './globo';
 import { GloboObjetivo } from './globo-objetivo';
 import { PanelBusqueda } from './ui/busqueda';
 import { FichaCandidato } from './ui/ficha';
@@ -93,8 +93,18 @@ async function iniciar(): Promise<void> {
   const barra = document.createElement('div');
   barra.className = 'barra-estado';
   barra.innerHTML = `<span class="fps-badge" data-fps>-- FPS</span>
+    <select class="select-coro" data-mapa-base aria-label="Mapa base">
+      <option value="sentinel2-eox" selected>EOX 2025 · 10 m</option>
+      <option value="gibs-bluemarble">GIBS Marble · 500 m</option>
+      <option value="naturalearth">NaturalEarth · Offline</option>
+    </select>
     <button type="button" class="btn-mini" data-accion="toggle-objetivo" disabled>Ver objetivo (Luna/Marte)</button>`;
   ui.appendChild(barra);
+
+  barra.querySelector<HTMLSelectElement>('[data-mapa-base]')?.addEventListener('change', (ev) => {
+    const sel = ev.target as HTMLSelectElement;
+    void cambiarMapaBase(viewer, sel.value as TipoMapaBase);
+  });
 
   const panelObj = document.createElement('div');
   panelObj.className = 'panel-objetivo oculto';
