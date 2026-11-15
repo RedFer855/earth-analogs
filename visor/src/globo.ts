@@ -1,13 +1,32 @@
 import * as Cesium from 'cesium';
 
 const PROBE_TIMEOUT_MS = 4000;
+const EOX_PRIMER_ANIO = 2016;
+const EOX_ULTIMO_ANIO = 2025;
 
-const EOX_2016_TEMPLATE =
-  'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg';
-const EOX_2016_CREDIT =
-  '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless - https://s2maps.eu</a> ' +
-  'by <a href="https://eox.at" target="_blank" rel="noopener">EOX IT Services GmbH</a> ' +
-  '(Contains modified Copernicus Sentinel data 2016 &amp; 2017 · CC BY 4.0)';
+export type TipoMapaBase = 'sentinel2-eox' | 'gibs-bluemarble' | 'naturalearth';
+
+function anioEoxSolicitado(): number {
+  const raw = new URLSearchParams(window.location.search).get('imagen');
+  const anio = raw === null ? EOX_ULTIMO_ANIO : Number(raw);
+  return Number.isInteger(anio) && anio >= EOX_PRIMER_ANIO && anio <= EOX_ULTIMO_ANIO
+    ? anio
+    : EOX_ULTIMO_ANIO;
+}
+
+function plantillaEox(anio: number): string {
+  const capa = anio === EOX_PRIMER_ANIO ? 's2cloudless' : `s2cloudless-${anio}`;
+  return `https://tiles.maps.eox.at/wmts/1.0.0/${capa}_3857/default/g/{z}/{y}/{x}.jpg`;
+}
+
+function creditoEox(anio: number): string {
+  const datos = anio === EOX_PRIMER_ANIO ? '2016 &amp; 2017' : String(anio);
+  return (
+    '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless - https://s2maps.eu</a> ' +
+    'by <a href="https://eox.at" target="_blank" rel="noopener">EOX IT Services GmbH</a> ' +
+    `(Contains modified Copernicus Sentinel data ${datos})`
+  );
+}
 
 const GIBS_BLUEMARBLE_TEMPLATE =
   'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_NextGeneration/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg';
@@ -38,30 +57,58 @@ async function sondearUrl(url: string, timeoutMs = PROBE_TIMEOUT_MS): Promise<bo
   }
 }
 
-async function elegirImagenBase(): Promise<Cesium.ImageryProvider> {
-  const eoxProbe = EOX_2016_TEMPLATE.replace('{z}', '0').replace('{y}', '0').replace('{x}', '0');
-  if (await sondearUrl(eoxProbe)) {
-    return new Cesium.UrlTemplateImageryProvider({
-      url: EOX_2016_TEMPLATE,
-      tilingScheme: new Cesium.WebMercatorTilingScheme(),
-      maximumLevel: 14,
-      credit: new Cesium.Credit(EOX_2016_CREDIT, true),
-    });
+async function intentarEox(): Promise<Cesium.ImageryProvider | null> {
+  const anios = [anioEoxSolicitado(), EOX_PRIMER_ANIO].filter(
+    (y, i, all) => all.indexOf(y) === i,
+  );
+  for (const anio of anios) {
+    const plantilla = plantillaEox(anio);
+    const probe = plantilla.replace('{z}', '0').replace('{y}', '0').replace('{x}', '0');
+    if (await sondearUrl(probe)) {
+      return new Cesium.UrlTemplateImageryProvider({
+        url: plantilla,
+        tilingScheme: new Cesium.WebMercatorTilingScheme(),
+        maximumLevel: 14,
+        credit: new Cesium.Credit(creditoEox(anio), true),
+      });
+    }
+  }
+  return null;
+}
+
+export async function construirImagenBase(tipo: TipoMapaBase): Promise<Cesium.ImageryProvider> {
+  if (tipo === 'sentinel2-eox') {
+    const eox = await intentarEox();
+    if (eox) return eox;
   }
 
-  const gibsProbe = GIBS_BLUEMARBLE_TEMPLATE.replace('{z}', '1').replace('{y}', '0').replace('{x}', '0');
-  if (await sondearUrl(gibsProbe)) {
-    return new Cesium.UrlTemplateImageryProvider({
-      url: GIBS_BLUEMARBLE_TEMPLATE,
-      tilingScheme: new Cesium.WebMercatorTilingScheme(),
-      maximumLevel: 8,
-      credit: new Cesium.Credit(GIBS_CREDIT, true),
-    });
+  if (tipo === 'gibs-bluemarble' || tipo === 'sentinel2-eox') {
+    const gibsProbe = GIBS_BLUEMARBLE_TEMPLATE.replace('{z}', '1').replace('{y}', '0').replace('{x}', '0');
+    if (await sondearUrl(gibsProbe)) {
+      return new Cesium.UrlTemplateImageryProvider({
+        url: GIBS_BLUEMARBLE_TEMPLATE,
+        tilingScheme: new Cesium.WebMercatorTilingScheme(),
+        maximumLevel: 8,
+        credit: new Cesium.Credit(GIBS_CREDIT, true),
+      });
+    }
   }
 
   return Cesium.TileMapServiceImageryProvider.fromUrl(
     Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII'),
   );
+}
+
+async function elegirImagenBase(): Promise<Cesium.ImageryProvider> {
+  return construirImagenBase('sentinel2-eox');
+}
+
+export async function cambiarMapaBase(viewer: Cesium.Viewer, tipo: TipoMapaBase): Promise<void> {
+  const proveedor = await construirImagenBase(tipo);
+  if (viewer.isDestroyed()) return;
+  viewer.imageryLayers.removeAll(true);
+  viewer.imageryLayers.addImageryProvider(proveedor);
+  viewer.scene.requestRender();
 }
 
 function parsearPhotonFeature(feature: PhotonFeature): Cesium.GeocoderService.Result | null {
