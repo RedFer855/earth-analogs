@@ -4,8 +4,8 @@ type: adr
 status: vigente
 estado: aceptado
 date: 2026-11-14
-updated: 2026-11-14
-summary: "La pendiente se calcula en el DEM fino con halo y agua enmascarada, y solo después se agrega a la celda; la rugosidad y el relieve quedan para la ficha del sitio."
+updated: 2026-11-15
+summary: "La pendiente, la rugosidad y el relieve se calculan en bloques cuadrados de 200 m (LAEA local) con ventana de 1 km, igual en la Tierra, la Luna y Marte, y solo después se agregan a la celda."
 autor: fernando
 scope: [docs/etl-plan.md]
 tablas: []
@@ -29,16 +29,33 @@ quita las depresiones secas como el Valle de la Muerte ([[I-10-mascaras-de-agua]
 
 ## 2. Decisión
 
-1. **Pendiente a 200 m, calculada en el DEM Copernicus GLO-90 y agregada después a la celda.** Nunca se calcula sobre
-   un DEM ya promediado a la celda.
-2. **La columna de comparación es `slope_mean_deg` junto con `slope_std_deg`.** La rugosidad y el relieve se calculan
-   solo para la ficha del sitio y no puntúan la semejanza.
+1. **Pendiente en bloques cuadrados de 200 m, calculada en el DEM Copernicus GLO-90 y agregada después a la celda.**
+   Cada tesela se reproyecta a una proyección azimutal de áreas iguales de Lambert (LAEA) centrada en ella, con píxeles
+   de 200 m (promedio de área; un bloque es válido si su validez es ≥ 0.999). Nunca se calcula sobre un DEM ya promediado
+   a la celda. La Luna (LOLA, bloques de 10 × 10 píxeles de 20 m) y Marte (HRSC-MOLA, reproyectado a LAEA local) usan
+   la misma regla, así que los tres cuerpos se miden a la misma escala.
+2. **Columnas de comparación y de ficha.** `slope_mean_deg` y `slope_std_deg` comparan. La rugosidad RMS y el relieve
+   se calculan en una ventana de 5 × 5 bloques (1 km, al menos 19 válidos) con el mismo estimador en los tres cuerpos.
+   Nota: el motor privado hoy las usa como variables obligatorias; eso se decide en el equipo, no aquí.
 3. **Halo entre teselas:** cada ventana se lee con un borde de unos 0.02° tomado de las teselas vecinas, a través de
    un mosaico virtual (VRT), y se recorta después.
 4. **Ancho de celda desde la geotransformada de cada tesela,** porque el ancho en longitud cambia con la latitud.
 5. **Máscara de agua antes de la pendiente:** el mar se enmascara siempre. Lagos y ríos se enmascaran solo donde la
    ocurrencia de agua superficial es ≥ 50 %; los salares y lagos secos se conservan.
-6. **Fuera de alcance:** los 2° alrededor de los polos (la Antártida queda fuera por el reto).
+6. **Fuera de alcance:** los 2° alrededor de los polos, por el límite del DEM y de la proyección. El reto no excluye la
+   Antártida ni las regiones polares: pide explorar la Tierra entera (`10-reto/dimensiones-innegociables`). Los Valles
+   Secos de McMurdo (a unos 77.5° S) sí entran en la malla; lo que les falta son capas de permafrost (ver E-07).
+7. **Una sola pasada.** `e03_extras.py` calcula todas las columnas de terreno leyendo el DEM una vez (antes, `e03_terreno.py`
+   y `e03_extras.py` lo leían dos veces).
+
+### Medición del cambio (2026-11-15)
+
+Antes: bloques de 2 × 2 píxeles GLO-90 (~185 m de N a S y ~131 m de E a O a 45° de latitud) y ventana de ~900 m.
+Contra la regla de 200 m del ETL privado, cruzando por coordenada (P-010) 28,4 millones de celdas con relieve > 20 m:
+relieve y rugosidad salían un 9 % más bajos (mediana del cociente 0.907 y 0.910) y la pendiente un 4 % más alta
+(1.038). En Marte, con bloques de `200·cos(lat)` m de E a O, la misma superficie daba un relieve de 91 m a 0° y 53 m a
+60° de latitud; con bloques cuadrados la diferencia es menor que 3 % (`etl/test_e12_bloques.py`). Después: ver la nota
+de sesión de este cambio para el cociente con la corrida completa.
 
 ## 3. Diseño
 
@@ -69,7 +86,7 @@ quita las depresiones secas como el Valle de la Muerte ([[I-10-mascaras-de-agua]
 
 | ID | Decisión | Qué falta para cerrarla |
 | :-- | :-- | :-- |
-| Q-1 | Escala de comparación para la Luna y Marte | Medir la resolución efectiva de cada DEM planetario |
+| Q-1 | Escala de comparación para la Luna y Marte | **Cerrada el 2026-11-15:** 200 m cuadrados y ventana de 1 km en los tres cuerpos (decisión 1). Queda medir la resolución efectiva del DEM de cada cuerpo |
 | Q-2 | Umbral de ocurrencia de agua (50 %) | Revisarlo con salares y lagos estacionales conocidos |
 
 ## 7. Fuentes
