@@ -1,0 +1,20 @@
+{
+  "name": "earth-analogs-visor",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "prueba": "tsc --noEmit && node pruebas/correr.mjs"
+  },
+  "dependencies": {
+    "cesium": "1.147.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10",
+    "vite-plugin-static-copy": "^2.1.0"
+  }
+}
