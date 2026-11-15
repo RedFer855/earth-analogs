@@ -67,8 +67,8 @@ _(vacía)_
 
 - [[2026-11-15-fernando-etl-ndvi-y-e13-incremental]] · sesion · fernando · claude-code · 2026-11-15 — El NDVI recupera costas y latitudes altas (cobertura de 80.7 % a 88.15 %) y E-13 relee solo lo que cambió y abre cada fuente una sola vez (unos 10 minutos a menos de 3).
 - [[2026-11-15-fernando-etl-escala-200m]] · sesion · fernando · claude-code · 2026-11-15 — El terreno se calcula igual en los tres cuerpos (bloques cuadrados de 200 m, ventana de 1 km); el error de pendiente contra la relectura independiente de E-13 baja de 0.176° a 0.050°.
-- [[2026-11-14-fernando-etl-e01-a-e13]] · sesion · fernando · claude-code · 2026-11-14 — Se escribió y corrió el ETL completo (malla, terreno, temperatura, NDVI, aridez, permafrost, viento y polvo, material, agua, objetivos de la Luna y Marte, manifiesto), cada paso con su comprobación y su registro de auditoría; los errores encontrados quedaron corregidos y registrados.
-- _(3 sesiones más: ver contexto/INDEX-bitacora.md)_
+- [[2026-11-15-fernando-e16-cuevas]] · sesion · fernando · antigravity · 2026-11-15 — Se curaron 57 entradas verificadas (55 sistemas únicos) de Pyroduct Digital Catalog v3.0 con fuentes abiertas, se implementó el paso E-16 (cueva_n_tubos y cueva_dist_km) y se regeneró el manifiesto E-13 con 78 columnas y cadena de auditoría íntegra.
+- _(4 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

@@ -21,7 +21,10 @@ Each entry lists product and version, where it comes from and its license.
 | Surface water | JRC Global Surface Water v1.5 | global-surface-water.appspot.com | Copernicus open license |
 | Wetlands and lakes | GLWD v2 | Figshare | CC BY 4.0 |
 | Dunes and sand | GSDP30 and GSDS30 | Zenodo 10.5281/zenodo.13907012, 10.5281/zenodo.10441041 | CC BY 4.0 |
-| Lava tubes | Pyroduct Digital Catalog v3.0 | Zenodo 10.5281/zenodo.14535885 | CC BY 4.0 |
+| Lava tubes (catalog) | Pyroduct Digital Catalog v3.0 (indices & survey metadata, no WGS84 coordinates) | Zenodo 10.5281/zenodo.14535885 | CC BY 4.0 |
+| Lava tube coordinates (map entrances) | OpenStreetMap `natural=cave_entrance` nodes/ways | openstreetmap.org/copyright | ODbL 1.0 |
+| Lava tube coordinates (open gazetteer/fauna) | Wikidata P625 & Plazi (`10.15468/x49sxc`) | wikidata.org / Plazi | CC0 1.0 |
+| Lava tube coordinates (published caves) | García et al. 2021 (`10.3897/subtbiol.38.61733`); Martínez et al. 2026 (`10.15468/eugwe2`); Nicolosi et al. (`10.15468/f4xjdb`); Bell et al. 2022 DRUM (`10.13016/ovqx-j09w`) | Pensoft / GBIF / UMD DRUM | CC BY 4.0 |
 | Ground ice | Karjalainen et al. 2022 v1.1 | Zenodo 10.5281/zenodo.7009875 | CC BY 4.0 |
 | Sky-view factor | Li et al. 2024 | ESSD | CC BY 4.0 |
 | Soil fine fraction | SoilGrids 2.0 (clay, silt), 1 km | ISRIC | CC BY 4.0 |

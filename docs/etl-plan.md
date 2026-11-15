@@ -47,6 +47,7 @@ the input of the similarity engine; the website only loads light derived files (
 | E-10 | Surface water, dunes and sand at 30 m | Every tile done, zero tile errors |
 | E-11 | Lunar targets (9 Artemis regions) | Day > night temperature in almost all pixels |
 | E-12 | Mars targets (12 sites) | Hematite maximum falls in Meridiani (search between 60° S and 60° N) |
+| E-16 | Lava tubes: `cueva_n_tubos`, `cueva_dist_km` | Known caves (`29.1604,-13.4394`, `43.8949,-121.3695`, `41.7312,-121.5061`) verified; non-cave cells remain `NaN` |
 | E-13 | Manifest and independent verification | See section 6 |
 
 **Gates (local time, Tegucigalpa):**
@@ -72,6 +73,7 @@ the input of the similarity engine; the website only loads light derived files (
 | ASTER GED | Emissivity outside 0.5–1 is fill: set to `NaN`; derived indices inherit it. |
 | EMIT | `lat`/`lon` are the upper-left corner, not the center. |
 | GLiM | Class 15 (`nd`) is "no data": set to `NaN`. Class 11 (`wb`) is water. |
+| Pyroduct v3.0 (E-16) | Curated verified open entrances only (`ODbL 1.0`, `CC0 1.0`, `CC BY 4.0`); protected/uncertain tubes stay `null`, duplicate surveys merge via `grupo_sistema`, and non-cave cells remain `NaN` in `cueva_n_tubos`. |
 | Mars Climate Database | Time is universal time at longitude 0: convert to local time before taking day and night. Values are `local_only`. |
 | Ground ice (Karjalainen) | Not used until its unit is read from the source paper. |
 | Sky-view factor (Li et al. 2024) | It is the fraction of visible sky, not illumination. Context for the site sheet only; it does not score similarity. |
