@@ -37,7 +37,7 @@ through `?embed=1`.
 - [x] C3 — Engine and adapter: `deterministicRules.ts` (green/yellow/red + `testSuitabilityScore`),
   `fallbackTemplates.ts`, `etlToCopilotMapper.ts` (N1, N2, N3, N5 from the published fields; N4, N6, N7 and
   `surfaceTempK` as missing). Test-first.
-- [ ] C4 — Buses: `copilotEventBus.ts` (`nasa:visor-focus-sites`, `nasa:visor-select-cell`, `nasa:visor-tour-step`),
+- [x] C4 — Buses: `copilotEventBus.ts` (`nasa:visor-focus-sites`, `nasa:visor-select-cell`, `nasa:visor-tour-step`),
   `simulatorTransport.ts` (iframe `?embed=1` + `postMessage`, lazy mount, `PAUSE`/`RESUME` on hide, alert
   subscription, clean destroy). Test-first for the pure parts.
 - [ ] C5 — UI: `RecommendationCards.ts`, `ReadinessMatrix.ts`, `ActionChips.ts`, `CopilotPanel.ts`, minimal CesiumJS
@@ -67,6 +67,10 @@ through `?embed=1`.
   Commit `22b8149`.
 - 2026-11-15: C2 RED: three search test files failed with "Cannot find module"; GREEN: 38/38, then the T1 sample
   test (39/39). T1 offline on the sample: parse 0.53 ms, parse + rank 2.7 ms (warm cache); top 5 all Mars, lat <= 60.
+  Commit `796ec31`.
+- 2026-11-15: C4 RED: bus and transport test files failed with "Cannot find module"; GREEN: 49/49. The transport
+  takes DOM seams (`TransportEnv`) so lazy mount, PAUSE/RESUME, origin checks and listener cleanup run in Node.
+  No sandbox change needed: `mountSandbox` already reads `?origin=` and restricts its `message` listener to it.
 
 ## Next step
 
