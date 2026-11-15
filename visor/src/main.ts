@@ -3,6 +3,7 @@ import './style.css';
 import * as Cesium from 'cesium';
 import { CapaCandidatos } from './capas/candidatos';
 import { CapaCapas7 } from './capas/capas7';
+import { CapaOverlaysZona } from './capas/overlaysZona';
 import { CapaPines } from './capas/pines';
 import { CapaZonas } from './capas/zonas';
 import {
@@ -160,9 +161,10 @@ async function iniciar(): Promise<void> {
   const capa = new CapaCandidatos(viewer);
   const capaPines = new CapaPines(viewer);
   const capaZonas = new CapaZonas(viewer);
+  const overlaysZona = new CapaOverlaysZona(viewer);
   let panel: PanelLateral;
   let seleccionarCandidato: (rango: number, volar?: boolean) => void = () => {};
-  const panelZona = new PanelZona(ui, BASE_DATOS, capaZonas, (rango) => {
+  const panelZona = new PanelZona(ui, BASE_DATOS, capaZonas, overlaysZona, (rango) => {
     seleccionarCandidato(rango, true);
   });
   new BarraNavegacion(ui, viewer, (coords, forma) => {
