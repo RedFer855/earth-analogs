@@ -2,6 +2,7 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import './style.css';
 import * as Cesium from 'cesium';
 import { CapaCandidatos } from './capas/candidatos';
+import { CapaAnalogos } from './capas/analogos';
 import { CapaCapas7 } from './capas/capas7';
 import { CapaOverlaysZona } from './capas/overlaysZona';
 import { CapaPines } from './capas/pines';
@@ -11,8 +12,8 @@ import {
   evaluarCondiciones,
   obtenerColumnaCapas7,
 } from './datos/capas7';
+import { cargarAnalogos, type AnalogoTierra } from './datos/analogos';
 import {
-  cargarCorrelacion,
   cargarEstabilidad,
   cargarIndice,
   cargarPuntos,
@@ -27,8 +28,7 @@ import { cambiarMapaBase, crearGlobo, type TipoMapaBase } from './globo';
 import { GloboObjetivo } from './globo-objetivo';
 import { BarraNavegacion } from './ui/barra';
 import { PanelBusqueda } from './ui/busqueda';
-import { FichaCandidato } from './ui/ficha';
-import { PanelLateral } from './ui/panel';
+import { PanelAnalogos } from './panel/panelAnalogos';
 import { PanelZona } from './ui/panelZona';
 import { Asistente } from './ui/asistente';
 
@@ -93,6 +93,7 @@ async function iniciar(): Promise<void> {
 
   void cargarEstabilidad(BASE_DATOS).then((est) => {
     estabilidad = est;
+    if (est && resultadoActual) panel.establecerResultado(resultadoActual, est);
   });
 
   const barra = document.createElement('div');
@@ -161,9 +162,10 @@ async function iniciar(): Promise<void> {
 
   const capa = new CapaCandidatos(viewer);
   const capaPines = new CapaPines(viewer);
+  const capaAnalogos = new CapaAnalogos(viewer);
   const capaZonas = new CapaZonas(viewer);
   const overlaysZona = new CapaOverlaysZona(viewer);
-  let panel: PanelLateral;
+  let panel: PanelAnalogos;
   let seleccionarCandidato: (rango: number, volar?: boolean) => void = () => {};
   const panelZona = new PanelZona(ui, BASE_DATOS, capaZonas, overlaysZona, (rango) => {
     seleccionarCandidato(rango, true);
@@ -172,53 +174,80 @@ async function iniciar(): Promise<void> {
     panelZona.mostrarAnalisis(coords, forma);
   });
 
-  const ficha = new FichaCandidato(
-    ui,
-    (candidato) => {
-      capa.resaltar(candidato.rango);
-      volarA(viewer, candidato.centro.lat, candidato.centro.lon);
-    },
-    () => {
-      actualizarUrl(sitioActualId, null);
-      panel.marcarCandidato(null);
-    },
-    (lat, lon) => volarA(viewer, lat, lon),
-  );
+  let asistente: Asistente;
+  let resultadoEsNuevo = false;
+  const seleccionarAnalogo = (a: AnalogoTierra): void => {
+    panel.seleccionarAnalogo(a);
+    asistente.establecerAnalogo(indice, resultadoActual, a);
+    volarA(viewer, a.lat, a.lon, Math.max(400_000, a.radio_km * 6_000));
+  };
+  const mostrarResultadoNuevo = (res: ResultadoJson): void => {
+    resultadoEsNuevo = true;
+    resultadoActual = res;
+    capa.mostrar(res.candidatos);
+    panelZona.configurarCandidatos(res.candidatos);
+    panel.establecerResultado(res, estabilidad, true);
+    asistente.establecerContexto(indice, res, null);
+    const mejor = res.candidatos[0];
+    if (mejor) volarA(viewer, mejor.centro.lat, mejor.centro.lon);
+  };
 
-  const asistente = new Asistente(ui, {
-    bboxVista: () => {
-      const r = viewer.camera.computeViewRectangle();
-      if (!r) return null;
-      const g = Cesium.Math.toDegrees;
-      const caja: [number, number, number, number] = [g(r.south), g(r.west), g(r.north), g(r.east)];
-      return caja[2] - caja[0] > 170 ? null : caja;
+  panel = new PanelAnalogos(ui, indice, {
+    alElegirSitio: (sitio) => {
+      void seleccionarSitio(sitio, null);
     },
-    alRecalcular: (res) => {
-      resultadoActual = res;
-      ficha.ocultar();
-      capa.mostrar(res.candidatos);
-      panel.mostrarCandidatos(res.candidatos);
-      panelZona.configurarCandidatos(res.candidatos);
-      asistente.establecerContexto(indice, res, null);
-      const mejor = res.candidatos[0];
-      if (mejor) volarA(viewer, mejor.centro.lat, mejor.centro.lon);
+    alElegirCandidato: (rango) => seleccionarCandidato(rango, true),
+    alElegirAnalogo: seleccionarAnalogo,
+    alIr: (lat, lon) => volarA(viewer, lat, lon, 900_000),
+    alCerrarFicha: () => {
+      actualizarUrl(sitioActualId, null);
+      asistente.establecerContexto(indice, resultadoActual, null);
+    },
+    alColorear: (fn) => capa.colorear(fn),
+    alVerGrupo: (g, visible) => {
+      if (g === 'hallado') capaAnalogos.visible(visible);
+      else if ((g === 'nuevo') === resultadoEsNuevo) capa.visible(visible);
+    },
+    alCambiarPines: (visibles) => capaPines.definirVisibles(visibles),
+    alPreguntar: (q) => {
+      const ctxAnalogo = panel.contextoAnalogo();
+      if (ctxAnalogo) {
+        asistente.establecerAnalogo(indice, resultadoActual, ctxAnalogo.analogo, ctxAnalogo.lecturas);
+      }
+      void asistente.preguntar(q);
     },
   });
 
+  asistente = new Asistente(
+    panel.contenedorChat(),
+    {
+      bboxVista: () => {
+        const r = viewer.camera.computeViewRectangle();
+        if (!r) return null;
+        const g = Cesium.Math.toDegrees;
+        const caja: [number, number, number, number] = [g(r.south), g(r.west), g(r.north), g(r.east)];
+        return caja[2] - caja[0] > 170 ? null : caja;
+      },
+      alRecalcular: mostrarResultadoNuevo,
+    },
+    true,
+  );
+
   capaPines.definirAlElegir((punto) => {
-    panel.marcarCandidato(null);
-    ficha.mostrarPin(punto);
+    panel.mostrarPin(punto);
+    asistente.establecerContexto(indice, resultadoActual, null);
     const [lon, lat] = punto.geometry.coordinates;
     volarA(viewer, lat, lon);
   });
+
+  capaAnalogos.definirAlElegir(seleccionarAnalogo);
 
   seleccionarCandidato = (rango: number, volar = true): void => {
     if (!resultadoActual) return;
     const candidato: Celda | undefined = resultadoActual.candidatos.find((c) => c.rango === rango);
     if (!candidato) return;
     capa.resaltar(rango);
-    panel.marcarCandidato(rango);
-    ficha.mostrar(candidato, resultadoActual, indice, estabilidad);
+    panel.seleccionarCandidato(rango);
     asistente.establecerContexto(indice, resultadoActual, candidato);
     actualizarUrl(sitioActualId, rango);
     if (volar) {
@@ -233,14 +262,14 @@ async function iniciar(): Promise<void> {
     candidatoInicial: number | null = null,
   ): Promise<void> => {
     const miSolicitud = ++solicitudId;
+    resultadoEsNuevo = false;
     sitioActual = sitio;
     sitioActualId = sitio.id;
     btnObj.disabled = false;
     actualizarGloboObj();
     resultadoActual = null;
     capa.limpiar();
-    ficha.ocultar();
-    panel.establecerSitio(sitio.id, sitio.cuerpo);
+    panel.establecerSitio(sitio.id);
     actualizarUrl(sitio.id, candidatoInicial);
 
     const archivo =
@@ -258,7 +287,7 @@ async function iniciar(): Promise<void> {
 
       resultadoActual = res;
       capa.mostrar(res.candidatos);
-      panel.mostrarCandidatos(res.candidatos);
+      panel.establecerResultado(res, estabilidad);
       panelZona.configurarCandidatos(res.candidatos);
       asistente.establecerContexto(indice, res, null);
 
@@ -282,14 +311,6 @@ async function iniciar(): Promise<void> {
     }
   };
 
-  panel = new PanelLateral(ui, indice, {
-    alElegirSitio: (sitio) => {
-      void seleccionarSitio(sitio, null);
-    },
-    alElegirCandidato: (rango) => seleccionarCandidato(rango, true),
-    alCambiarPines: (visibles) => capaPines.definirVisibles(visibles),
-  });
-
   void cargarPuntos(BASE_DATOS).then((geojson) => {
     if (!geojson) return;
     const conteos = capaPines.cargar(geojson);
@@ -297,14 +318,22 @@ async function iniciar(): Promise<void> {
     panelZona.configurarPuntos(geojson);
   });
 
-  void cargarCorrelacion(BASE_DATOS).then((corr) => {
-    if (corr) panel.configurarCorrelacion(corr);
+  void cargarAnalogos(BASE_DATOS).then((cat) => {
+    if (!cat) return;
+    capaAnalogos.cargar(cat.sitios);
+    panel.configurarAnalogos(cat);
   });
+
+  // Top multivariable: lugares que salen entre los candidatos de varios objetivos a la vez
+  void Promise.all(
+    indice.resultados.slice(0, 24).map((r) => cargarResultado(BASE_DATOS, r.archivo).catch(() => null)),
+  ).then((todos) => panel.configurarTop(todos.filter((x): x is ResultadoJson => x !== null)));
 
   const capaCapas7 = new CapaCapas7(viewer);
   void cargarCapas7(`${BASE_DATOS}capas7/`).then((datos7) => {
     if (!datos7) return;
     panelZona.configurarDatos7(datos7);
+    panel.configurarDatos7(datos7, `${BASE_DATOS}capas7/`);
     const divBusqueda = document.createElement('div');
     const panelBusqueda = new PanelBusqueda(divBusqueda, datos7, {
       alAplicarBusqueda: async (condiciones, soloTodas) => {

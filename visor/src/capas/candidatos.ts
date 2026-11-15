@@ -16,6 +16,9 @@ export class CapaCandidatos {
   private primitivaBordes: Cesium.Primitive | null = null;
   private celdasPorRango = new Map<number, Celda>();
   private rangoResaltado: number | null = null;
+  private mostrarActivos = true;
+  /** Color de cada celda: por nota (por omisión) o el que fije el panel (p. ej. por solidez). */
+  private colorDe: (c: Celda) => Cesium.Color = (c) => colorInstancia(c.nota);
   private manejador: Cesium.ScreenSpaceEventHandler;
 
   constructor(viewer: Cesium.Viewer, alElegir?: (rango: number) => void) {
@@ -23,6 +26,7 @@ export class CapaCandidatos {
     this.alElegir = alElegir;
     this.manejador = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     this.manejador.setInputAction((mov: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+      if (!this.mostrarActivos) return;
       const picked = this.viewer.scene.pick(mov.position);
       if (!picked || picked.id === undefined || picked.id === null) return;
       let rango: number | null = null;
@@ -65,7 +69,7 @@ export class CapaCandidatos {
             vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
           }),
           attributes: {
-            color: Cesium.ColorGeometryInstanceAttribute.fromColor(colorInstancia(c.nota)),
+            color: Cesium.ColorGeometryInstanceAttribute.fromColor(this.colorDe(c)),
           },
         }),
       );
@@ -103,8 +107,34 @@ export class CapaCandidatos {
       asynchronous: false,
     });
 
+    this.primitivaRelleno.show = this.mostrarActivos;
+    this.primitivaBordes.show = this.mostrarActivos;
     this.viewer.scene.primitives.add(this.primitivaRelleno);
     this.viewer.scene.primitives.add(this.primitivaBordes);
+    this.viewer.scene.requestRender();
+  }
+
+  visible(si: boolean): void {
+    this.mostrarActivos = si;
+    if (this.primitivaRelleno) this.primitivaRelleno.show = si;
+    if (this.primitivaBordes) this.primitivaBordes.show = si;
+    this.viewer.scene.requestRender();
+  }
+
+  /** Cambia el color de todas las celdas sin volver a crear la geometría. null vuelve al color por nota. */
+  colorear(fn: ((c: Celda) => [number, number, number]) | null): void {
+    this.colorDe = fn
+      ? (c) => {
+          const [r, g, b] = fn(c);
+          return Cesium.Color.fromBytes(r, g, b, ALPHA_RELLENO);
+        }
+      : (c) => colorInstancia(c.nota);
+    if (!this.primitivaRelleno?.ready) return;
+    for (const [rango, c] of this.celdasPorRango) {
+      if (rango === this.rangoResaltado) continue;
+      const a = this.primitivaRelleno.getGeometryInstanceAttributes(rango);
+      if (a) a.color = Cesium.ColorGeometryInstanceAttribute.toValue(this.colorDe(c));
+    }
     this.viewer.scene.requestRender();
   }
 
@@ -127,7 +157,7 @@ export class CapaCandidatos {
       if (previa) {
         const attrsPrev = this.primitivaRelleno.getGeometryInstanceAttributes(this.rangoResaltado);
         if (attrsPrev) {
-          attrsPrev.color = Cesium.ColorGeometryInstanceAttribute.toValue(colorInstancia(previa.nota));
+          attrsPrev.color = Cesium.ColorGeometryInstanceAttribute.toValue(this.colorDe(previa));
         }
       }
     }

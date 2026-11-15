@@ -359,12 +359,30 @@ export interface EstabilidadJson {
   objetivos: Record<string, EstabilidadObjetivo>;
 }
 
-export async function cargarEstabilidad(base = 'datos/'): Promise<EstabilidadJson | null> {
-  const data = await pedirOpcional<EstabilidadJson>(unirRuta(base, 'estabilidad.json'));
-  if (!data || !data.objetivos || typeof data.objetivos !== 'object') {
-    return null;
+/**
+ * El motor escribe estabilidad.json como { escenarios: [{ objetivo, … }], robustez: { <sitio>: [celda, …] } }.
+ * Se normaliza a { objetivos: { <sitio>: { n_escenarios, celdas } } }; la forma ya normalizada también se acepta.
+ */
+export function normalizarEstabilidad(data: unknown): EstabilidadJson | null {
+  const d = data as {
+    objetivos?: Record<string, EstabilidadObjetivo>;
+    robustez?: Record<string, CeldaEstabilidad[]>;
+    escenarios?: { objetivo?: string }[];
+  } | null;
+  if (!d || typeof d !== 'object') return null;
+  if (d.objetivos && typeof d.objetivos === 'object') return { objetivos: d.objetivos };
+  if (!d.robustez || typeof d.robustez !== 'object' || !Array.isArray(d.escenarios)) return null;
+  const n = new Map<string, number>();
+  for (const e of d.escenarios) if (e.objetivo) n.set(e.objetivo, (n.get(e.objetivo) ?? 0) + 1);
+  const objetivos: Record<string, EstabilidadObjetivo> = {};
+  for (const [sitio, celdas] of Object.entries(d.robustez)) {
+    if (Array.isArray(celdas) && (n.get(sitio) ?? 0) > 0) objetivos[sitio] = { n_escenarios: n.get(sitio) ?? 0, celdas };
   }
-  return data;
+  return { objetivos };
+}
+
+export async function cargarEstabilidad(base = 'datos/'): Promise<EstabilidadJson | null> {
+  return normalizarEstabilidad(await pedirOpcional<unknown>(unirRuta(base, 'estabilidad.json')));
 }
 
 export function colorNota(n: number): [number, number, number] {

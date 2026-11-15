@@ -96,6 +96,14 @@ const extras = [];
 if (rutaPuntos) {
   extras.push({ ruta: rutaPuntos, rel: 'puntos.geojson' });
 }
+const rutaEstabilidad = join(dirSalida, 'estabilidad.json');
+if (existsSync(rutaEstabilidad)) {
+  extras.push({ ruta: rutaEstabilidad, rel: 'estabilidad.json' });
+}
+const rutaAnalogos = join(raizRepo, 'etl', 'sitios', 'analogos-tierra.json');
+if (existsSync(rutaAnalogos)) {
+  extras.push({ ruta: rutaAnalogos, rel: 'analogos-tierra.json' });
+}
 const rutaCorrelacion = join(raizRepo, 'docs', 'analisis', 'point-correlation.json');
 if (existsSync(rutaCorrelacion)) {
   extras.push({ ruta: rutaCorrelacion, rel: 'point-correlation.json' });

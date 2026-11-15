@@ -108,7 +108,15 @@ impl Sitios {
             return Ok(Self {
                 luna: leer_registros(&ruta.join("objetivos-luna.json"), "regiones")?,
                 marte: leer_registros(&ruta.join("objetivos-marte.json"), "sitios")?,
-                tierra: BTreeMap::new(),
+                // análogos documentados de la Tierra (I-03): opcionales, marcan `analogo_conocido`
+                tierra: {
+                    let r = ruta.join("analogos-tierra.json");
+                    if r.is_file() {
+                        leer_registros(&r, "sitios")?
+                    } else {
+                        BTreeMap::new()
+                    }
+                },
             });
         }
         let t = fs::read_to_string(ruta)
@@ -1182,6 +1190,35 @@ mod pruebas {
         let c_jz = centro_de(jz).context("centro JZ")?;
         ensure!((c_jz.lat - 18.38).abs() < 1e-9, "jz lat");
         ensure!((c_jz.lon - 77.58).abs() < 1e-9, "jz lon");
+        ensure!(
+            sitios.tierra.is_empty(),
+            "sin analogos-tierra.json no hay análogos"
+        );
+        let _ = fs::remove_dir_all(&dir);
+        Ok(())
+    }
+
+    #[test]
+    fn lee_el_catalogo_de_analogos_de_la_tierra_si_existe() -> Result<()> {
+        let dir = std::env::temp_dir().join(format!("motor-analogos-{}", std::process::id()));
+        fs::create_dir_all(&dir)?;
+        fs::write(dir.join("objetivos-luna.json"), r#"{"regiones":[]}"#)?;
+        fs::write(dir.join("objetivos-marte.json"), r#"{"sitios":[]}"#)?;
+        fs::write(
+            dir.join("analogos-tierra.json"),
+            r#"{"sitios":[{"codigo":"T-ATACAMA","nombre":"Atacama","lat":-24.09,"lon":-69.93}]}"#,
+        )?;
+        let sitios = Sitios::leer(&dir)?;
+        let a = sitios.tierra.get("T-ATACAMA").context("falta T-ATACAMA")?;
+        let c = centro_de(a).context("centro")?;
+        ensure!((c.lat - (-24.09)).abs() < 1e-9, "lat");
+        ensure!((c.lon - (-69.93)).abs() < 1e-9, "lon");
+        let cerca = analogo_conocido(&sitios, -24.0, -69.9, 50.0);
+        ensure!(cerca.as_deref() == Some("T-ATACAMA"), "{cerca:?}");
+        ensure!(
+            analogo_conocido(&sitios, 40.0, 10.0, 50.0).is_none(),
+            "lejos"
+        );
         let _ = fs::remove_dir_all(&dir);
         Ok(())
     }

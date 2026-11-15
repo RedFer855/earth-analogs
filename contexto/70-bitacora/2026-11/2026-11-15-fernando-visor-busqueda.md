@@ -14,7 +14,6 @@ scope:
   - visor/src/datos/capas7.ts
   - visor/src/capas/capas7.ts
   - visor/src/ui/busqueda.ts
-  - visor/src/ui/panel.ts
   - visor/src/main.ts
   - scripts/visor/publicar-datos.mjs
 symbols:

@@ -12,8 +12,6 @@ rama: feat/visor-pines
 scope:
   - visor/src/capas/pines.ts
   - visor/src/datos/contrato.ts
-  - visor/src/ui/ficha.ts
-  - visor/src/ui/panel.ts
   - visor/src/main.ts
   - scripts/visor/publicar-datos.mjs
 symbols:
