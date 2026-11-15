@@ -291,6 +291,34 @@ PASOS: tuple[Paso, ...] = (
         ),
         pesado=False,
     ),
+    Paso(
+        id="E-21",
+        script="e21_capas_web.py",
+        args=(),
+        salidas=(
+            "web/capas7/capas7.json",
+            "web/capas7/ipix.u32",
+            "web/capas7/n_hijas.u16",
+            *(f"web/capas7/{c}.f32" for c in (
+                "slope_mean_deg",
+                "slope_std_deg",
+                "rug_rms_mean_m",
+                "relieve_mean_m",
+                "aridez_ai",
+                "ndvi_max_clim",
+                "rango_diurno_k",
+                "roca_volcanica_frac",
+                "roca_evaporita_frac",
+                "cueva_dist_km",
+                "dist_crater_km",
+                "dist_playa_km",
+            )),
+        ),
+        depende_de=(
+            "E-13",  # toma n_celdas, unidades, fuentes y licencias del manifiesto
+        ),
+        pesado=False,
+    ),
 )
 
 
