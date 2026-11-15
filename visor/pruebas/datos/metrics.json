@@ -1,0 +1,201 @@
+{
+  "analogos_conocidos": [],
+  "contrato": {
+    "tabla": {
+      "commit": "7f4ec39897fe8c8e14667871eafd0cefedb02ff0",
+      "generado": "2026-11-15T02:55:27-0600",
+      "n_celdas": 58817178
+    },
+    "version": "1.0.0"
+  },
+  "cuerpos": {
+    "luna": {
+      "atmosfera": "Prácticamente vacío (exosfera)",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+      "gravedad_ms2": 1.62,
+      "nombre": "Luna",
+      "presion_superficie_pa": 3e-10,
+      "radiacion": "Sin campo magnético global ni atmósfera: la superficie recibe radiación solar y cósmica directa",
+      "radio_m": 1737400.0
+    },
+    "marte": {
+      "atmosfera": "Muy delgada, casi toda CO₂",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+      "gravedad_ms2": 3.71,
+      "nombre": "Marte",
+      "presion_superficie_pa": 636.0,
+      "radiacion": "Sin campo magnético global y con atmósfera delgada: mucha más radiación en superficie que en la Tierra",
+      "radio_m": 3389500.0
+    },
+    "tierra": {
+      "atmosfera": "Densa, con nitrógeno y oxígeno",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html",
+      "gravedad_ms2": 9.8,
+      "nombre": "Tierra",
+      "presion_superficie_pa": 101400.0,
+      "radiacion": "Campo magnético y atmósfera protegen la superficie",
+      "radio_m": 6371000.0
+    }
+  },
+  "es_ejemplo": false,
+  "fuentes": [
+    {
+      "columnas": [
+        "slope_mean_deg",
+        "slope_std_deg",
+        "rug_rms_mean_m",
+        "relieve_mean_m"
+      ],
+      "licencia": "Copernicus DEM license; JRC GSW: Copernicus open license",
+      "nombre": "Copernicus DEM GLO-90 release 2024_1 (DEM y WBM); JRC GSW v1.5 occurrence",
+      "url": "https://registry.opendata.aws/copernicus-dem/"
+    }
+  ],
+  "generado": "2026-11-15T16:50:47Z",
+  "healpix": {
+    "esquema": "nested",
+    "nivel": 12
+  },
+  "marcas": [
+    {
+      "id": "ndvi_bajo",
+      "nombre": "NDVI máximo de la climatología con dato y bajo el umbral",
+      "tipo": "filtro"
+    }
+  ],
+  "perfiles": [
+    {
+      "contra": [
+        "luna",
+        "marte"
+      ],
+      "descripcion": "Perfil terreno contra luna, marte",
+      "id": "terreno",
+      "nombre": "terreno",
+      "variables": [
+        "slope_mean_deg",
+        "slope_std_deg",
+        "rug_rms_mean_m",
+        "relieve_mean_m"
+      ]
+    }
+  ],
+  "resultados": [
+    {
+      "archivo": "resultados/terreno/CB.json",
+      "mejor": {
+        "centro": {
+          "lat": 66.64205,
+          "lon": -63.93575
+        },
+        "nota": 0.991,
+        "region": null
+      },
+      "n_candidatos": 200,
+      "perfil": "terreno",
+      "sitio": "CB"
+    },
+    {
+      "archivo": "resultados/terreno/JZ.json",
+      "mejor": {
+        "centro": {
+          "lat": 31.12002,
+          "lon": 2.46094
+        },
+        "nota": 1.0,
+        "region": null
+      },
+      "n_candidatos": 200,
+      "perfil": "terreno",
+      "sitio": "JZ"
+    }
+  ],
+  "sitios_objetivo": [
+    {
+      "centro": {
+        "lat": -83.637,
+        "lon": -68.749
+      },
+      "cuerpo": "luna",
+      "id": "CB",
+      "nombre": "Peak Near Cabeus B"
+    },
+    {
+      "centro": {
+        "lat": 18.38,
+        "lon": 77.58
+      },
+      "cuerpo": "marte",
+      "id": "JZ",
+      "nombre": "Jezero"
+    }
+  ],
+  "variables": [
+    {
+      "aplica_a": [
+        "marte"
+      ],
+      "codigo": "N13",
+      "descripcion": "Diferencia entre el mes más cálido y el mes más frío de la temperatura media diaria",
+      "id": "amp_anual_k",
+      "nombre": "Amplitud térmica anual",
+      "unidad": "K"
+    },
+    {
+      "aplica_a": [
+        "luna",
+        "marte"
+      ],
+      "codigo": "N5",
+      "descripcion": "MODIS Aqua MYD11C3 v061, diferencia entre LST de día y de noche",
+      "id": "rango_diurno_k",
+      "nombre": "Rango térmico diario",
+      "unidad": "K"
+    },
+    {
+      "aplica_a": [
+        "luna",
+        "marte"
+      ],
+      "codigo": "N3",
+      "descripcion": "Desnivel en ventana de 5 × 5 píxeles de 200 m promediado por celda",
+      "id": "relieve_mean_m",
+      "nombre": "Relieve relativo",
+      "unidad": "m"
+    },
+    {
+      "aplica_a": [
+        "luna",
+        "marte"
+      ],
+      "codigo": "N2",
+      "descripcion": "Rugosidad RMS en ventana de 5 × 5 píxeles de 200 m promediada por celda",
+      "id": "rug_rms_mean_m",
+      "nombre": "Rugosidad RMS",
+      "unidad": "m"
+    },
+    {
+      "aplica_a": [
+        "luna",
+        "marte"
+      ],
+      "codigo": "N1",
+      "descripcion": "Pendiente de Horn a 200 m promediada por celda",
+      "id": "slope_mean_deg",
+      "nombre": "Pendiente media",
+      "unidad": "grados"
+    },
+    {
+      "aplica_a": [
+        "luna",
+        "marte"
+      ],
+      "codigo": "N12",
+      "descripcion": "Desviación estándar de la pendiente dentro de la celda",
+      "id": "slope_std_deg",
+      "nombre": "Variación de la pendiente",
+      "unidad": "grados"
+    }
+  ],
+  "version_contrato": "1.0.0"
+}
