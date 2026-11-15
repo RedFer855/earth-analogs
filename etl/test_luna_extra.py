@@ -6,7 +6,7 @@ import unittest
 
 import numpy as np
 
-from e05_ndvi import VI_QUALITY_NODATA, es_tierra_vi_quality, filtrar_ndvi
+from e05_ndvi import VI_QUALITY_NODATA, CurvaClimatologica, anio_y_dia, es_tierra_vi_quality, filtrar_ndvi
 from e11_luna import (
     ESCALA_AVGVISIB,
     ESCALA_LPSR,
@@ -97,23 +97,50 @@ class PruebasMazaricoYMiniRF(unittest.TestCase):
 
 
 class PruebasMod13c1ViQuality(unittest.TestCase):
-    def test_bits_11_a_13_solo_acepta_codigo_1_tierra(self) -> None:
+    def test_bits_11_a_13_aceptan_tierra_y_costa(self) -> None:
         ruido_otros_bits = 0xC555  # bits 11-13 en 0, resto con 1s mezclados
         codigos = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=np.uint16)
         viq = np.append((codigos << 11) | ruido_otros_bits, np.uint16(VI_QUALITY_NODATA))
 
         tierra = es_tierra_vi_quality(viq)
-        self.assertEqual(tierra.tolist(), [False, True, False, False, False, False, False, False, False])
+        self.assertEqual(tierra.tolist(), [False, True, True, False, False, False, False, False, False])
 
     def test_filtrar_ndvi_con_mascara_y_fiabilidad(self) -> None:
-        # 5 píxeles: tierra buena, costa (2), océano profundo (7), tierra con nube (fiab=3), tierra relleno (-3000)
-        ndvi = np.array([5000, 5000, 5000, 5000, -3000], dtype=np.int16)
-        fiab = np.array([0, 1, 0, 3, 0], dtype=np.int8)
-        viq = np.array([1 << 11, 2 << 11, 7 << 11, 1 << 11, 1 << 11], dtype=np.uint16)
+        # 6 píxeles: tierra buena, costa (2), agua interior somera (3), océano profundo (7), tierra con nube (fiab=3),
+        # tierra relleno (-3000)
+        ndvi = np.array([5000, 5000, 5000, 5000, 5000, -3000], dtype=np.int16)
+        fiab = np.array([0, 1, 0, 0, 3, 0], dtype=np.int8)
+        viq = np.array([1 << 11, 2 << 11, 3 << 11, 7 << 11, 1 << 11, 1 << 11], dtype=np.uint16)
 
         out = filtrar_ndvi(ndvi, fiab, viq)
         self.assertAlmostEqual(float(out[0]), 0.5, places=5)
-        self.assertTrue(np.isnan(out[1:]).all())
+        self.assertAlmostEqual(float(out[1]), 0.5, places=5)
+        self.assertTrue(np.isnan(out[2:]).all())
+
+
+class PruebasCurvaClimatologica(unittest.TestCase):
+    def test_maximo_de_la_media_por_dia_del_anio(self) -> None:
+        # 3 píxeles, 2 años, 4 días del año. Píxel 0: la media por día sube y baja; píxel 1: solo 2 días con dato;
+        # píxel 2: un año sin dato en el pico (la media de ese día usa solo el año con dato).
+        nan = np.nan
+        datos = {  # día -> (año 1, año 2)
+            1: ([0.1, 0.2, 0.1], [0.3, nan, 0.1]),
+            17: ([0.5, 0.4, 0.2], [0.7, nan, 0.4]),
+            33: ([0.4, nan, 0.9], [0.2, nan, nan]),
+            49: ([0.1, nan, 0.3], [0.1, nan, 0.3]),
+        }
+        curva = CurvaClimatologica()
+        for dia, anios in datos.items():
+            for v in anios:
+                curva.agregar(dia, np.array(v, dtype=np.float32))
+        r = curva.resultado()
+        self.assertAlmostEqual(float(r[0]), 0.6, places=5)  # media del día 17
+        self.assertTrue(np.isnan(r[1]))  # 2 días con dato < 3
+        self.assertAlmostEqual(float(r[2]), 0.9, places=5)  # día 33, solo un año con dato
+        self.assertEqual(curva.n_periodos.tolist(), [4, 2, 4])
+
+    def test_anio_y_dia_del_nombre(self) -> None:
+        self.assertEqual(anio_y_dia("MOD13C1.A2018353.061.2021313104545.hdf"), (2018, 353))
 
 
 if __name__ == "__main__":
