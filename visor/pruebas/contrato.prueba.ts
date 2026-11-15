@@ -18,6 +18,12 @@ import {
 import { evaluarCondiciones } from '../src/datos/capas7';
 import { formatearAlturaM, parsearCoordenadas } from '../src/datos/coordenadas';
 import {
+  crearZonaGuardada,
+  exportarZonasAGeoJson,
+  filtrarCandidatosEnZona,
+  resumirColumnasEnZona,
+} from '../src/datos/cruceZona';
+import {
   areaEsfericaM2,
   construirCirculoPorPerimetro,
   construirCuadroPorPerimetro,
@@ -245,3 +251,54 @@ const cruzado = [
 assert.equal(hayAutoInterseccion(cruzado), true);
 const destorcido = destorcerPoligono(cruzado);
 assert.equal(hayAutoInterseccion(destorcido), false);
+
+// 10. Cruce de zona con capas7, candidatos y exportación GeoJSON
+const zonaDemo = crearZonaGuardada(
+  [
+    { lat: 10, lon: -10 },
+    { lat: 10, lon: 10 },
+    { lat: -10, lon: 10 },
+    { lat: -10, lon: -10 },
+  ],
+  'cuadro',
+  'Zona Prueba',
+);
+assert.ok(zonaDemo.areaKm2 > 1_000_000);
+const colsZona = new Map<string, Float32Array>([
+  ['slope_mean_deg', new Float32Array([2, 6, Number.NaN, 10])],
+]);
+const metaZona = {
+  slope_mean_deg: {
+    archivo: 'slope.f32',
+    unidad: '°',
+    fuente: 'test',
+    url: 'https://example.com',
+    licencia: 'CC0',
+    metodo: 'mean',
+    cobertura_pct: 100,
+    p1: 0,
+    p50: 5,
+    p99: 15,
+  },
+};
+const resCols = resumirColumnasEnZona([0, 1, 2], metaZona, colsZona);
+assert.equal(resCols.length, 1);
+assert.equal(resCols[0].min, 2);
+assert.equal(resCols[0].media, 4);
+assert.equal(resCols[0].max, 6);
+assert.equal(resCols[0].nValidos, 2);
+
+const candsDentro = filtrarCandidatosEnZona(zonaDemo.coords, [
+  { ...resultadoFixture.candidatos[0], centro: { lat: 0, lon: 0 } },
+  { ...resultadoFixture.candidatos[0], rango: 99, centro: { lat: 60, lon: 60 } },
+]);
+assert.equal(candsDentro.length, 1);
+
+const gj = JSON.parse(exportarZonasAGeoJson([zonaDemo])) as {
+  type: string;
+  features: { geometry: { coordinates: number[][][] }; properties: { nombre: string } }[];
+};
+assert.equal(gj.type, 'FeatureCollection');
+assert.equal(gj.features.length, 1);
+assert.equal(gj.features[0].properties.nombre, 'Zona Prueba');
+assert.equal(gj.features[0].geometry.coordinates[0].length, 5);
