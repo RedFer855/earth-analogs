@@ -5,6 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true
 
+[[bin]]
+name = "pipeline"
+path = "src/main.rs"
+
 [dependencies]
 nucleo = { path = "../nucleo" }
 anyhow = "1"

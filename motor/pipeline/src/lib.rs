@@ -3,7 +3,9 @@
 
 pub mod area;
 pub mod barrido;
+pub mod ejecutar;
 pub mod entrada;
 pub mod geo;
 pub mod indice;
+pub mod salida;
 pub mod tabla;
