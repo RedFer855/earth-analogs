@@ -365,13 +365,13 @@ class PruebasCola(unittest.TestCase):
     def test_tabla_real_y_comando_auditoria(self) -> None:
         por_id = {p.id: p for p in cola.PASOS}
         pesados = {p.id for p in cola.PASOS if p.pesado}
-        self.assertEqual(pesados, {"E-03", "E-03-extras", "E-04", "E-05", "E-07", "E-15"})
+        self.assertEqual(pesados, {"E-03", "E-04", "E-05", "E-07", "E-15"})
         self.assertIn("E-15", por_id)
         self.assertEqual(por_id["E-15"].script, "e15_capas_30m.py")
         self.assertEqual(set(por_id["E-13"].depende_de), set(por_id) - {"E-13"})
 
         cmd = cola.construir_comando_audit(
-            por_id["E-03-extras"],
+            por_id["E-03"],
             self.run_dir,
             integrante="fernando",
             agente="antigravity",

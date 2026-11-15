@@ -63,47 +63,33 @@ PASOS: tuple[Paso, ...] = (
     ),
     Paso(
         id="E-03",
-        script="e03_terreno.py",
+        script="e03_extras.py",
         args=(),
         salidas=(
             "terreno/gsw_occurrence.vrt",
             "terreno/e03.json",
-            "columns/slope_mean_deg.f32",
-            "columns/slope_mean_deg.json",
-            "columns/slope_std_deg.f32",
-            "columns/slope_std_deg.json",
-            "columns/terreno_n_px.f32",
-            "columns/terreno_n_px.json",
+            *_cols(
+                "slope_mean_deg",
+                "slope_std_deg",
+                "terreno_n_px",
+                "slope_p90_deg",
+                "slope_p99_deg",
+                "slope_frac_gt15",
+                "elev_mean_m",
+                "elev_std_m",
+                "relieve_m",
+                "rug_rms_mean_m",
+                "rug_rms_p90_m",
+                "relieve_mean_m",
+                "relieve_p90_m",
+                "frac_valida",
+                resumen="columns/e03_extras.json",
+            ),
         ),
         depende_de=(
             "E-01",  # lee la malla HEALPix con cargar_malla(run)
         ),
         pesado=True,
-    ),
-    Paso(
-        id="E-03-extras",
-        script="e03_extras.py",
-        args=(),
-        salidas=_cols(
-            "slope_p90_deg",
-            "slope_p99_deg",
-            "slope_frac_gt15",
-            "elev_mean_m",
-            "elev_std_m",
-            "relieve_m",
-            "rug_rms_mean_m",
-            "rug_rms_p90_m",
-            "relieve_mean_m",
-            "relieve_p90_m",
-            "frac_valida",
-            resumen="columns/e03_extras.json",
-        ),
-        depende_de=(
-            "E-01",  # lee la malla HEALPix con cargar_malla(run)
-            "E-03",  # usa terreno/gsw_occurrence.vrt y compara contra columns/slope_mean_deg.f32
-        ),
-        pesado=True,
-        paso_audit="E-03",
     ),
     Paso(
         id="E-04",
@@ -281,8 +267,7 @@ PASOS: tuple[Paso, ...] = (
         depende_de=(
             "E-01",  # lee grid/grid.json y la malla con cargar_malla(run)
             "E-02",  # incluye fuentes/e02.json en el manifiesto
-            "E-03",  # verifica las columnas de pendiente y relee slope_mean_deg
-            "E-03-extras",  # verifica las columnas extra de terreno en columns/
+            "E-03",  # verifica las columnas de terreno y relee slope_mean_deg
             "E-04",  # verifica las columnas de temperatura en columns/
             "E-05",  # verifica las columnas de NDVI y relee ndvi_max
             "E-06",  # verifica las columnas de aridez y relee aridez_ai
