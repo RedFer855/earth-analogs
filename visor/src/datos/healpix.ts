@@ -35,15 +35,52 @@ function xyfAUnidad(fx: number, fy: number, cara: number, nside: number): [numbe
     kshift = (jr - nside) & 1;
   }
 
+  // Esquina en el polo (anillo 0 o 4·nside): la longitud no está definida y la
+  // fórmula de phi divide entre nr = 0. Se devuelve NaN y ipixAVertices la resuelve.
+  if (nr <= 0) return [z > 0 ? 90 : -90, Number.NaN];
+
   let jp = (JPLL[cara] * nr + fx - fy + 1 + kshift) / 2;
   if (jp > 4 * nside) jp -= 4 * nside;
   if (jp < 1) jp += 4 * nside;
 
   const phi = ((jp - (kshift + 1) * 0.5) * (Math.PI / 2)) / nr;
   const lat = Math.asin(Math.max(-1, Math.min(1, z))) * RAD_A_DEG;
-  let lon = phi * RAD_A_DEG;
-  if (lon > 180) lon -= 360;
-  return [lat, lon];
+  return [lat, envolver180(phi * RAD_A_DEG)];
+}
+
+/** Lleva una longitud a (-180, 180] sin bucles (un bucle con Infinity no termina). */
+function envolver180(lon: number): number {
+  const l = (((lon + 180) % 360) + 360) % 360 - 180;
+  return l === -180 ? 180 : l;
+}
+
+/**
+ * Punto de la cara `cara` con coordenadas continuas (x, y) en [0, 1] a [lat, lon].
+ * Es `xyf2loc` de la biblioteca HEALPix (healpix_base.cc). En el polo (nr = 0) la
+ * longitud no está definida y se devuelve NaN.
+ */
+function xyfALocal(x: number, y: number, cara: number): [number, number] {
+  const jr = JRLL[cara] - x - y;
+  let nr: number;
+  let z: number;
+  if (jr < 1) {
+    nr = jr;
+    z = 1 - (nr * nr) / 3;
+  } else if (jr > 3) {
+    nr = 4 - jr;
+    z = (nr * nr) / 3 - 1;
+  } else {
+    nr = 1;
+    z = ((2 - jr) * 2) / 3;
+  }
+  const lat = Math.asin(Math.max(-1, Math.min(1, z))) * RAD_A_DEG;
+  if (nr < 1e-15) return [z > 0 ? 90 : -90, Number.NaN];
+
+  let tmp = JPLL[cara] * nr + x - y;
+  if (tmp < 0) tmp += 8;
+  if (tmp >= 8) tmp -= 8;
+  const phi = (0.25 * Math.PI * tmp) / nr;
+  return [lat, envolver180(phi * RAD_A_DEG)];
 }
 
 export function ipixACentro(ipix: number, nside: number): [number, number] {
@@ -76,18 +113,27 @@ export function ipixAVertices(
     [0, 1],
   ];
 
-  // En HEALPix nested, (ix, iy) está en [0, nside-1]; las esquinas son (ix ± 0.5, iy ± 0.5)
-  // relativas al centro (ix, iy) en la proyección xyf (desplazado por -0.5 en cada eje respecto al borde)
+  // Las esquinas de la celda son (ix + dx, iy + dy) / nside en coordenadas de la cara.
   const esquinas = offsets.map(([dx, dy]) =>
-    xyfAUnidad(ix + dx - 0.5, iy + dy - 0.5, cara, nside),
+    xyfALocal((ix + dx) / nside, (iy + dy) / nside, cara),
   ) as [[number, number], [number, number], [number, number], [number, number]];
 
-  const lonRef = esquinas[0][1];
-  for (let i = 1; i < 4; i += 1) {
-    let d = esquinas[i][1] - lonRef;
-    while (d > 180) d -= 360;
-    while (d < -180) d += 360;
+  // Desenrolla respecto a la primera esquina con longitud definida.
+  const ref = esquinas.find((e) => Number.isFinite(e[1]));
+  const lonRef = ref ? ref[1] : 0;
+  const definidas: number[] = [];
+  for (let i = 0; i < 4; i += 1) {
+    if (!Number.isFinite(esquinas[i][1])) continue;
+    const d = envolver180(esquinas[i][1] - lonRef);
     esquinas[i] = [esquinas[i][0], lonRef + d];
+    definidas.push(lonRef + d);
+  }
+
+  // La esquina del polo toma el promedio de las otras: así el polígono queda
+  // como un triángulo con vértice en el polo, sin coordenadas NaN.
+  const lonPolo = definidas.length > 0 ? definidas.reduce((a, b) => a + b, 0) / definidas.length : 0;
+  for (let i = 0; i < 4; i += 1) {
+    if (!Number.isFinite(esquinas[i][1])) esquinas[i] = [esquinas[i][0], lonPolo];
   }
   return esquinas;
 }

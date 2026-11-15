@@ -3,6 +3,8 @@ import type { ColumnaCapas7 } from '../datos/capas7';
 import { ipixAVertices } from '../datos/healpix';
 
 const MAX_INSTANCIAS = 12_000;
+/** Latitud máxima de un vértice de polígono: ~5 km antes del polo. */
+const LAT_MAX_POLIGONO = 89.95;
 
 function colorCalor(fraccion: number, todas: boolean): Cesium.Color {
   if (todas) {
@@ -45,19 +47,33 @@ export class CapaCapas7 {
     this.viewer = viewer;
   }
 
-  private jerarquia(ipix: number, nside: number): Cesium.PolygonHierarchy {
+  /** Instancia de la celda, o null si alguna esquina no es un número: con NaN Cesium detiene el render. */
+  private instancia(ipix: number, nside: number, color: Cesium.Color): Cesium.GeometryInstance | null {
+    const h = this.jerarquia(ipix, nside);
+    if (!h) return null;
+    return new Cesium.GeometryInstance({
+      geometry: new Cesium.PolygonGeometry({ polygonHierarchy: h }),
+      attributes: { color: Cesium.ColorGeometryInstanceAttribute.fromColor(color) },
+    });
+  }
+
+  private jerarquia(ipix: number, nside: number): Cesium.PolygonHierarchy | null {
     const cached = this.cachePoligonos.get(ipix);
     if (cached) return cached;
     const v = ipixAVertices(ipix, nside);
+    if (v.some(([lat, lon]) => !Number.isFinite(lat) || !Number.isFinite(lon))) return null;
+    // Un vértice exactamente en el polo rompe la proyección estereográfica de
+    // PolygonGeometry ("normalized result is not a number") y detiene el render.
+    const lat = (x: number): number => Math.max(-LAT_MAX_POLIGONO, Math.min(LAT_MAX_POLIGONO, x));
     const posiciones = Cesium.Cartesian3.fromDegreesArray([
       v[0][1],
-      v[0][0],
+      lat(v[0][0]),
       v[1][1],
-      v[1][0],
+      lat(v[1][0]),
       v[2][1],
-      v[2][0],
+      lat(v[2][0]),
       v[3][1],
-      v[3][0],
+      lat(v[3][0]),
     ]);
     const h = new Cesium.PolygonHierarchy(posiciones);
     this.cachePoligonos.set(ipix, h);
@@ -91,16 +107,8 @@ export class CapaCapas7 {
       const idx = indices[k];
       const c = conteos[idx];
       const color = colorCalor(c / totalCondiciones, c === totalCondiciones);
-      instancias.push(
-        new Cesium.GeometryInstance({
-          geometry: new Cesium.PolygonGeometry({
-            polygonHierarchy: this.jerarquia(ipix[idx], nside),
-          }),
-          attributes: {
-            color: Cesium.ColorGeometryInstanceAttribute.fromColor(color),
-          },
-        }),
-      );
+      const inst = this.instancia(ipix[idx], nside, color);
+      if (inst) instancias.push(inst);
     }
 
     if (instancias.length > 0) {
@@ -135,16 +143,8 @@ export class CapaCapas7 {
     for (let k = 0; k < validos.length; k += paso) {
       const idx = validos[k];
       const color = colorCoropletico(valores[idx], colMeta.p1, colMeta.p99);
-      instancias.push(
-        new Cesium.GeometryInstance({
-          geometry: new Cesium.PolygonGeometry({
-            polygonHierarchy: this.jerarquia(ipix[idx], nside),
-          }),
-          attributes: {
-            color: Cesium.ColorGeometryInstanceAttribute.fromColor(color),
-          },
-        }),
-      );
+      const inst = this.instancia(ipix[idx], nside, color);
+      if (inst) instancias.push(inst);
     }
 
     if (instancias.length > 0) {

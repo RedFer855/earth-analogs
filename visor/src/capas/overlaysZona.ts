@@ -1,6 +1,7 @@
 import * as Cesium from 'cesium';
 import type { Coordenada } from '../datos/coordenadas';
 import { centroPoligono } from '../datos/cruceZona';
+import { desenrollarLongitudes, normalizarLon } from '../datos/geometria';
 
 export type TipoOverlayZona = 'ninguno' | 'gibs-aod' | 'gibs-lst' | 'macrostrat';
 
@@ -28,19 +29,44 @@ export interface ResultadoOverlayZona {
 
 const TIMEOUT_MS = 4000;
 
+/**
+ * Caja de la zona en grados. Si la zona cruza el antimeridiano, `west > east`
+ * (convención de `Cesium.Rectangle`). Si encierra un polo, cubre todas las
+ * longitudes y llega hasta ese polo.
+ */
 export function calcularBboxZona(coords: Coordenada[]): BboxZona | null {
   if (coords.length < 3) return null;
-  let west = 180;
-  let east = -180;
+  const anillo = desenrollarLongitudes(coords);
+  let minLon = Number.POSITIVE_INFINITY;
+  let maxLon = Number.NEGATIVE_INFINITY;
   let south = 90;
   let north = -90;
-  for (const c of coords) {
-    if (c.lon < west) west = c.lon;
-    if (c.lon > east) east = c.lon;
+  for (const c of anillo) {
+    if (c.lon < minLon) minLon = c.lon;
+    if (c.lon > maxLon) maxLon = c.lon;
     if (c.lat < south) south = c.lat;
     if (c.lat > north) north = c.lat;
   }
-  return { west, south, east, north };
+
+  // Al cerrar el anillo, un polígono que rodea un polo suma ±360° de longitud.
+  const primero = anillo[0].lon;
+  const ultimo = anillo[anillo.length - 1].lon;
+  let cierre = primero - ultimo;
+  while (cierre > 180) cierre -= 360;
+  while (cierre < -180) cierre += 360;
+  const giro = ultimo - primero + cierre;
+  if (Math.abs(giro) > 180) {
+    const poloNorte = south + north >= 0;
+    return {
+      west: -180,
+      south: poloNorte ? south : -90,
+      east: 180,
+      north: poloNorte ? 90 : north,
+    };
+  }
+
+  if (maxLon - minLon >= 360) return { west: -180, south, east: 180, north };
+  return { west: normalizarLon(minLon), south, east: normalizarLon(maxLon), north };
 }
 
 export function parsearUnidadesMacrostrat(payload: unknown): UnidadGeologica[] {

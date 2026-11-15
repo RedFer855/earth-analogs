@@ -39,6 +39,12 @@ ADR-010 dejó pendientes dos mejoras de la fórmula: calibrar S por grados de li
 perfiles con distinto número de variables) y transformar con logaritmo pendiente, rugosidad y relieve. Ninguna se
 aplicó sin medir antes cuánto cambia el orden de los candidatos.
 
+### P-017 — El CI no corre las pruebas del ETL
+
+`ci.yml` corre las pruebas de `audit/`, el motor y el visor, pero no las de `etl/test_*.py` (118 pruebas que pasan
+en local con el entorno pixi el 2026-11-15). Un cambio que rompa el ETL puede entrar a main con el check en verde.
+Falta un job que instale el entorno de `etl/pixi.toml` y corra `python -m unittest discover` en `etl/`.
+
 ## Relaciones
 
 - [[resuelta-2026]] — a donde pasan los ítems cerrados

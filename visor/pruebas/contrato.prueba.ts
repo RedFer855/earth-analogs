@@ -18,7 +18,9 @@ import {
 import { evaluarCondiciones } from '../src/datos/capas7';
 import { calcularBboxZona, parsearUnidadesMacrostrat } from '../src/capas/overlaysZona';
 import { formatearAlturaM, parsearCoordenadas } from '../src/datos/coordenadas';
+import { creditoEox } from '../src/globo';
 import {
+  centroPoligono,
   crearZonaGuardada,
   exportarZonasAGeoJson,
   filtrarCandidatosEnZona,
@@ -309,6 +311,33 @@ const bbox = calcularBboxZona(zonaDemo.coords);
 assert.deepEqual(bbox, { west: -10, south: -10, east: 10, north: 10 });
 assert.equal(calcularBboxZona([{ lat: 0, lon: 0 }]), null);
 
+// 11b. Zona que cruza el antimeridiano (Fiyi): west > east, como pide Cesium.Rectangle
+const fiyi = [
+  { lat: -16, lon: 177 },
+  { lat: -16, lon: -178 },
+  { lat: -19, lon: -178 },
+  { lat: -19, lon: 177 },
+];
+assert.deepEqual(calcularBboxZona(fiyi), { west: 177, south: -19, east: -178, north: -16 });
+const centroFiyi = centroPoligono(fiyi);
+assert.ok(Math.abs(Math.abs(centroFiyi.lon) - 179.5) < 1e-9, `centro en 179.5°, no en 0°: ${centroFiyi.lon}`);
+assert.ok(Math.abs(centroFiyi.lat + 17.5) < 1e-9);
+
+// 11c. Zona que rodea el polo sur: todas las longitudes y hasta -90
+const antartida = [
+  { lat: -80, lon: 0 },
+  { lat: -80, lon: 90 },
+  { lat: -80, lon: 180 },
+  { lat: -80, lon: -90 },
+];
+assert.deepEqual(calcularBboxZona(antartida), { west: -180, south: -90, east: 180, north: -80 });
+
+// 11d. Crédito de EOX con la licencia correcta por año
+assert.match(creditoEox(2016), /CC BY 4\.0/);
+assert.ok(!creditoEox(2016).includes('NC-SA'), '2016 no es NC-SA');
+assert.match(creditoEox(2025), /CC BY-NC-SA 4\.0/);
+assert.match(creditoEox(2025), /Copernicus Sentinel data 2025/);
+
 const unidades = parsearUnidadesMacrostrat({
   success: {
     data: [
@@ -320,3 +349,47 @@ const unidades = parsearUnidadesMacrostrat({
 assert.equal(unidades.length, 1);
 assert.equal(unidades[0].nombre, 'Basaltos');
 assert.deepEqual(parsearUnidadesMacrostrat({}), []);
+
+// 12. Esquinas HEALPix de nivel 7: finitas, del ancho de una celda y como las de cdshealpix
+//     (la fórmula anterior daba celdas de 20° a 325° de ancho, y en el polo dividía
+//     entre cero; Cesium detenía el render con "normalized result is not a number").
+{
+  const nside = 128;
+  let malas = 0;
+  let anchoMax = 0;
+  for (let i = 0; i < 12 * nside * nside; i += 1) {
+    const v = ipixAVertices(i, nside);
+    for (const [lat, lon] of v) {
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90) malas += 1;
+    }
+    const c = ipixACentro(i, nside);
+    if (!Number.isFinite(c[0]) || !Number.isFinite(c[1]) || Math.abs(c[1]) > 180) malas += 1;
+    if (v.every(([lat]) => Math.abs(lat) < 80)) {
+      const lons = v.map(([, lon]) => lon);
+      anchoMax = Math.max(anchoMax, Math.max(...lons) - Math.min(...lons));
+    }
+  }
+  assert.equal(malas, 0, `${malas} esquinas o centros no finitos`);
+  // Cerca de 80° de latitud una celda legítima mide ~3.1° de longitud.
+  assert.ok(anchoMax < 5, `una celda abarca ${anchoMax}° de longitud`);
+
+  // Referencia: cdshealpix.nested.vertices([10942], 7), en (lat, lon).
+  const ref10942: [number, number][] = [
+    [43.804488, 0.731707],
+    [44.20153, 0.737705],
+    [44.597991, 0.0],
+    [44.20153, 0.0],
+  ];
+  const v10942 = ipixAVertices(10942, nside);
+  for (const [la, lo] of ref10942) {
+    assert.ok(
+      v10942.some(([a, b]) => Math.abs(a - la) < 1e-5 && Math.abs(b - lo) < 1e-5),
+      `falta el vértice (${la}, ${lo}) en ${JSON.stringify(v10942)}`,
+    );
+  }
+  // La celda que toca el polo norte tiene un vértice en lat 90.
+  const polo = ipixAVertices(nside * nside - 1, nside);
+  assert.ok(polo.some(([lat]) => lat === 90), 'la última celda de la cara 0 toca el polo norte');
+  const poloSur = ipixAVertices(8 * nside * nside, nside);
+  assert.ok(poloSur.some(([lat]) => lat === -90), 'la primera celda de la cara 8 toca el polo sur');
+}
