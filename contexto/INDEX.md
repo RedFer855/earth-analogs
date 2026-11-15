@@ -65,7 +65,7 @@ _(vacía)_
 
 ## 70-bitacora — Notas de sesión por mes
 
-- [[2026-11-15-fernando-etl-escala-200m-y-ndvi]] · sesion · fernando · claude-code · 2026-11-15 — El terreno se calcula igual en los tres cuerpos (bloques cuadrados de 200 m, ventana de 1 km); el NDVI recupera costas y latitudes altas; E-13 baja de unos 12 minutos a menos de 3; el error de pendiente contra la relectura independiente baja de 0.176° a 0.050°.
+- [[2026-11-15-fernando-etl-escala-200m-y-ndvi]] · sesion · fernando · claude-code · 2026-11-15 — El terreno se calcula igual en los tres cuerpos (bloques cuadrados de 200 m, ventana de 1 km); el error de pendiente contra la relectura independiente de E-13 baja de 0.176° a 0.050°.
 - [[2026-11-14-fernando-etl-e01-a-e13]] · sesion · fernando · claude-code · 2026-11-14 — Se escribió y corrió el ETL completo (malla, terreno, temperatura, NDVI, aridez, permafrost, viento y polvo, material, agua, objetivos de la Luna y Marte, manifiesto), cada paso con su comprobación y su registro de auditoría; los errores encontrados quedaron corregidos y registrados.
 - [[2026-11-14-fernando-etl-deuda-cerrada]] · sesion · fernando · claude-code · 2026-11-14 — E-03 terreno se rehízo solo en las teselas afectadas (índice validado bit a bit), E-11 suma iluminación y Mini-RF, E-12 suma el clima de la MCD 6.2 (local, presión corregida por altura), E-05 usa máscara de tierra, E-15 agrega cinco capas de 30 m y el manifiesto lista n_celdas, nivel y local_only.
 - _(2 sesiones más: ver contexto/INDEX-bitacora.md)_
