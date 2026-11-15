@@ -29,6 +29,12 @@ export interface ZonaGuardada {
   perimetroKm: number;
   color: string;
   creadaEn: string;
+  /** Cuerpo al que la zona quiere parecerse; opcional para no romper lo guardado antes. */
+  cuerpo?: 'marte' | 'luna';
+  /** Sitio objetivo elegido (id del índice) y su nombre al momento de elegirlo. */
+  objetivo?: string;
+  objetivoNombre?: string;
+  notas?: string;
 }
 
 export interface SeleccionCeldasZona {
@@ -168,29 +174,30 @@ export function crearZonaGuardada(
   };
 }
 
-export function exportarZonasAGeoJson(zonas: ZonaGuardada[]): string {
-  const fc = {
-    type: 'FeatureCollection',
-    features: zonas.map((z) => {
-      const anillo = z.coords.map((c) => [c.lon, c.lat]);
-      if (anillo.length > 0) anillo.push([...anillo[0]]);
-      return {
-        type: 'Feature',
-        properties: {
-          id: z.id,
-          nombre: z.nombre,
-          forma: z.forma,
-          area_km2: Number(z.areaKm2.toFixed(4)),
-          perimetro_km: Number(z.perimetroKm.toFixed(4)),
-          color: z.color,
-          creada_en: z.creadaEn,
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [anillo],
-        },
-      };
-    }),
+export function zonaAFeature(z: ZonaGuardada): Record<string, unknown> {
+  const anillo = z.coords.map((c) => [c.lon, c.lat]);
+  if (anillo.length > 0) anillo.push([...anillo[0]]);
+  return {
+    type: 'Feature',
+    properties: {
+      id: z.id,
+      nombre: z.nombre,
+      forma: z.forma,
+      area_km2: Number(z.areaKm2.toFixed(4)),
+      perimetro_km: Number(z.perimetroKm.toFixed(4)),
+      color: z.color,
+      creada_en: z.creadaEn,
+      ...(z.cuerpo ? { cuerpo: z.cuerpo } : {}),
+      ...(z.objetivo ? { objetivo: z.objetivo, objetivo_nombre: z.objetivoNombre ?? null } : {}),
+      ...(z.notas ? { notas: z.notas } : {}),
+    },
+    geometry: {
+      type: 'Polygon',
+      coordinates: [anillo],
+    },
   };
-  return JSON.stringify(fc, null, 2);
+}
+
+export function exportarZonasAGeoJson(zonas: ZonaGuardada[]): string {
+  return JSON.stringify({ type: 'FeatureCollection', features: zonas.map(zonaAFeature) }, null, 2);
 }

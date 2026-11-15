@@ -6,6 +6,7 @@ import { CapaAnalogos } from './capas/analogos';
 import { CapaCapas7 } from './capas/capas7';
 import { CapaOverlaysZona } from './capas/overlaysZona';
 import { CapaPines } from './capas/pines';
+import { CapaPinesUsuario } from './capas/pinesUsuario';
 import { CapaZonas } from './capas/zonas';
 import {
   cargarCapas7,
@@ -29,6 +30,7 @@ import { GloboObjetivo } from './globo-objetivo';
 import { BarraNavegacion } from './ui/barra';
 import { PanelBusqueda } from './ui/busqueda';
 import { PanelAnalogos } from './panel/panelAnalogos';
+import { PanelCatalogo } from './ui/catalogo';
 import { PanelZona } from './ui/panelZona';
 import { Asistente } from './ui/asistente';
 
@@ -170,9 +172,21 @@ async function iniciar(): Promise<void> {
   const panelZona = new PanelZona(ui, BASE_DATOS, capaZonas, overlaysZona, (rango) => {
     seleccionarCandidato(rango, true);
   });
-  new BarraNavegacion(ui, viewer, (coords, forma) => {
-    panelZona.mostrarAnalisis(coords, forma);
+  const capaPinesUsuario = new CapaPinesUsuario(viewer);
+  const catalogo = new PanelCatalogo(ui, capaZonas, capaPinesUsuario, indice.sitios_objetivo, {
+    medirEn: (coord) => barraNav.medirEn(coord),
   });
+  const barraNav = new BarraNavegacion(
+    ui,
+    viewer,
+    (coords, forma) => {
+      panelZona.mostrarAnalisis(coords, forma);
+    },
+    (coord) => {
+      capaPinesUsuario.agregar(coord);
+      catalogo.mostrarPestana('pines');
+    },
+  );
 
   let asistente: Asistente;
   let resultadoEsNuevo = false;
@@ -333,6 +347,7 @@ async function iniciar(): Promise<void> {
   void cargarCapas7(`${BASE_DATOS}capas7/`).then((datos7) => {
     if (!datos7) return;
     panelZona.configurarDatos7(datos7);
+    catalogo.configurarDatos7(datos7, BASE_DATOS);
     panel.configurarDatos7(datos7, `${BASE_DATOS}capas7/`);
     const divBusqueda = document.createElement('div');
     const panelBusqueda = new PanelBusqueda(divBusqueda, datos7, {

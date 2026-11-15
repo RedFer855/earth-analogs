@@ -346,9 +346,14 @@ html, body, #globo {
   transform: translateX(-50%);
   pointer-events: auto;
   z-index: 15;
+  /* deja libres los paneles de los lados: la barra se parte en filas en pantallas angostas */
+  max-width: calc(100vw - 770px);
+  min-width: min(480px, calc(100vw - 24px));
 }
 .barra-nav {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
@@ -414,7 +419,7 @@ html, body, #globo {
 .panel-zona {
   position: absolute;
   bottom: 28px;
-  left: 12px;
+  left: 360px;
   width: 310px;
   max-height: 62vh;
   display: flex;
