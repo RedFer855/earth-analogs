@@ -13,6 +13,37 @@ const ETIQUETAS_TIPO: Record<TipoPunto, string> = {
   playa_salar: 'Salares',
 };
 
+const SVG_POR_TIPO: Record<TipoPunto, string> = {
+  tubo_lava:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">' +
+    '<circle cx="14" cy="14" r="12.5" fill="#1e293b" stroke="#f97316" stroke-width="2"/>' +
+    '<path d="M5 20 L10 9 L14 13 L18 8 L23 20 Z" fill="#fdba74"/>' +
+    '<path d="M10.5 20 C10.5 14.5 17.5 14.5 17.5 20 Z" fill="#0f172a"/>' +
+    '</svg>',
+  crater_impacto:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">' +
+    '<circle cx="14" cy="14" r="12.5" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>' +
+    '<ellipse cx="14" cy="15" rx="8.5" ry="4.5" fill="#0f172a" stroke="#7dd3fc" stroke-width="1.8"/>' +
+    '<path d="M7.5 15.5 C10 18.2 18 18.2 20.5 15.5" fill="none" stroke="#38bdf8" stroke-width="1.2"/>' +
+    '</svg>',
+  playa_salar:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">' +
+    '<circle cx="14" cy="14" r="12.5" fill="#1e293b" stroke="#eab308" stroke-width="2"/>' +
+    '<polygon points="14,6 20,10.5 20,17.5 14,22 8,17.5 8,10.5" fill="#fde047" stroke="#fef08a" stroke-width="1.2"/>' +
+    '<line x1="14" y1="6" x2="14" y2="22" stroke="#854d0e" stroke-width="1"/>' +
+    '<line x1="8" y1="10.5" x2="20" y2="17.5" stroke="#854d0e" stroke-width="1"/>' +
+    '<line x1="20" y1="10.5" x2="8" y2="17.5" stroke="#854d0e" stroke-width="1"/>' +
+    '</svg>',
+};
+
+export function svgIconoTipo(tipo: TipoPunto): string {
+  return SVG_POR_TIPO[tipo];
+}
+
+function dataUrlIconoTipo(tipo: TipoPunto): string {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(SVG_POR_TIPO[tipo])}`;
+}
+
 export class CapaPines {
   private viewer: Cesium.Viewer;
   private fuentes = new Map<TipoPunto, Cesium.CustomDataSource>();
@@ -82,11 +113,11 @@ export class CapaPines {
       const entidad = ds.entities.add({
         name: feat.properties.nombre || feat.properties.id,
         position: Cesium.Cartesian3.fromDegrees(lon, lat),
-        point: {
-          pixelSize: 8,
-          color: COLORES_TIPO[tipo],
-          outlineColor: Cesium.Color.BLACK,
-          outlineWidth: 1.5,
+        billboard: {
+          image: dataUrlIconoTipo(tipo),
+          width: 24,
+          height: 24,
+          verticalOrigin: Cesium.VerticalOrigin.CENTER,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
       });

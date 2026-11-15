@@ -221,6 +221,20 @@ html, body, #globo {
   border-radius: 50%;
   display: inline-block;
 }
+.pin-icono {
+  width: 17px;
+  height: 17px;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.pin-icono svg { width: 100%; height: 100%; }
+.pines-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.pines-botones { display: flex; gap: 4px; }
 .pin-tubo_lava { background: #f97316; }
 .pin-crater_impacto { background: #38bdf8; }
 .pin-playa_salar { background: #eab308; }
