@@ -30,6 +30,7 @@ import { PanelBusqueda } from './ui/busqueda';
 import { FichaCandidato } from './ui/ficha';
 import { PanelLateral } from './ui/panel';
 import { PanelZona } from './ui/panelZona';
+import { Asistente } from './ui/asistente';
 
 const BASE_DATOS = 'datos/';
 const ALTURA_VUELO_M = 150_000;
@@ -184,6 +185,26 @@ async function iniciar(): Promise<void> {
     (lat, lon) => volarA(viewer, lat, lon),
   );
 
+  const asistente = new Asistente(ui, {
+    bboxVista: () => {
+      const r = viewer.camera.computeViewRectangle();
+      if (!r) return null;
+      const g = Cesium.Math.toDegrees;
+      const caja: [number, number, number, number] = [g(r.south), g(r.west), g(r.north), g(r.east)];
+      return caja[2] - caja[0] > 170 ? null : caja;
+    },
+    alRecalcular: (res) => {
+      resultadoActual = res;
+      ficha.ocultar();
+      capa.mostrar(res.candidatos);
+      panel.mostrarCandidatos(res.candidatos);
+      panelZona.configurarCandidatos(res.candidatos);
+      asistente.establecerContexto(indice, res, null);
+      const mejor = res.candidatos[0];
+      if (mejor) volarA(viewer, mejor.centro.lat, mejor.centro.lon);
+    },
+  });
+
   capaPines.definirAlElegir((punto) => {
     panel.marcarCandidato(null);
     ficha.mostrarPin(punto);
@@ -198,6 +219,7 @@ async function iniciar(): Promise<void> {
     capa.resaltar(rango);
     panel.marcarCandidato(rango);
     ficha.mostrar(candidato, resultadoActual, indice, estabilidad);
+    asistente.establecerContexto(indice, resultadoActual, candidato);
     actualizarUrl(sitioActualId, rango);
     if (volar) {
       volarA(viewer, candidato.centro.lat, candidato.centro.lon);
@@ -238,6 +260,7 @@ async function iniciar(): Promise<void> {
       capa.mostrar(res.candidatos);
       panel.mostrarCandidatos(res.candidatos);
       panelZona.configurarCandidatos(res.candidatos);
+      asistente.establecerContexto(indice, res, null);
 
       if (candidatoInicial !== null) {
         const existe = res.candidatos.some((c) => c.rango === candidatoInicial);

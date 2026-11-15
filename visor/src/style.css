@@ -450,3 +450,64 @@ html, body, #globo {
   }
   .panel { position: static; width: auto; max-height: 36vh; }
 }
+
+/* --- Asistente IA (BYOK) --- */
+.asistente-abrir {
+  position: fixed;
+  right: 404px;
+  bottom: 36px;
+  pointer-events: auto;
+}
+.asistente-abrir.oculto { display: none; }
+.asistente {
+  right: 404px;
+  top: auto;
+  bottom: 28px;
+  width: 360px;
+  max-height: 72vh;
+}
+.asistente-cab { display: flex; justify-content: space-between; align-items: center; }
+.asistente-cab h2 { margin: 0; font-size: 14px; }
+.asistente-contexto { margin: 0; color: #9fb0c7; font-size: 12px; }
+.asistente-clave { display: flex; flex-direction: column; gap: 6px; }
+.asistente-clave select,
+.asistente-clave input[type='text'],
+.asistente-clave input[type='password'],
+.asistente-form input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #e6edf3;
+  font: inherit;
+}
+.asistente-chk { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #cbd5e1; }
+.asistente-acciones, .asistente-rapidas { display: flex; flex-wrap: wrap; gap: 6px; }
+.asistente-aviso { margin: 0; font-size: 11px; color: #86efac; }
+.asistente-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 60px;
+  max-height: 32vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.asistente-msg {
+  padding: 6px 8px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.asistente-msg.usuario { align-self: flex-end; background: rgba(37, 99, 235, 0.35); }
+.asistente-msg.asistente { background: rgba(30, 41, 59, 0.8); }
+.asistente-msg.aviso { border: 1px solid rgba(250, 204, 21, 0.4); }
+.asistente-form { display: flex; gap: 6px; }
+.asistente-motor { display: flex; flex-direction: column; gap: 6px; }
+.asistente-motor.oculto { display: none; }
+.asistente-estado { margin: 0; font-size: 11px; color: #9fb0c7; min-height: 14px; }
+@media (max-width: 1200px) {
+  .asistente, .asistente-abrir { right: 12px; }
+}
