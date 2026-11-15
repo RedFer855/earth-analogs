@@ -33,7 +33,7 @@ El reto pide cráteres de impacto y salinas (principio 4) y geología (dimensió
 ## Verificación
 
 - `test_puntos.py` 7 pruebas y `analisis/test_correlacion.py` 3 pruebas: OK.
-- E-17 (4 min 47 s), E-18 (32 s) y E-19 (8 s) corridos con `audit/audit.py`. Cobertura: distancias 100 %, roca 99.3 %.
+- E-17 (91 s), E-18 (7 s) y E-19 (0.4 s) corridos con `audit/audit.py` al unir la rama con `main`; las líneas de la primera corrida no pasaron al registro porque su comando guardaba rutas locales. Mismos conteos: 202 cráteres, 73 playas y 332 pines. Cobertura: distancias 100 %, roca 99.3 %.
 - Puntos de control: Meteor Crater `dentro_crater=1`; Salar de Uyuni `dist_playa_km=0`; Vredefort dentro.
 - Resultado más claro: los salares son mucho más áridos, planos y sin vegetación que sus controles (δ de Cliff entre
   −0.73 y −0.87); los tubos tienen más roca volcánica (+0.67) y más relieve (+0.49). Los cráteres apenas difieren.
