@@ -232,3 +232,63 @@ export async function crearGlobo(id: string): Promise<Cesium.Viewer> {
 
   return viewer;
 }
+
+const ALTURA_MIN_M = 200;
+const ALTURA_MAX_M = 30_000_000;
+
+/** Altura aproximada de la cámara sobre el suelo o elipsoide en metros. */
+export function obtenerAlturaCamaraM(viewer: Cesium.Viewer): number {
+  if (viewer.isDestroyed()) return 0;
+  const carto = viewer.camera.positionCartographic;
+  if (!carto) return 0;
+  const elevTerreno = viewer.scene.globe.getHeight(carto);
+  const base = Number.isFinite(elevTerreno) ? elevTerreno! : 0;
+  return Math.max(0, Math.round(carto.height - base));
+}
+
+/** Acerca (factor < 1) o aleja (factor > 1) la cámara respetando cotas seguras. */
+export function ajustarZoom(viewer: Cesium.Viewer, factor: number): void {
+  if (viewer.isDestroyed() || !Number.isFinite(factor) || factor <= 0) return;
+  const altura = Math.max(ALTURA_MIN_M, viewer.camera.positionCartographic.height);
+  const objetivo = Math.min(ALTURA_MAX_M, Math.max(ALTURA_MIN_M, altura * factor));
+  const delta = objetivo - altura;
+  if (delta < 0) {
+    viewer.camera.zoomIn(Math.abs(delta));
+  } else if (delta > 0) {
+    viewer.camera.zoomOut(delta);
+  }
+  viewer.scene.requestRender();
+}
+
+/**
+ * Alterna entre vista cenital 2D (-90°) y vista inclinada 3D (-35°).
+ * Devuelve `true` si queda en modo 3D inclinado, `false` si queda en 2D cenital.
+ */
+export function alternarVista3D(viewer: Cesium.Viewer): boolean {
+  if (viewer.isDestroyed()) return false;
+  const estaEn3D = viewer.camera.pitch > -1.1;
+  const nuevoPitch = estaEn3D ? -Cesium.Math.PI_OVER_TWO : -Cesium.Math.toRadians(35);
+
+  const canvas = viewer.scene.canvas;
+  const centroPantalla = new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2);
+  const rayo = viewer.camera.getPickRay(centroPantalla);
+  const puntoSuelo = rayo ? viewer.scene.globe.pick(rayo, viewer.scene) : undefined;
+
+  if (puntoSuelo) {
+    const rango = Cesium.Cartesian3.distance(viewer.camera.positionWC, puntoSuelo);
+    viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(puntoSuelo, 0), {
+      offset: new Cesium.HeadingPitchRange(0, nuevoPitch, Math.max(ALTURA_MIN_M, rango)),
+      duration: 0.6,
+    });
+  } else {
+    const carto = viewer.camera.positionCartographic;
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height),
+      orientation: { heading: 0, pitch: nuevoPitch, roll: 0 },
+      duration: 0.6,
+    });
+  }
+
+  viewer.scene.requestRender();
+  return !estaEn3D;
+}
