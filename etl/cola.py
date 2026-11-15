@@ -269,7 +269,7 @@ PASOS: tuple[Paso, ...] = (
         args=(),
         salidas=("columns/e15.json",),
         depende_de=(
-            "E-01",  # paso de columnas a 30 m sobre la malla HEALPix (sin script en esta rama)
+            "E-01",  # lee la malla HEALPix con cargar_malla(run)
         ),
         pesado=True,
     ),
@@ -292,7 +292,7 @@ PASOS: tuple[Paso, ...] = (
             "E-10",  # verifica las columnas de agua y usa frac_tierra en la relectura
             "E-11",  # incluye objetivos/objetivos_luna.json en el manifiesto
             "E-12",  # incluye objetivos/objetivos_marte.json en el manifiesto
-            "E-15",  # verificará las columnas de 30 m en columns/ cuando exista el script
+            "E-15",  # verifica las columnas de 30 m en columns/
         ),
         pesado=False,
     ),
