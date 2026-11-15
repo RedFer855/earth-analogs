@@ -44,7 +44,7 @@ _(vacía)_
 
 ## 45-decisiones — ADR-NNN, estándares E-NN y decisiones pendientes DP-NN
 
-- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]]
+- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]] · [[ADR-010-motor-de-busqueda-sobre-la-tabla-del-etl]]
 - _(tipo, estado y summary: ver contexto/INDEX-decisiones.md)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
@@ -73,7 +73,7 @@ _(vacía)_
 ## 80-deuda — Deuda técnica P-NNN
 
 - [[abierta]] · deuda · vigente · 2026-11-15 — Pendientes abiertos del proyecto, uno por ítem P-NNN.
-- [[resuelta-2026]] · deuda · vigente · 2026-11-14 — Pendientes cerrados en 2026, con cómo se cerraron.
+- [[resuelta-2026]] · deuda · vigente · 2026-11-15 — Pendientes cerrados en 2026, con cómo se cerraron.
 
 ## 85-entrega — Lo que se presenta: pitch, video, demo y formulario de Space Apps
 

@@ -368,7 +368,9 @@ class PruebasCola(unittest.TestCase):
         self.assertEqual(pesados, {"E-03", "E-04", "E-05", "E-07", "E-15"})
         self.assertIn("E-15", por_id)
         self.assertEqual(por_id["E-15"].script, "e15_capas_30m.py")
-        self.assertEqual(set(por_id["E-13"].depende_de), set(por_id) - {"E-13"})
+        # E-13 espera a todos los pasos que escriben la tabla; E-20 lee el manifiesto, así que va después
+        self.assertEqual(set(por_id["E-13"].depende_de), set(por_id) - {"E-13", "E-20"})
+        self.assertEqual(por_id["E-20"].depende_de, ("E-13",))
 
         cmd = cola.construir_comando_audit(
             por_id["E-03"],

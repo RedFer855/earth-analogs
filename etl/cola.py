@@ -281,6 +281,16 @@ PASOS: tuple[Paso, ...] = (
         ),
         pesado=False,
     ),
+    Paso(
+        id="E-20",
+        script="e20_perfiles.py",
+        args=(),
+        salidas=("perfiles.json",),
+        depende_de=(
+            "E-13",  # toma n_celdas y los percentiles de terreno del manifiesto
+        ),
+        pesado=False,
+    ),
 )
 
 

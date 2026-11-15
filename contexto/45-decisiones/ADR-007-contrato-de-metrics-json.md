@@ -84,3 +84,5 @@ Estructura de alto nivel, a detallar en el esquema:
 ## Relaciones
 
 - [plan del ETL](../../docs/etl-plan.md) — manifiesto y pasos E-11 a E-13
+- [[ADR-010-motor-de-busqueda-sobre-la-tabla-del-etl]] — el motor que escribe este archivo; precisa §2.1 (índice y
+  detalle por sitio)
