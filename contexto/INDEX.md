@@ -53,7 +53,7 @@ _(vacía)_
 
 ## 55-investigaciones — I-NN y sus prompts
 
-- _(42 notas: ver contexto/INDEX-investigaciones.md)_
+- _(41 notas: ver contexto/INDEX-investigaciones.md)_
 
 ## 60-qa — Validación de resultados contra análogos conocidos y pruebas del motor
 
