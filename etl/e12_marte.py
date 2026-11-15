@@ -35,6 +35,8 @@ from objetivos_comun import parches, puntos_circulo, resumen, resumir_parches
 
 gdal.UseExceptions()
 R_MARTE = 3396190.0
+BLOQUE_M = 200.0  # bloque cuadrado de terreno, igual que en la Tierra y la Luna (ADR-005)
+MARGEN_TERRENO_M = 2000.0  # borde extra para que los parches del límite del círculo tengan vecinos
 # Valores estándar de Marte, no verificados en la documentación de la MCD
 R_GAS_MARTE = 191.18  # J kg-1 K-1, constante específica del gas de la atmósfera de Marte
 G_MARTE = 3.7274  # m s-2, aceleración de la gravedad superficial de Marte
@@ -87,15 +89,34 @@ def _circulo(lat, lon, radio_m, geo, forma):
     return (c0, f0, c1 - c0, f1 - f0), d * R_MARTE <= radio_m, lats
 
 
-def terreno_marte(ds, lat, lon, radio_m):
-    """Calcula métricas de terreno en parches de ~1.6 km dentro del círculo de radio_m."""
+def bloques_200m(ds, lat, lon, radio_m):
+    """Reproyecta el DEM alrededor del sitio a LAEA local con píxeles cuadrados de 200 m (promedio de área).
+
+    El DEM es una rejilla lat/lon: 200 m de N a S pero 200·cos(lat) m de E a O. Con bloques cuadrados de 200 m la
+    pendiente, la rugosidad y el relieve se miden a la misma escala que en la Tierra (E-03) y la Luna (ADR-005).
+    Devuelve (z, máscara del círculo de radio_m).
+    """
     geo = ds.GetGeoTransform()
-    (c0, f0, w, h), m, lats = _circulo(lat, lon, radio_m, geo, (ds.RasterYSize, ds.RasterXSize))
-    z = ds.GetRasterBand(1).ReadAsArray(c0, f0, w, h).astype(np.float64)
-    z[z == -32768] = np.nan
-    sy = np.radians(-geo[5]) * R_MARTE
-    sx = (np.radians(geo[1]) * R_MARTE * np.cos(np.radians(lats)))[:, None]
-    ps = parches(z, sx, sy, m)
+    lado = float(np.ceil((radio_m + MARGEN_TERRENO_M) / BLOQUE_M) * BLOQUE_M)
+    (c0, f0, w, h), _, _ = _circulo(lat, lon, lado * np.sqrt(2), geo, (ds.RasterYSize, ds.RasterXSize))
+    srs = osr.SpatialReference(wkt=ds.GetProjection())
+    laea = srs.CloneGeogCS()  # mismo cuerpo y datum que el DEM: PROJ no transforma entre cuerpos distintos
+    laea.SetLAEA(float(lat), float(lon), 0.0, 0.0)
+    ventana = gdal.Translate("", ds, format="VRT", srcWin=[c0, f0, w, h])
+    dst = gdal.Warp("", ventana, format="MEM", dstSRS=laea.ExportToWkt(), outputBounds=(-lado, -lado, lado, lado),
+                    xRes=BLOQUE_M, yRes=BLOQUE_M, resampleAlg="average", srcNodata=-32768, dstNodata=np.nan,
+                    outputType=gdal.GDT_Float32, multithread=False)
+    z = dst.GetRasterBand(1).ReadAsArray().astype(np.float64)
+    dst = ventana = None
+    centros = -lado + (np.arange(z.shape[1]) + 0.5) * BLOQUE_M
+    x, y = np.meshgrid(centros, centros[::-1][: z.shape[0]])
+    return z, np.hypot(x, y) <= radio_m
+
+
+def terreno_marte(ds, lat, lon, radio_m):
+    """Calcula métricas de terreno en parches de ~1.6 km dentro del círculo de radio_m, en bloques de 200 m."""
+    z, m = bloques_200m(ds, lat, lon, radio_m)
+    ps = parches(z, BLOQUE_M, BLOQUE_M, m)
     terreno = resumir_parches(ps)
     sm = terreno["slope_mean_deg"]["mediana"] if terreno["slope_mean_deg"] else None
     ss = terreno["slope_std_deg"]["mediana"] if terreno["slope_std_deg"] else None
