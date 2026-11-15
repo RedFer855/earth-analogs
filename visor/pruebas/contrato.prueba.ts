@@ -14,6 +14,8 @@ import {
   type Indice,
   type ResultadoJson,
 } from '../src/datos/contrato';
+import { evaluarCondiciones } from '../src/datos/capas7';
+import { ipixACentro, ipixAVertices } from '../src/datos/healpix';
 
 const metricsRaw = readFileSync(resolve('datos/metrics.json'), 'utf8');
 const jzRaw = readFileSync(resolve('datos/resultados/terreno/JZ.json'), 'utf8');
@@ -155,3 +157,22 @@ try {
 } finally {
   globalThis.fetch = fetchOriginal;
 }
+
+// 7. HEALPix nested nivel 7 y evaluarCondiciones
+const [lat0, lon0] = ipixACentro(0, 128);
+assert.ok(Number.isFinite(lat0) && lat0 > 0 && lat0 < 90);
+assert.ok(Number.isFinite(lon0) && lon0 >= -180 && lon0 <= 180);
+const verts0 = ipixAVertices(0, 128);
+assert.equal(verts0.length, 4);
+
+const cols = new Map<string, Float32Array>([
+  ['slope_mean_deg', new Float32Array([2.0, 8.0, Number.NaN, 3.0])],
+  ['aridez_ai', new Float32Array([0.02, 0.01, 0.01, 0.5])],
+]);
+const evalRes = evaluarCondiciones(4, cols, [
+  { columna: 'slope_mean_deg', op: '<=', umbral: 5 },
+  { columna: 'aridez_ai', op: '<=', umbral: 0.05 },
+]);
+assert.deepEqual(Array.from(evalRes.conteos), [2, 1, 1, 1]);
+assert.equal(evalRes.celdasTodas, 1);
+assert.equal(evalRes.celdasAlguna, 4);

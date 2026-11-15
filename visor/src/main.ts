@@ -2,7 +2,13 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import './style.css';
 import * as Cesium from 'cesium';
 import { CapaCandidatos } from './capas/candidatos';
+import { CapaCapas7 } from './capas/capas7';
 import { CapaPines } from './capas/pines';
+import {
+  cargarCapas7,
+  evaluarCondiciones,
+  obtenerColumnaCapas7,
+} from './datos/capas7';
 import {
   cargarCorrelacion,
   cargarIndice,
@@ -14,6 +20,7 @@ import {
   type Sitio,
 } from './datos/contrato';
 import { crearGlobo } from './globo';
+import { PanelBusqueda } from './ui/busqueda';
 import { FichaCandidato } from './ui/ficha';
 import { PanelLateral } from './ui/panel';
 
@@ -178,6 +185,53 @@ async function iniciar(): Promise<void> {
 
   void cargarCorrelacion(BASE_DATOS).then((corr) => {
     if (corr) panel.configurarCorrelacion(corr);
+  });
+
+  const capaCapas7 = new CapaCapas7(viewer);
+  void cargarCapas7(`${BASE_DATOS}capas7/`).then((datos7) => {
+    if (!datos7) return;
+    const divBusqueda = document.createElement('div');
+    const panelBusqueda = new PanelBusqueda(divBusqueda, datos7, {
+      alAplicarBusqueda: async (condiciones, soloTodas) => {
+        if (condiciones.length === 0) {
+          capaCapas7.limpiar();
+          panelBusqueda.establecerEstado('');
+          return;
+        }
+        panelBusqueda.establecerEstado('Cargando capas...');
+        await Promise.all(
+          condiciones.map((c) => obtenerColumnaCapas7(datos7, c.columna, `${BASE_DATOS}capas7/`)),
+        );
+        const res = evaluarCondiciones(datos7.meta.n_celdas, datos7.cacheColumnas, condiciones);
+        const pintadas = capaCapas7.mostrarBusqueda(
+          datos7.ipix,
+          datos7.meta.nside,
+          res.conteos,
+          res.totalCondiciones,
+          soloTodas,
+        );
+        panelBusqueda.establecerEstado(
+          `${res.celdasTodas.toLocaleString('es-ES')} celdas cumplen todas (${pintadas.toLocaleString('es-ES')} dibujadas).`,
+        );
+      },
+      alAplicarCoropletico: async (columna) => {
+        if (!columna) {
+          capaCapas7.limpiar();
+          return;
+        }
+        const vals = await obtenerColumnaCapas7(datos7, columna, `${BASE_DATOS}capas7/`);
+        const meta = datos7.meta.columnas[columna];
+        if (meta) {
+          capaCapas7.mostrarCoropletico(datos7.ipix, datos7.meta.nside, vals, meta);
+        }
+      },
+      alCargarPresetSitio: async (sitioId) => {
+        const meta = indice.resultados.find((r) => r.sitio === sitioId);
+        if (!meta?.archivo) return null;
+        return cargarResultado(BASE_DATOS, meta.archivo);
+      },
+    });
+    panel.configurarBusqueda(divBusqueda);
   });
 
   const params = new URLSearchParams(window.location.search);

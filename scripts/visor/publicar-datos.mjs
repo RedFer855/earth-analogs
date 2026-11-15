@@ -1,4 +1,5 @@
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -18,9 +19,13 @@ if (args.length < 1) {
 
 const dirSalida = resolve(args[0]);
 let rutaPuntos = null;
+let dirCapas7 = null;
 for (let i = 1; i < args.length; i += 1) {
   if (args[i] === '--puntos' && args[i + 1]) {
     rutaPuntos = resolve(args[i + 1]);
+    i += 1;
+  } else if (args[i] === '--capas7' && args[i + 1]) {
+    dirCapas7 = resolve(args[i + 1]);
     i += 1;
   } else {
     console.error(`Argumento desconocido: ${args[i]}`);
@@ -124,3 +129,29 @@ for (const item of preparados) {
 
 const kbTotales = (bytesTotales / 1024).toFixed(1);
 console.log(`Publicados ${preparados.length} archivos (${kbTotales} KB) en ${dirDestino}`);
+
+if (dirCapas7) {
+  const destCapas7 = join(dirDestino, 'capas7');
+  mkdirSync(destCapas7, { recursive: true });
+  const metaTexto = readFileSync(join(dirCapas7, 'capas7.json'), 'utf8');
+  if (metaTexto.includes('local_only')) {
+    console.error('Abortado: capas7.json contiene "local_only".');
+    process.exit(1);
+  }
+  const metaCapas7 = JSON.parse(metaTexto);
+  writeFileSync(join(destCapas7, 'capas7.json'), JSON.stringify(metaCapas7), 'utf8');
+  const binarios = [
+    metaCapas7.archivos.ipix,
+    metaCapas7.archivos.n_hijas,
+    ...Object.values(metaCapas7.columnas).map((c) => c.archivo),
+  ];
+  let bytesCapas = 0;
+  for (const bin of binarios) {
+    const src = join(dirCapas7, bin);
+    copyFileSync(src, join(destCapas7, bin));
+    bytesCapas += statSync(src).size;
+  }
+  console.log(
+    `Publicadas ${binarios.length + 1} capas nivel 7 (${(bytesCapas / 1024).toFixed(1)} KB) en ${destCapas7}`,
+  );
+}
