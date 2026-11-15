@@ -25,6 +25,17 @@ Creation phase (2026-11-14 and 2026-11-15).
 | Viewer | [visor/](visor/README.md) | CesiumJS globe with candidates, pins and a sheet of what matches and what differs. |
 | Agents and AI | [scripts/mcp/](docs/mcp-and-ai.md) | MCP server for AI agents, local bridge, and a bring-your-own-key assistant in the viewer. |
 
+## Run everything with one command
+
+```bash
+node scripts/iniciar.mjs --run /path/to/run --puntos /path/to/other-run
+```
+
+Starts the local bridge (engine and assistant), starts the viewer on the first free port and opens the page. `RUN`
+and `RUN_PUNTOS` can come from the environment instead of the flags. Without `RUN` the viewer still works; only the
+"recalculate with the Rust engine" button is off. Options: `--build` serves the production build, `--sin-abrir`
+does not open the browser, `--sin-puente` skips the bridge. Ctrl+C stops everything.
+
 ## Use it from an AI agent (MCP)
 
 ```bash
