@@ -48,7 +48,11 @@ dibujan y guardar pines, en el mismo estilo de vidrio oscuro del panel derecho.
 - `visor/src/capas/zonas.ts` → avisa cambios, edita zonas, relleno por zona y alta de varias a la vez.
 - `visor/src/ui/barra.ts` → botones Marcar Pin (clic en el globo) y Guardar Pin; `medirEn` para medir desde una tarjeta.
   La barra se parte en filas en pantallas angostas para no tapar los paneles.
-- `visor/src/style.css` → el panel de análisis de zona se corre a la derecha del catálogo.
+- `visor/src/style.css` → el panel de análisis de zona se corre a la derecha del catálogo y las opciones de los
+  desplegables se leen sobre fondo oscuro.
+- Pestaña Buscar → «Como Jezero» y «Como Shackleton» muestran los candidatos del motor del sitio (lugares distintos,
+  con nota) en vez de pintar las decenas de miles de celdas que cumplen los umbrales. «Buscar en el globo» agrupa esas
+  celdas en regiones de unos 400 km (`visor/src/datos/regiones.ts`): un punto por región, más grande si hay más celdas.
 
 ## Verificación
 

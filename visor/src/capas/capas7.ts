@@ -1,8 +1,11 @@
 import * as Cesium from 'cesium';
 import type { ColumnaCapas7 } from '../datos/capas7';
 import { ipixAVertices } from '../datos/healpix';
+import { agruparBusqueda } from '../datos/regiones';
 
 const MAX_INSTANCIAS = 12_000;
+/** Máximo de zonas (regiones de ~400 km) que marca una búsqueda multicondición. */
+export const MAX_PUNTOS_BUSQUEDA = 150;
 /** Latitud máxima de un vértice de polígono: ~5 km antes del polo. */
 const LAT_MAX_POLIGONO = 89.95;
 
@@ -41,6 +44,7 @@ function colorCoropletico(valor: number, p1: number, p99: number): Cesium.Color 
 export class CapaCapas7 {
   private viewer: Cesium.Viewer;
   private primitiva: Cesium.Primitive | null = null;
+  private puntosBusqueda: Cesium.PointPrimitiveCollection | null = null;
   private cachePoligonos = new Map<number, Cesium.PolygonHierarchy>();
 
   constructor(viewer: Cesium.Viewer) {
@@ -93,37 +97,26 @@ export class CapaCapas7 {
       return 0;
     }
 
-    const indices: number[] = [];
-    for (let i = 0; i < conteos.length; i += 1) {
-      const c = conteos[i];
-      if (c === totalCondiciones || (!soloTodas && c > 0)) {
-        indices.push(i);
-      }
-    }
-
-    const paso = indices.length > MAX_INSTANCIAS ? Math.ceil(indices.length / MAX_INSTANCIAS) : 1;
-    const instancias: Cesium.GeometryInstance[] = [];
-    for (let k = 0; k < indices.length; k += paso) {
-      const idx = indices[k];
-      const c = conteos[idx];
-      const color = colorCalor(c / totalCondiciones, c === totalCondiciones);
-      const inst = this.instancia(ipix[idx], nside, color);
-      if (inst) instancias.push(inst);
-    }
-
-    if (instancias.length > 0) {
-      this.primitiva = new Cesium.Primitive({
-        geometryInstances: instancias,
-        appearance: new Cesium.PerInstanceColorAppearance({
-          flat: true,
-          translucent: true,
-        }),
-        asynchronous: false,
+    // Se agrupan las celdas en regiones: un punto por zona, tamaño según cuántas celdas cumplen.
+    const regiones = agruparBusqueda(ipix, nside, conteos, totalCondiciones, soloTodas).slice(0, MAX_PUNTOS_BUSQUEDA);
+    const maxCeldas = regiones.reduce((m, r) => Math.max(m, r.celdas), 1);
+    const puntos = new Cesium.PointPrimitiveCollection();
+    for (const r of regiones) {
+      puntos.add({
+        position: Cesium.Cartesian3.fromDegrees(r.lon, r.lat),
+        pixelSize: 8 + 12 * Math.sqrt(r.celdas / maxCeldas),
+        color: (r.todas > 0 ? Cesium.Color.fromCssColorString('#e879f9') : Cesium.Color.fromCssColorString('#f59e0b')).withAlpha(0.9),
+        outlineColor: Cesium.Color.WHITE,
+        outlineWidth: 1.5,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       });
-      this.viewer.scene.primitives.add(this.primitiva);
+    }
+    if (regiones.length > 0) {
+      this.puntosBusqueda = puntos;
+      this.viewer.scene.primitives.add(puntos);
     }
     this.viewer.scene.requestRender();
-    return instancias.length;
+    return regiones.length;
   }
 
   mostrarCoropletico(
@@ -166,6 +159,10 @@ export class CapaCapas7 {
     if (this.primitiva) {
       this.viewer.scene.primitives.remove(this.primitiva);
       this.primitiva = null;
+    }
+    if (this.puntosBusqueda) {
+      this.viewer.scene.primitives.remove(this.puntosBusqueda);
+      this.puntosBusqueda = null;
     }
     if (render) {
       this.viewer.scene.requestRender();

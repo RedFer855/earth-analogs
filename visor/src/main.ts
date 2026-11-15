@@ -370,7 +370,7 @@ async function iniciar(): Promise<void> {
           soloTodas,
         );
         panelBusqueda.establecerEstado(
-          `${res.celdasTodas.toLocaleString('es-ES')} celdas cumplen todas (${pintadas.toLocaleString('es-ES')} dibujadas).`,
+          `${res.celdasTodas.toLocaleString('es-ES')} celdas cumplen todas; agrupadas en ${pintadas.toLocaleString('es-ES')} zonas (el punto es más grande si hay más celdas).`,
         );
       },
       alAplicarCoropletico: async (columna) => {
@@ -383,6 +383,17 @@ async function iniciar(): Promise<void> {
         if (meta) {
           capaCapas7.mostrarCoropletico(datos7.ipix, datos7.meta.nside, vals, meta);
         }
+      },
+      alElegirSitio: (sitioId) => {
+        const objetivo = indice.sitios_objetivo.find((s) => s.id === sitioId);
+        if (!objetivo) return;
+        const resMeta = indice.resultados.find((r) => r.sitio === objetivo.id);
+        void seleccionarSitio({
+          ...objetivo,
+          archivo: resMeta?.archivo ?? null,
+          n_candidatos: resMeta?.n_candidatos ?? 0,
+          mejor: resMeta?.mejor ?? null,
+        });
       },
       alCargarPresetSitio: async (sitioId) => {
         const meta = indice.resultados.find((r) => r.sitio === sitioId);
