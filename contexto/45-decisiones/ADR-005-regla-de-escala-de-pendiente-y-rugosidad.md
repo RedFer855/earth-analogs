@@ -59,6 +59,12 @@ el mismo relieve (±2 %). Contra la relectura independiente de E-13 (GLO-90 a UT
 mediano de `slope_mean_deg` (40 celdas sin agua) pasó de 0.176° (p90 0.84°) antes del cambio a 0.050° (p90 0.30°)
 después, medido el 2026-11-15 con la corrida completa de E-03 a 200 m (E-13, 300 celdas de muestra).
 
+Coherencia entre cuerpos (`etl/medir_coherencia_escala.py`, 2026-11-15): se toma el percentil que ocupa la mediana de
+pendiente, rugosidad y relieve de cada uno de los 21 sitios (9 regiones lunares y 12 sitios marcianos) dentro de la
+distribución terrestre. Con una escala común los tres percentiles de un sitio coinciden. Con los bloques de 200 m la
+dispersión (máximo menos mínimo) es de 0.91 puntos como máximo y 0.45 de media; con el método anterior era de 3.37
+y 1.97.
+
 ## 3. Diseño
 
 - El mar es exactamente 0 m en el DEM: se enmascara antes de derivar, para no crear pendientes en la costa.
