@@ -2,7 +2,18 @@ import unittest
 
 import numpy as np
 
-from e03_extras import _caja, cuantil, por_celda, ventana
+from e03_extras import (
+    AREA_CELDA_M2,
+    BLOQUE_M,
+    CLAVES,
+    ESPERADOS_POR_CELDA,
+    UMBRAL_PEND,
+    UMBRAL_VALIDEZ,
+    _caja,
+    cuantil,
+    por_celda,
+    ventana,
+)
 from e03_terreno import horn
 
 
@@ -16,6 +27,21 @@ class PruebasHorn(unittest.TestCase):
         z = np.tile(np.arange(4.0), (4, 1))  # sube 1 m por metro hacia el este
         p = horn(z, np.ones((2, 1)), np.ones((2, 1)))
         np.testing.assert_allclose(p, 45.0)
+
+    def test_plano_inclinado_espaciado_escalar_200m(self):
+        z = np.tile(np.arange(4.0) * 200.0, (4, 1))
+        p = horn(z, 200.0, 200.0)
+        np.testing.assert_allclose(p, 45.0)
+
+
+class PruebasConstantesEscala(unittest.TestCase):
+    def test_escala_200m_y_claves(self):
+        self.assertEqual(BLOQUE_M, 200.0)
+        self.assertEqual(UMBRAL_VALIDEZ, 0.999)
+        self.assertEqual(UMBRAL_PEND, 15)
+        self.assertAlmostEqual(ESPERADOS_POR_CELDA, AREA_CELDA_M2 / 40_000.0, places=6)
+        for clave in ("n", "media", "desv", "esperados", "rug_media", "rel_media"):
+            self.assertIn(clave, CLAVES)
 
 
 class PruebasVentana(unittest.TestCase):
