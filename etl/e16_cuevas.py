@@ -223,7 +223,7 @@ def correr(run: Path, datos: Path, ruta_json: Path = JSON_DEFECTO) -> dict:
 
     fuera_codigos = [sistemas[i]["grupo_sistema"] for i in fuera_idx]
     advertencias = [
-        "Catálogo parcial: solo 55 sistemas únicos de los 119 tubos en 11 países de Pyroduct v3.0 tienen boca georreferenciada abierta y verificable.",
+        f"Catálogo parcial: solo {len(sistemas)} sistemas únicos de los {len(data_json['cuevas'])} tubos de Pyroduct v3.0 tienen boca georreferenciada abierta y verificable.",
         "Las celdas sin registro en cueva_n_tubos quedan en NaN (no significa ausencia física de tubos de lava).",
     ]
     if fuera_codigos:
