@@ -7,7 +7,7 @@ import {
   type Sitio,
   type TipoPunto,
 } from '../datos/contrato';
-import { etiquetaTipoPunto } from '../capas/pines';
+import { etiquetaTipoPunto, svgIconoTipo } from '../capas/pines';
 
 export type CuerpoTab = 'luna' | 'marte' | 'buscar';
 
@@ -73,6 +73,18 @@ export class PanelLateral {
         if (Number.isInteger(rango)) {
           this.callbacks.alElegirCandidato(rango);
         }
+        return;
+      }
+
+      const pinesAccion = target.closest<HTMLButtonElement>('[data-pines-accion]');
+      if (pinesAccion) {
+        if (pinesAccion.dataset.pinesAccion === 'todos') {
+          this.pinesVisibles = new Set<TipoPunto>(['tubo_lava', 'crater_impacto', 'playa_salar']);
+        } else {
+          this.pinesVisibles.clear();
+        }
+        this.callbacks.alCambiarPines?.(new Set(this.pinesVisibles));
+        this.render();
       }
     });
 
@@ -228,13 +240,19 @@ export class PanelLateral {
         const checked = this.pinesVisibles.has(t) ? ' checked' : '';
         return `<label class="pin-check">
           <input type="checkbox" data-pin-tipo="${t}"${checked} />
-          <span class="pin-dot pin-${t}"></span>
+          <span class="pin-icono">${svgIconoTipo(t)}</span>
           <span>${escaparHtml(etiquetaTipoPunto(t))} (${this.conteosPines?.[t] ?? 0})</span>
         </label>`;
       })
       .join('');
     return `<div class="bloque-pines">
-      <div class="subtitulo">Pines de referencia</div>
+      <div class="pines-cabecera">
+        <span class="subtitulo" style="padding:0">Pines de referencia</span>
+        <span class="pines-botones">
+          <button type="button" class="btn-mini" data-pines-accion="todos">Todos</button>
+          <button type="button" class="btn-mini" data-pines-accion="ninguno">Ninguno</button>
+        </span>
+      </div>
       <div class="pines-checks">${checks}</div>
     </div>`;
   }
