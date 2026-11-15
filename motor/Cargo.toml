@@ -1,0 +1,50 @@
+[workspace]
+resolver = "2"
+members = ["nucleo"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.97"
+publish = false
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+unfulfilled_lint_expectations = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+
+allow_attributes = "forbid"
+allow_attributes_without_reason = "forbid"
+
+todo = "forbid"
+unimplemented = "forbid"
+dbg_macro = "forbid"
+undocumented_unsafe_blocks = "forbid"
+multiple_unsafe_ops_per_block = "forbid"
+
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+panic_in_result_fn = "deny"
+indexing_slicing = "deny"
+
+float_cmp = "deny"
+float_cmp_const = "deny"
+lossy_float_literal = "deny"
+cast_possible_truncation = "deny"
+cast_sign_loss = "deny"
+cast_precision_loss = "deny"
+cast_possible_wrap = "deny"
+
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+module_name_repetitions = "allow"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+debug = false

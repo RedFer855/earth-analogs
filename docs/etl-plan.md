@@ -49,6 +49,7 @@ the input of the similarity engine; the website only loads light derived files (
 | E-12 | Mars targets (12 sites) | Hematite maximum falls in Meridiani (search between 60° S and 60° N) |
 | E-16 | Lava tubes: `cueva_n_tubos`, `cueva_dist_km` | Known caves (`29.1604,-13.4394`, `43.8949,-121.3695`, `41.7312,-121.5061`) verified; non-cave cells remain `NaN` |
 | E-13 | Manifest and independent verification | See section 6 |
+| E-20 | Search profiles for the engine (`perfiles.json`), one per lunar and Martian target | Every target has the four terrain variables; correlation symmetric with unit diagonal (ADR-010) |
 
 **Gates (local time, Tegucigalpa):**
 

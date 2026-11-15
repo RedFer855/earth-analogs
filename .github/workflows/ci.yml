@@ -2,6 +2,7 @@ name: ci
 
 # - cambios: tamaño del PR y búsqueda de secretos con gitleaks. Corre siempre.
 # - auditoria: pruebas del registro de auditoría y verificación de su cadena.
+# - motor: formato, clippy y pruebas del motor en Rust (las que no necesitan la tabla real).
 # - CI completo: el único check obligatorio. Falla si un job falló o se canceló.
 # Las acciones van fijadas por SHA, con la versión en un comentario; Dependabot las actualiza.
 on:
@@ -95,10 +96,31 @@ jobs:
       - name: Cadena del registro
         run: node audit/verificar.mjs
 
+  motor:
+    name: Motor (Rust)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: motor
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # rustup viene en la imagen del runner; no hace falta otra acción
+      - name: Toolchain estable
+        run: rustup toolchain install stable --profile minimal -c clippy,rustfmt && rustup default stable
+      - name: Formato
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Pruebas
+        run: cargo test --workspace --locked
+
   ci-completo:
     name: CI completo
     if: always()
-    needs: [cambios, auditoria]
+    needs: [cambios, auditoria, motor]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

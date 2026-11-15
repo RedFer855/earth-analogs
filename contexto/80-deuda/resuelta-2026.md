@@ -3,7 +3,7 @@ title: "Deuda resuelta 2026"
 type: deuda
 status: vigente
 date: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-15
 summary: "Pendientes cerrados en 2026, con cómo se cerraron."
 autor: fernando
 ---
@@ -88,6 +88,16 @@ La revisión de las 76 columnas cuesta 31 s (0 s con la caché por columna). El 
 independiente: `_pixel` abría la fuente en cada celda y la aridez se descomprimía de su ZIP una y otra vez. Ahora cada
 fuente se abre una sola vez. Con la misma muestra de 60 celdas: aridez de 191 s a 5 s y NDVI de 18 s a 2 s, con
 resultado idéntico (`etl/test_e13_incremental.py`, `etl/e13_manifiesto.py`).
+
+### P-011 — Conectar la tabla con el motor de búsqueda
+
+Falta decidir cómo el motor de búsqueda consume la tabla del ETL. Los nombres de columna del ETL son el contrato
+(ADR-007 regla 8), así que la conexión no debe renombrar columnas que miden otra cosa: `arena_frac` es arena móvil y
+semifija, y la búsqueda necesita solo la móvil. Los perfiles de búsqueda se calculan sobre la tabla actual.
+
+Cerrado el 2026-11-15 (ADR-010): el motor lee `$RUN` tal cual, con los nombres del ETL, sin adaptador ni copia. Los
+perfiles los escribe el paso E-20 sobre la tabla actual. Se encontró y corrigió además que la tabla guarda latitud
+geodésica y HEALPix trabaja en autálica (hasta 0.128° de diferencia).
 
 ## Relaciones
 
