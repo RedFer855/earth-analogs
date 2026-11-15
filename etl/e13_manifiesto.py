@@ -59,12 +59,16 @@ def releer_ndvi_un_periodo(datos: Path, lat, lon, columna):
     sub = [s[0] for s in gdal.Open(str(a)).GetSubDatasets()]
     ndvi = [s for s in sub if s.endswith('"CMG 0.05 Deg 16 days NDVI"')][0]
     fiab = [s for s in sub if s.endswith('"CMG 0.05 Deg 16 days pixel reliability"')][0]
+    viq = [s for s in sub if s.endswith('"CMG 0.05 Deg 16 days VI Quality"')][0]
     malos = 0
     revisados = 0
     for la, lo, v in zip(lat, lon, columna):
         n = _pixel(ndvi, float(la), float(lo), "<h")
         r = _pixel(fiab, float(la), float(lo), "<b")
-        if n is None or r is None or r not in (0, 1) or n <= -3000 or not np.isfinite(v):
+        q = _pixel(viq, float(la), float(lo), "<H")
+        # misma regla que E-05 (fiabilidad 0 o 1 y tierra en VI Quality bits 11-13 == 1), leída por otro camino
+        tierra = q is not None and q != 65535 and ((q >> 11) & 0b111) == 1
+        if n is None or r is None or r not in (0, 1) or not tierra or n <= -3000 or not np.isfinite(v):
             continue
         revisados += 1
         if n / 10000 > v + 1e-6:
@@ -171,22 +175,35 @@ def main() -> int:
         commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
     except Exception:  # noqa: BLE001 - sin git el manifiesto lo dice
         commit = "no disponible"
+    try:  # el manifiesto dice si el código que corrió tenía cambios sin commit
+        arbol_limpio = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], capture_output=True,
+                                      text=True, check=True).stdout.strip() == ""
+    except Exception:  # noqa: BLE001
+        arbol_limpio = None
     e02 = run / "fuentes" / "e02.json"
+    malla = json.loads((run / "grid" / "grid.json").read_text(encoding="utf-8"))
+    objetivos = {c: (json.loads((run / "objetivos" / f"objetivos_{c}.json").read_text(encoding="utf-8"))
+                     if (run / "objetivos" / f"objetivos_{c}.json").exists() else "no disponible")
+                 for c in ("luna", "marte")}
+    # campos de licencia restringida (ADR-007, regla 6): no salen en ningún archivo público
+    local_only = sorted({f"objetivos.{c}.{campo}" for c, o in objetivos.items() if isinstance(o, dict)
+                         for campo in o.get("local_only", [])})
     manifiesto = {
         "generado": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "commit": commit,
-        "malla": json.loads((run / "grid" / "grid.json").read_text(encoding="utf-8")),
+        "arbol_limpio": arbol_limpio,
+        "nivel_healpix": malla.get("nivel"),
+        "n_celdas": malla.get("celdas"),
+        "malla": malla,
         "fuentes_e02": json.loads(e02.read_text(encoding="utf-8"))["fuentes"] if e02.exists() else "no disponible",
         "columnas": columnas,
         "relectura_independiente": relectura,
-        "objetivos": {c: (json.loads((run / "objetivos" / f"objetivos_{c}.json").read_text(encoding="utf-8"))
-                          if (run / "objetivos" / f"objetivos_{c}.json").exists() else "no disponible")
-                      for c in ("luna", "marte")},
+        "objetivos": objetivos,
         "indicadores": {
             "cobertura_por_columna": {k: v["cobertura_pct"] for k, v in columnas.items()},
             "acuerdo_con_analogos_documentados": "no medido (requiere el motor)",
         },
-        "local_only": [],
+        "local_only": local_only,
         "avisos": avisos,
         "fallos": fallos,
     }
