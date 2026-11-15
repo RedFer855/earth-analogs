@@ -6,7 +6,10 @@
 3. Ubicación del máximo de cada columna.
 4. manifest.json: malla, columnas con su entrada, fuentes de E-02, commit y fecha.
 
-Uso: python e13_manifiesto.py [muestra]
+El paso 1 y el 3 se guardan por columna en $RUN/cache/e13_columnas.json: una columna se vuelve a leer solo si cambió
+su .f32, su .json o la malla (tamaño y fecha de modificación). --completo ignora la caché.
+
+Uso: python e13_manifiesto.py [muestra] [--completo]
 """
 
 from __future__ import annotations
@@ -26,11 +29,69 @@ from comun_tabla import cargar_malla
 
 gdal.UseExceptions()
 SEMILLA = 20261114
+VERSION_CACHE = 1
 
 
-def _pixel(ruta: str, lat: float, lon: float, tipo: str):
-    """Lee un píxel con ReadRaster crudo: camino distinto del de los pasos del ETL."""
-    ds = gdal.Open(ruta)
+def _huella(ruta: Path) -> list[int]:
+    s = ruta.stat()
+    return [s.st_size, s.st_mtime_ns]
+
+
+def revisar_columnas(run: Path, ipix, lat, lon, completo: bool = False) -> tuple[dict, list[str], int]:
+    """Comprueba cada columna (largo, infinitos) y ubica su máximo; reusa lo de la caché si nada cambió.
+
+    Devuelve (entradas por columna, fallos, columnas que se leyeron del disco).
+    """
+    ruta_cache = run / "cache" / "e13_columnas.json"
+    malla = _huella(run / "grid" / "ipix.u32") + _huella(run / "grid" / "lat.f32") + _huella(run / "grid" / "lon.f32")
+    cache = {}
+    if ruta_cache.exists() and not completo:
+        try:
+            previa = json.loads(ruta_cache.read_text(encoding="utf-8"))
+            if previa.get("version") == VERSION_CACHE and previa.get("malla") == malla:
+                cache = previa.get("columnas", {})
+        except (json.JSONDecodeError, OSError):  # una caché rota se ignora y se rehace
+            cache = {}
+    columnas, fallos, nueva, releidas = {}, [], {}, 0
+    for js in sorted((run / "columns").glob("*.json")):
+        f32 = run / "columns" / f"{js.stem}.f32"
+        if not f32.exists():
+            continue
+        e = json.loads(js.read_text(encoding="utf-8"))
+        if f32.stat().st_size != ipix.size * 4:
+            fallos.append(f"{js.stem}: {f32.stat().st_size} bytes; se esperaban {ipix.size * 4}")
+            continue
+        huella = _huella(f32) + _huella(js)
+        previa = cache.get(js.stem)
+        if previa is not None and previa.get("huella") == huella:
+            r = previa
+        else:
+            v = np.fromfile(f32, dtype=np.float32)
+            releidas += 1
+            r = {"huella": huella, "infinitos": bool(np.isinf(v).any()), "maximo_en": None}
+            if np.isfinite(v).any():
+                i = int(np.nanargmax(v))
+                r["maximo_en"] = {"lat": float(lat[i]), "lon": float(lon[i]), "valor": float(v[i])}
+        if r["infinitos"]:
+            fallos.append(f"{js.stem}: tiene infinitos")
+        if r["maximo_en"] is not None:
+            e["maximo_en"] = r["maximo_en"]
+        columnas[js.stem] = e
+        nueva[js.stem] = r
+    ruta_cache.parent.mkdir(parents=True, exist_ok=True)
+    tmp = ruta_cache.with_suffix(".tmp")
+    tmp.write_text(json.dumps({"version": VERSION_CACHE, "malla": malla, "columnas": nueva}), encoding="utf-8")
+    tmp.replace(ruta_cache)
+    return columnas, fallos, releidas
+
+
+def _pixel(fuente, lat: float, lon: float, tipo: str):
+    """Lee un píxel con ReadRaster crudo: camino distinto del de los pasos del ETL.
+
+    `fuente` es una ruta o un dataset ya abierto. Con muchas celdas hay que pasar el dataset: abrir la ruta en cada
+    píxel descomprime una y otra vez los ZIP (/vsizip) y los HDF.
+    """
+    ds = gdal.Open(fuente) if isinstance(fuente, str) else fuente
     x0, dx, _, y0, _, dy = ds.GetGeoTransform()
     c, f = int(np.floor((lon - x0) / dx)), int(np.floor((lat - y0) / dy))
     if not (0 <= c < ds.RasterXSize and 0 <= f < ds.RasterYSize):
@@ -43,10 +104,11 @@ def _pixel(ruta: str, lat: float, lon: float, tipo: str):
 def releer_aridez(datos: Path, lat, lon, columna):
     z = f"/vsizip/{datos.as_posix()}/tierra/aridez-global-ai-v3_1/Global-AI_ET0__annual_v3_1.zip/Global-AI_ET0__annual_v3_1/ai_v31_yr.tif"
     dif = []
+    ds = gdal.Open(z)
     for la, lo, v in zip(lat, lon, columna):
         if la >= 80:
             continue
-        crudo = _pixel(z, float(la), float(lo), "<H")
+        crudo = _pixel(ds, float(la), float(lo), "<H")
         ref = np.nan if crudo in (None, 65535) else crudo / 10000
         if np.isfinite(ref) or np.isfinite(v):
             dif.append(abs(ref - v) if (np.isfinite(ref) and np.isfinite(v)) else np.inf)
@@ -62,12 +124,14 @@ def releer_ndvi_un_periodo(datos: Path, lat, lon, columna):
     viq = [s for s in sub if s.endswith('"CMG 0.05 Deg 16 days VI Quality"')][0]
     malos = 0
     revisados = 0
+    ds_n, ds_r, ds_q = gdal.Open(ndvi), gdal.Open(fiab), gdal.Open(viq)
     for la, lo, v in zip(lat, lon, columna):
-        n = _pixel(ndvi, float(la), float(lo), "<h")
-        r = _pixel(fiab, float(la), float(lo), "<b")
-        q = _pixel(viq, float(la), float(lo), "<H")
-        # misma regla que E-05 (fiabilidad 0 o 1 y tierra en VI Quality bits 11-13 == 1), leída por otro camino
-        tierra = q is not None and q != 65535 and ((q >> 11) & 0b111) == 1
+        n = _pixel(ds_n, float(la), float(lo), "<h")
+        r = _pixel(ds_r, float(la), float(lo), "<b")
+        q = _pixel(ds_q, float(la), float(lo), "<H")
+        # misma regla que E-05 (fiabilidad 0 o 1; VI Quality bits 11-13 en 1 tierra o 2 costa u orilla), escrita aparte
+        # a propósito: si E-05 cambia la regla y esta no, la relectura lo marca
+        tierra = q is not None and q != 65535 and ((q >> 11) & 0b111) in (1, 2)
         if n is None or r is None or r not in (0, 1) or not tierra or n <= -3000 or not np.isfinite(v):
             continue
         revisados += 1
@@ -127,29 +191,17 @@ def releer_pendiente(datos: Path, run: Path, ipix, lat, lon, n: int = 40) -> dic
 
 
 def main() -> int:
-    muestra = int(sys.argv[1]) if len(sys.argv) > 1 else 300
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    muestra = int(args[0]) if args else 300
     datos, run = ruta_env("DATOS"), ruta_env("RUN")
     t0 = time.time()
     ipix, lat, lon = cargar_malla(run)
     fallos, avisos = [], []
     if not np.all(np.diff(ipix.astype(np.int64)) > 0):
         fallos.append("ipix no es ascendente y único")
-    columnas = {}
-    for js in sorted((run / "columns").glob("*.json")):
-        if not (run / "columns" / f"{js.stem}.f32").exists():
-            continue
-        e = json.loads(js.read_text(encoding="utf-8"))
-        f32 = run / "columns" / f"{js.stem}.f32"
-        if f32.stat().st_size != ipix.size * 4:
-            fallos.append(f"{js.stem}: {f32.stat().st_size} bytes; se esperaban {ipix.size * 4}")
-            continue
-        v = np.fromfile(f32, dtype=np.float32)
-        if np.isinf(v).any():
-            fallos.append(f"{js.stem}: tiene infinitos")
-        if np.isfinite(v).any():
-            i = int(np.nanargmax(v))
-            e["maximo_en"] = {"lat": float(lat[i]), "lon": float(lon[i]), "valor": float(v[i])}
-        columnas[js.stem] = e
+    columnas, fallos_col, releidas = revisar_columnas(run, ipix, lat, lon, completo="--completo" in sys.argv)
+    fallos += fallos_col
+    print(f"columnas: {len(columnas)}, releídas {releidas}, tomadas de la caché {len(columnas) - releidas}", flush=True)
     rng = np.random.default_rng(SEMILLA)
     k = rng.choice(ipix.size, size=min(muestra, ipix.size), replace=False)
     relectura = {}

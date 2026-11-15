@@ -1,7 +1,9 @@
 """E-05: NDVI máximo (MOD13C1 V061, 2013-2022; ADR-004).
 
 Un periodo de 16 días entra si la fiabilidad del píxel es 0 o 1 (se descartan nieve, nubes y valores estimados)
-y si "VI Quality" (UInt16, nodata 65535) marca tierra en los bits 11-13 (código 1).
+y si "VI Quality" (UInt16, nodata 65535) marca tierra (código 1) o costa u orilla (código 2) en los bits 11-13. El
+agua (3 a 7) queda fuera. Aceptar solo el 1 dejaba sin NDVI a los píxeles de 0.05° con costa u orilla, que en el norte
+son la mayoría (medición en ADR-006).
 
 Códigos de máscara tierra/agua en VI Quality (bits 11-13, según la guía MOD13 C6.1):
   0 = océano somero (shallow ocean)
@@ -13,7 +15,9 @@ Códigos de máscara tierra/agua en VI Quality (bits 11-13, según la guía MOD1
   6 = océano moderado o continental (moderate or continental ocean)
   7 = océano profundo (deep ocean)
 
-El máximo exige al menos 3 periodos válidos. Columnas: ndvi_max, ndvi_n_periodos, ndvi_max_clim y ndvi_media.
+El máximo exige al menos 3 periodos válidos. ndvi_max_clim es el máximo de la curva climatológica: para cada uno de
+los 23 periodos del año, la media de los años con dato; luego el máximo entre periodos, con al menos 3 periodos con
+dato (basta la temporada sin nieve). Columnas: ndvi_max, ndvi_n_periodos, ndvi_max_clim y ndvi_media.
 
 Uso: python e05_ndvi.py
 """
@@ -32,18 +36,62 @@ from comun_tabla import cargar_malla, escribir_columna, muestrear, valor_en
 
 gdal.UseExceptions()
 MIN_PERIODOS = 3
-TIERRA_VI_QUALITY = 1
+CODIGOS_TIERRA_VI_QUALITY = (1, 2)  # tierra y costa u orilla; el agua (3 a 7) queda fuera
 VI_QUALITY_NODATA = 65535
 
 
 def es_tierra_vi_quality(vi_quality: np.ndarray) -> np.ndarray:
-    """True donde VI Quality (UInt16, nodata 65535) marca código 1 (tierra) en los bits 11-13."""
+    """True donde VI Quality (UInt16, nodata 65535) marca tierra (1) o costa u orilla (2) en los bits 11-13."""
     viq = np.asarray(vi_quality)
-    return (viq != VI_QUALITY_NODATA) & (((viq >> 11) & 0b111) == TIERRA_VI_QUALITY)
+    return (viq != VI_QUALITY_NODATA) & np.isin((viq >> 11) & 0b111, CODIGOS_TIERRA_VI_QUALITY)
+
+
+class CurvaClimatologica:
+    """Máximo de la curva climatológica del NDVI.
+
+    Se alimenta con los periodos ordenados por día del año: para cada día se promedian los años con dato y se guarda
+    el máximo entre días. Así no hace falta tener las 23 rejillas en memoria.
+    """
+
+    def __init__(self) -> None:
+        self.maximo = self.n_periodos = self._suma = self._cuenta = None
+        self._dia = None
+
+    def agregar(self, dia: int, v: np.ndarray) -> None:
+        if self._dia is not None and dia != self._dia:
+            self._cerrar()
+        if self._suma is None:
+            self._suma = np.zeros(v.shape, np.float64)
+            self._cuenta = np.zeros(v.shape, np.uint8)
+            self.maximo = np.full(v.shape, -np.inf, np.float32)
+            self.n_periodos = np.zeros(v.shape, np.uint8)
+        self._dia = dia
+        self._suma += np.nan_to_num(v)
+        self._cuenta += np.isfinite(v)
+
+    def _cerrar(self) -> None:
+        with np.errstate(invalid="ignore", divide="ignore"):
+            media = np.where(self._cuenta > 0, self._suma / self._cuenta, np.nan).astype(np.float32)
+        self.maximo = np.fmax(self.maximo, media)
+        self.n_periodos += self._cuenta > 0
+        self._suma.fill(0)
+        self._cuenta.fill(0)
+
+    def resultado(self, min_periodos: int = MIN_PERIODOS) -> np.ndarray:
+        if self._dia is not None:
+            self._cerrar()
+            self._dia = None
+        return np.where(self.n_periodos >= min_periodos, self.maximo, np.nan).astype(np.float32)
+
+
+def anio_y_dia(nombre: str) -> tuple[int, int]:
+    """Año y día del año de un archivo MOD13C1.AAAADDD..."""
+    s = nombre.split(".")[1]
+    return int(s[1:5]), int(s[5:8])
 
 
 def filtrar_ndvi(ndvi: np.ndarray, fiab: np.ndarray, vi_quality: np.ndarray) -> np.ndarray:
-    """Filtra un periodo MOD13C1 a tierra (VI Quality bits 11-13 == 1), fiabilidad 0 o 1 y NDVI > -3000."""
+    """Filtra un periodo MOD13C1 a tierra o costa (VI Quality bits 11-13 en 1 o 2), fiabilidad 0 o 1 y NDVI > -3000."""
     ok = (fiab >= 0) & (fiab <= 1) & (ndvi > -3000) & es_tierra_vi_quality(vi_quality)
     return np.where(ok, np.asarray(ndvi, dtype=np.float32) / 10000, np.nan)
 
@@ -58,14 +106,15 @@ def _sub(ruta: str, clave: str):
 def main() -> int:
     datos, run = ruta_env("DATOS"), ruta_env("RUN")
     t0 = time.time()
-    archivos = sorted((datos / "tierra" / "vegetacion-mod13c1-2013-2022").glob("*.hdf"))
+    # por día del año y después por año: la curva climatológica se arma día por día
+    archivos = sorted((datos / "tierra" / "vegetacion-mod13c1-2013-2022").glob("*.hdf"),
+                      key=lambda a: anio_y_dia(a.name)[::-1])
     if len(archivos) != 230:
         print(f"ERROR: se esperaban 230 periodos; hay {len(archivos)}")
         return 1
     maximo = cuenta = geo = suma = None
-    max_anio: dict[int, np.ndarray] = {}
+    curva = CurvaClimatologica()
     for i, a in enumerate(archivos, 1):
-        anio = int(a.name.split(".")[1][1:5])
         ndvi, geo = _sub(str(a), '"CMG 0.05 Deg 16 days NDVI"')
         fiab, _ = _sub(str(a), '"CMG 0.05 Deg 16 days pixel reliability"')
         viq, _ = _sub(str(a), '"CMG 0.05 Deg 16 days VI Quality"')
@@ -77,29 +126,18 @@ def main() -> int:
         maximo = np.fmax(maximo, v)
         cuenta += np.isfinite(v)
         suma += np.nan_to_num(v)
-        if anio not in max_anio:
-            max_anio[anio] = [np.full(v.shape, -np.inf, np.float32), np.zeros(v.shape, np.uint8)]
-        max_anio[anio][0] = np.fmax(max_anio[anio][0], v)
-        max_anio[anio][1] += np.isfinite(v)
+        curva.agregar(anio_y_dia(a.name)[1], v)
         if i % 46 == 0:
             print(f"  {i}/230 periodos, {time.time() - t0:.0f} s", flush=True)
     maximo = np.where(cuenta >= MIN_PERIODOS, maximo, np.nan)
     with np.errstate(invalid="ignore", divide="ignore"):
         media = np.where(cuenta >= MIN_PERIODOS, suma / cuenta, np.nan).astype(np.float32)
-    # climatología del máximo: media de los máximos anuales (cada año con al menos 3 periodos válidos)
-    s_clim = np.zeros(maximo.shape, np.float64)
-    n_clim = np.zeros(maximo.shape, np.uint8)
-    for mx, n in max_anio.values():
-        ok = n >= MIN_PERIODOS
-        s_clim += np.where(ok, mx, 0)
-        n_clim += ok
-    del max_anio
-    with np.errstate(invalid="ignore", divide="ignore"):
-        clim = np.where(n_clim >= 5, s_clim / n_clim, np.nan).astype(np.float32)
+    clim = curva.resultado()
+    del curva
     ipix, lat, lon = cargar_malla(run)
     col = muestrear(maximo, lat, lon, geo)
     n = muestrear(cuenta.astype(np.float32), lat, lon, geo)
-    filtro = "VI Quality bits 11-13 == 1 (solo tierra); fiabilidad 0 o 1"
+    filtro = "VI Quality bits 11-13 en 1 o 2 (tierra y costa u orilla; sin agua); fiabilidad 0 o 1"
     meta = {
         "fuente": "MODIS Terra MOD13C1 V061, 2013-2022 (230 periodos de 16 días)",
         "url": "https://lpdaac.usgs.gov/products/mod13c1v061/",
@@ -112,7 +150,8 @@ def main() -> int:
         escribir_columna(run, "ndvi_n_periodos", n, {**meta, "unidad": "periodos"}),
         escribir_columna(run, "ndvi_max_clim", muestrear(clim, lat, lon, geo), {
             **meta, "unidad": "adimensional",
-            "metodo": f"{filtro}; media de los máximos anuales; >= 3 periodos por año y >= 5 años; centro de celda"}),
+            "metodo": (f"{filtro}; máximo de la curva climatológica (media 2013-2022 de cada uno de los 23 periodos "
+                       "de 16 días, y máximo entre periodos); >= 3 periodos con dato; centro de celda")}),
         escribir_columna(run, "ndvi_media", muestrear(media, lat, lon, geo), {
             **meta, "unidad": "adimensional",
             "metodo": f"{filtro}; media de los periodos válidos; >= 3 periodos; centro de celda"}),
