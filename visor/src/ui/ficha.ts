@@ -4,6 +4,7 @@ import {
   pareceHielo,
   type Celda,
   type CuerpoJson,
+  type EstabilidadJson,
   type Indice,
   type Origen,
   type PuntoFeature,
@@ -84,7 +85,12 @@ export class FichaCandidato {
     this.raiz.innerHTML = '';
   }
 
-  mostrar(candidato: Celda, resultado: ResultadoJson, indice: Indice): void {
+  mostrar(
+    candidato: Celda,
+    resultado: ResultadoJson,
+    indice: Indice,
+    estabilidad?: EstabilidadJson | null,
+  ): void {
     this.candidatoActual = candidato;
     this.raiz.classList.remove('oculto');
 
@@ -215,6 +221,15 @@ export class FichaCandidato {
         </section>`
       : '';
 
+    const estObj = estabilidad?.objetivos?.[resultado.sitio];
+    const estCelda = estObj?.celdas.find((c) => c.ipix === candidato.ipix);
+    const bloqueEstabilidad = estCelda
+      ? `<section class="bloque">
+          <h2>Estabilidad entre escenarios</h2>
+          <p>Aparece en el <strong>${(estCelda.fraccion * 100).toFixed(0)}%</strong> de los escenarios (${estCelda.aparece_en}/${estObj?.n_escenarios ?? '?'}). Mediana S: ${(estCelda.s_mediana * 100).toFixed(1)}% (rango ${(estCelda.s_min * 100).toFixed(1)}%–${(estCelda.s_max * 100).toFixed(1)}%).</p>
+        </section>`
+      : '';
+
     this.pinActual = null;
     this.raiz.innerHTML = `
       <header class="ficha-cabecera">
@@ -246,6 +261,7 @@ export class FichaCandidato {
       </section>
       ${bloqueDiagnostico}
       ${bloqueCercaDe}
+      ${bloqueEstabilidad}
       ${bloqueCuerpos}
       <section class="bloque">
         <h2>Fuentes</h2>

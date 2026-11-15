@@ -280,6 +280,50 @@ html, body, #globo {
 .coro-ticks { display: flex; justify-content: space-between; font-size: 10px; color: #cbd5e1; margin-top: 3px; }
 .coro-fuente { font-size: 10px; color: #94a3b8; margin-top: 4px; }
 
+.barra-estado {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  pointer-events: auto;
+  z-index: 15;
+}
+.fps-badge { font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+.panel-objetivo {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  height: 260px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  pointer-events: auto;
+  z-index: 16;
+}
+.panel-objetivo.oculto { display: none; }
+.panel-objetivo-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+.globo-objetivo-lienzo { flex: 1; position: relative; }
+
 @media (max-width: 800px) {
   #ui {
     display: flex;

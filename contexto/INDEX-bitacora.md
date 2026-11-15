@@ -5,6 +5,7 @@ Todas las sesiones vigentes: una por una las del último mes con notas y del ant
 por su resumen mensual. No se inyecta al arrancar: se consulta cuando la pregunta es sobre el trabajo pasado.
 Sesiones: `sesion · autor · agente · fecha` — resumen.
 
+- [[2026-11-15-fernando-visor-pulido]] · sesion · fernando · antigravity · 2026-11-15 — Fase 5 del visor: segundo globo Luna/Marte con Moon Trek / Mars Trek WMTS sin token, lectura opcional de estabilidad.json en la ficha del candidato y medidor de FPS en vivo.
 - [[2026-11-15-fernando-visor-pines]] · sesion · fernando · antigravity · 2026-11-15 — Fase 3 del visor: capa de 332 pines agrupables (tubos de lava, cráteres, salares) con ficha de fuente y atribución, bloque cerca_de en la ficha del candidato y panel de correlación de entornos.
 - [[2026-11-15-fernando-visor-busqueda]] · sesion · fernando · antigravity · 2026-11-15 — Fase 4 del visor: pestaña Buscar con deslizadores y presets (Como Jezero / Como Shackleton) sobre las 12 capas nivel 7 de E-21, mapa coroplético con p1-p99 y geometría HEALPix nested en TypeScript.
 - [[2026-11-15-fernando-visor-base]] · sesion · fernando · antigravity · 2026-11-15 — Visor web ligero (CesiumJS + Vite + TypeScript) que lee metrics.json y resultados/terreno/<sitio>.json, pinta 200 candidatos en un Primitive coloreado por nota y muestra la ficha de coincidencias, diferencias, temperatura y contexto planetario.

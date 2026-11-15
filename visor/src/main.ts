@@ -11,15 +11,18 @@ import {
 } from './datos/capas7';
 import {
   cargarCorrelacion,
+  cargarEstabilidad,
   cargarIndice,
   cargarPuntos,
   cargarResultado,
   escaparHtml,
   type Celda,
+  type EstabilidadJson,
   type ResultadoJson,
   type Sitio,
 } from './datos/contrato';
 import { crearGlobo } from './globo';
+import { GloboObjetivo } from './globo-objetivo';
 import { PanelBusqueda } from './ui/busqueda';
 import { FichaCandidato } from './ui/ficha';
 import { PanelLateral } from './ui/panel';
@@ -78,8 +81,68 @@ async function iniciar(): Promise<void> {
   const indice = indiceRes.valor;
 
   let resultadoActual: ResultadoJson | null = null;
+  let sitioActual: Sitio | null = null;
   let sitioActualId: string | null = null;
   let solicitudId = 0;
+  let estabilidad: EstabilidadJson | null = null;
+
+  void cargarEstabilidad(BASE_DATOS).then((est) => {
+    estabilidad = est;
+  });
+
+  const barra = document.createElement('div');
+  barra.className = 'barra-estado';
+  barra.innerHTML = `<span class="fps-badge" data-fps>-- FPS</span>
+    <button type="button" class="btn-mini" data-accion="toggle-objetivo" disabled>Ver objetivo (Luna/Marte)</button>`;
+  ui.appendChild(barra);
+
+  const panelObj = document.createElement('div');
+  panelObj.className = 'panel-objetivo oculto';
+  panelObj.innerHTML = `<div class="panel-objetivo-cab">
+      <span data-obj-titulo>Objetivo</span>
+      <button type="button" class="btn-cerrar" data-accion="cerrar-objetivo" aria-label="Cerrar globo objetivo">×</button>
+    </div>
+    <div class="globo-objetivo-lienzo"></div>`;
+  ui.appendChild(panelObj);
+
+  const lienzoObj = panelObj.querySelector<HTMLElement>('.globo-objetivo-lienzo')!;
+  const globoObj = new GloboObjetivo(lienzoObj);
+  let objVisible = false;
+
+  const btnObj = barra.querySelector<HTMLButtonElement>('[data-accion="toggle-objetivo"]')!;
+  const actualizarGloboObj = (): void => {
+    if (!objVisible || !sitioActual) return;
+    const tit = panelObj.querySelector<HTMLElement>('[data-obj-titulo]');
+    if (tit) tit.textContent = `${sitioActual.id} · ${sitioActual.nombre}`;
+    globoObj.mostrarSitio(sitioActual);
+  };
+
+  btnObj.addEventListener('click', () => {
+    objVisible = !objVisible;
+    panelObj.classList.toggle('oculto', !objVisible);
+    btnObj.textContent = objVisible ? 'Ocultar objetivo' : 'Ver objetivo (Luna/Marte)';
+    if (objVisible) actualizarGloboObj();
+  });
+  panelObj.querySelector('[data-accion="cerrar-objetivo"]')?.addEventListener('click', () => {
+    objVisible = false;
+    panelObj.classList.add('oculto');
+    btnObj.textContent = 'Ver objetivo (Luna/Marte)';
+  });
+
+  const fpsEl = barra.querySelector<HTMLElement>('[data-fps]')!;
+  let frames = 0;
+  let ultimoT = performance.now();
+  const medirFps = (ahora: number): void => {
+    frames += 1;
+    if (ahora - ultimoT >= 500) {
+      const fps = Math.round((frames * 1000) / (ahora - ultimoT));
+      fpsEl.textContent = `${fps} FPS`;
+      frames = 0;
+      ultimoT = ahora;
+    }
+    requestAnimationFrame(medirFps);
+  };
+  requestAnimationFrame(medirFps);
 
   const capa = new CapaCandidatos(viewer);
   const capaPines = new CapaPines(viewer);
@@ -111,7 +174,7 @@ async function iniciar(): Promise<void> {
     if (!candidato) return;
     capa.resaltar(rango);
     panel.marcarCandidato(rango);
-    ficha.mostrar(candidato, resultadoActual, indice);
+    ficha.mostrar(candidato, resultadoActual, indice, estabilidad);
     actualizarUrl(sitioActualId, rango);
     if (volar) {
       volarA(viewer, candidato.centro.lat, candidato.centro.lon);
@@ -125,7 +188,10 @@ async function iniciar(): Promise<void> {
     candidatoInicial: number | null = null,
   ): Promise<void> => {
     const miSolicitud = ++solicitudId;
+    sitioActual = sitio;
     sitioActualId = sitio.id;
+    btnObj.disabled = false;
+    actualizarGloboObj();
     resultadoActual = null;
     capa.limpiar();
     ficha.ocultar();
