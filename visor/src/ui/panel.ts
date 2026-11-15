@@ -1,10 +1,20 @@
-import { escaparHtml, sitiosPorCuerpo, type Celda, type Indice, type Sitio } from '../datos/contrato';
+import {
+  escaparHtml,
+  sitiosPorCuerpo,
+  type Celda,
+  type CorrelacionJson,
+  type Indice,
+  type Sitio,
+  type TipoPunto,
+} from '../datos/contrato';
+import { etiquetaTipoPunto } from '../capas/pines';
 
 export type CuerpoTab = 'luna' | 'marte';
 
 export interface PanelCallbacks {
   alElegirSitio: (sitio: Sitio) => void;
   alElegirCandidato: (rango: number) => void;
+  alCambiarPines?: (visibles: Set<TipoPunto>) => void;
 }
 
 export class PanelLateral {
@@ -16,6 +26,9 @@ export class PanelLateral {
   private candidatoActivoRango: number | null = null;
   private candidatosActuales: Celda[] = [];
   private mensajeEstado: string | null = null;
+  private conteosPines: Record<TipoPunto, number> | null = null;
+  private pinesVisibles = new Set<TipoPunto>(['tubo_lava', 'crater_impacto', 'playa_salar']);
+  private correlacion: CorrelacionJson | null = null;
 
   constructor(contenedor: HTMLElement, indice: Indice, callbacks: PanelCallbacks) {
     this.grupos = sitiosPorCuerpo(indice);
@@ -62,6 +75,28 @@ export class PanelLateral {
       }
     });
 
+    this.raiz.addEventListener('change', (ev) => {
+      const input = ev.target as HTMLInputElement | null;
+      if (!input || input.dataset.pinTipo === undefined) return;
+      const tipo = input.dataset.pinTipo as TipoPunto;
+      if (input.checked) {
+        this.pinesVisibles.add(tipo);
+      } else {
+        this.pinesVisibles.delete(tipo);
+      }
+      this.callbacks.alCambiarPines?.(new Set(this.pinesVisibles));
+    });
+
+    this.render();
+  }
+
+  configurarPines(conteos: Record<TipoPunto, number>): void {
+    this.conteosPines = conteos;
+    this.render();
+  }
+
+  configurarCorrelacion(correlacion: CorrelacionJson | null): void {
+    this.correlacion = correlacion;
     this.render();
   }
 
@@ -157,7 +192,60 @@ export class PanelLateral {
         </button>
       </div>
       <div class="lista-scroll lista-sitios">${itemsSitios}</div>
+      ${this.renderPines()}
+      ${this.renderCorrelacion()}
       ${bloqueCandidatos}
     `;
+  }
+
+  private renderPines(): string {
+    if (!this.conteosPines) return '';
+    const tipos: TipoPunto[] = ['tubo_lava', 'crater_impacto', 'playa_salar'];
+    const checks = tipos
+      .map((t) => {
+        const checked = this.pinesVisibles.has(t) ? ' checked' : '';
+        return `<label class="pin-check">
+          <input type="checkbox" data-pin-tipo="${t}"${checked} />
+          <span class="pin-dot pin-${t}"></span>
+          <span>${escaparHtml(etiquetaTipoPunto(t))} (${this.conteosPines?.[t] ?? 0})</span>
+        </label>`;
+      })
+      .join('');
+    return `<div class="bloque-pines">
+      <div class="subtitulo">Pines de referencia</div>
+      <div class="pines-checks">${checks}</div>
+    </div>`;
+  }
+
+  private renderCorrelacion(): string {
+    if (!this.correlacion) return '';
+    const grupos = Object.entries(this.correlacion.resultados)
+      .map(([tipo, g]) => {
+        const nombre = etiquetaTipoPunto(tipo as TipoPunto);
+        const top = g.filas
+          .slice()
+          .sort((a, b) => a.p_holm - b.p_holm)
+          .slice(0, 4)
+          .map(
+            (f) => `<tr>
+              <td>${escaparHtml(f.etiqueta)}</td>
+              <td class="num">${f.mediana_sitio.toFixed(2)} vs ${f.mediana_control.toFixed(2)}</td>
+              <td class="num">${f.cliff_delta.toFixed(2)}</td>
+            </tr>`,
+          )
+          .join('');
+        return `<div class="corr-grupo">
+          <div class="corr-titulo">${escaparHtml(nombre)} (${g.sitios_usados}/${g.sitios}, r=${g.radio_km} km)</div>
+          <table class="corr-tabla">
+            <thead><tr><th>Variable</th><th class="num">Sitio vs ctrl</th><th class="num">δ</th></tr></thead>
+            <tbody>${top}</tbody>
+          </table>
+        </div>`;
+      })
+      .join('');
+    return `<details class="bloque-correlacion">
+      <summary>Correlación de entornos (Cliff δ)</summary>
+      <div class="corr-contenido">${grupos}</div>
+    </details>`;
   }
 }

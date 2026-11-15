@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
+  cargarCorrelacion,
   cargarIndice,
+  cargarPuntos,
   cargarResultado,
   colorNota,
   escaparHtml,
@@ -103,6 +105,38 @@ try {
     if (ruta.endsWith('ok/resultados/terreno/JZ.json')) {
       return new Response(jzRaw, { status: 200 });
     }
+    if (ruta.endsWith('ok/puntos.geojson')) {
+      return new Response(
+        JSON.stringify({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              geometry: { type: 'Point', coordinates: [2.46, 31.12] },
+              properties: {
+                id: 't1',
+                tipo: 'tubo_lava',
+                nombre: 'Tubo demo',
+                fuente: 'Pyroduct v3.0',
+                licencia: 'CC BY 4.0',
+                atribucion: 'Pyroduct',
+              },
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+    }
+    if (ruta.endsWith('ok/point-correlation.json')) {
+      return new Response(
+        JSON.stringify({
+          resultados: {
+            tubo_lava: { sitios: 55, sitios_usados: 50, radio_km: 5, filas: [] },
+          },
+        }),
+        { status: 200 },
+      );
+    }
     return new Response('Not found', { status: 404 });
   }) as typeof fetch;
 
@@ -112,6 +146,12 @@ try {
   assert.equal(okIndice.sitios_objetivo.length, 2);
   const okRes = await cargarResultado('ok/', 'resultados/terreno/JZ.json');
   assert.equal(okRes.candidatos.length, 3);
+  const okPuntos = await cargarPuntos('ok/');
+  assert.equal(okPuntos?.features.length, 1);
+  assert.equal(await cargarPuntos('faltante/'), null);
+  const okCorr = await cargarCorrelacion('ok/');
+  assert.equal(okCorr?.resultados.tubo_lava?.sitios_usados, 50);
+  assert.equal(await cargarCorrelacion('faltante/'), null);
 } finally {
   globalThis.fetch = fetchOriginal;
 }

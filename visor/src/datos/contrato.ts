@@ -33,6 +33,12 @@ export type VerticesCelda = [
   [number, number],
 ];
 
+export interface CercaDe {
+  tubo_lava_km?: number | null;
+  crater_km?: number | null;
+  salar_km?: number | null;
+}
+
 export interface Celda {
   rango: number;
   ipix: number;
@@ -43,6 +49,7 @@ export interface Celda {
   variables: Record<string, VarCelda>;
   cobertura: Cobertura;
   diagnostico?: Record<string, Diagnostico>;
+  cerca_de?: CercaDe;
   marcas: string[];
   analogo_conocido: string | null;
   region: string | null;
@@ -246,6 +253,84 @@ export function cargarIndice(base = 'datos/'): Promise<Indice> {
 
 export function cargarResultado(base: string, archivo: string): Promise<ResultadoJson> {
   return pedirJson<ResultadoJson>(unirRuta(base, archivo), `el resultado ${archivo}`);
+}
+
+export type TipoPunto = 'tubo_lava' | 'crater_impacto' | 'playa_salar';
+
+export interface PuntoPropiedades {
+  id: string;
+  tipo: TipoPunto;
+  nombre: string;
+  diametro_km?: number | null;
+  confirmado?: boolean;
+  fuente: string;
+  url?: string | null;
+  licencia: string;
+  atribucion: string;
+}
+
+export interface PuntoFeature {
+  type: 'Feature';
+  id?: string;
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  properties: PuntoPropiedades;
+}
+
+export interface PuntosGeoJson {
+  type: 'FeatureCollection';
+  features: PuntoFeature[];
+}
+
+export interface FilaCorrelacion {
+  variable: string;
+  etiqueta: string;
+  n_sitios: number;
+  mediana_sitio: number;
+  mediana_control: number;
+  diferencia_mediana: number;
+  cliff_delta: number;
+  p: number;
+  p_holm: number;
+}
+
+export interface GrupoCorrelacion {
+  sitios: number;
+  sitios_usados: number;
+  radio_km: number;
+  filas: FilaCorrelacion[];
+}
+
+export interface CorrelacionJson {
+  meta?: Record<string, unknown>;
+  resultados: Record<string, GrupoCorrelacion>;
+}
+
+async function pedirOpcional<T>(url: string): Promise<T | null> {
+  const res = await fetch(url);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`No se pudo cargar ${url} (HTTP ${res.status}).`);
+  }
+  return (await res.json()) as T;
+}
+
+export async function cargarPuntos(base = 'datos/'): Promise<PuntosGeoJson | null> {
+  const data = await pedirOpcional<PuntosGeoJson>(unirRuta(base, 'puntos.geojson'));
+  if (!data || data.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
+    return null;
+  }
+  return data;
+}
+
+export async function cargarCorrelacion(base = 'datos/'): Promise<CorrelacionJson | null> {
+  const data = await pedirOpcional<CorrelacionJson>(unirRuta(base, 'point-correlation.json'));
+  if (!data || !data.resultados || typeof data.resultados !== 'object') {
+    return null;
+  }
+  return data;
 }
 
 export function colorNota(n: number): [number, number, number] {

@@ -198,6 +198,48 @@ html, body, #globo {
 .error-fatal h2 { margin: 0 0 6px; font-size: 15px; }
 .error-fatal p { margin: 0; font-size: 13px; }
 
+.bloque-pines, .bloque-correlacion {
+  padding: 8px 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+.pines-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 4px;
+}
+.pin-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pin-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.pin-tubo_lava { background: #f97316; }
+.pin-crater_impacto { background: #38bdf8; }
+.pin-playa_salar { background: #eab308; }
+.bloque-correlacion summary {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+.corr-contenido {
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.corr-grupo { margin-bottom: 10px; }
+.corr-titulo { font-size: 11px; font-weight: 600; color: #94a3b8; margin-bottom: 3px; }
+.corr-tabla { width: 100%; border-collapse: collapse; font-size: 11px; }
+.corr-tabla th, .corr-tabla td { padding: 2px 4px; border-bottom: 1px solid rgba(148, 163, 184, 0.12); }
+
 @media (max-width: 800px) {
   #ui {
     display: flex;

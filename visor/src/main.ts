@@ -2,12 +2,14 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import './style.css';
 import * as Cesium from 'cesium';
 import { CapaCandidatos } from './capas/candidatos';
+import { CapaPines } from './capas/pines';
 import {
+  cargarCorrelacion,
   cargarIndice,
+  cargarPuntos,
   cargarResultado,
   escaparHtml,
   type Celda,
-  type Indice,
   type ResultadoJson,
   type Sitio,
 } from './datos/contrato';
@@ -73,6 +75,7 @@ async function iniciar(): Promise<void> {
   let solicitudId = 0;
 
   const capa = new CapaCandidatos(viewer);
+  const capaPines = new CapaPines(viewer);
   let panel: PanelLateral;
 
   const ficha = new FichaCandidato(
@@ -85,7 +88,15 @@ async function iniciar(): Promise<void> {
       actualizarUrl(sitioActualId, null);
       panel.marcarCandidato(null);
     },
+    (lat, lon) => volarA(viewer, lat, lon),
   );
+
+  capaPines.definirAlElegir((punto) => {
+    panel.marcarCandidato(null);
+    ficha.mostrarPin(punto);
+    const [lon, lat] = punto.geometry.coordinates;
+    volarA(viewer, lat, lon);
+  });
 
   const seleccionarCandidato = (rango: number, volar = true): void => {
     if (!resultadoActual) return;
@@ -156,6 +167,17 @@ async function iniciar(): Promise<void> {
       void seleccionarSitio(sitio, null);
     },
     alElegirCandidato: (rango) => seleccionarCandidato(rango, true),
+    alCambiarPines: (visibles) => capaPines.definirVisibles(visibles),
+  });
+
+  void cargarPuntos(BASE_DATOS).then((geojson) => {
+    if (!geojson) return;
+    const conteos = capaPines.cargar(geojson);
+    panel.configurarPines(conteos);
+  });
+
+  void cargarCorrelacion(BASE_DATOS).then((corr) => {
+    if (corr) panel.configurarCorrelacion(corr);
   });
 
   const params = new URLSearchParams(window.location.search);

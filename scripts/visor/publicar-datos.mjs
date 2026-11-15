@@ -11,12 +11,22 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const args = process.argv.slice(2);
-if (args.length !== 1) {
-  console.error('Uso: node scripts/visor/publicar-datos.mjs <salida-dir>');
+if (args.length < 1) {
+  console.error('Uso: node scripts/visor/publicar-datos.mjs <salida-dir> [--puntos <puntos.geojson>]');
   process.exit(1);
 }
 
 const dirSalida = resolve(args[0]);
+let rutaPuntos = null;
+for (let i = 1; i < args.length; i += 1) {
+  if (args[i] === '--puntos' && args[i + 1]) {
+    rutaPuntos = resolve(args[i + 1]);
+    i += 1;
+  } else {
+    console.error(`Argumento desconocido: ${args[i]}`);
+    process.exit(1);
+  }
+}
 const raizRepo = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const dirDestino = join(raizRepo, 'visor', 'public', 'datos');
 
@@ -75,6 +85,25 @@ for (const ruta of archivosOrigen) {
   }
   const rel = relative(dirSalida, ruta);
   preparados.push({ rel, contenido: minificado });
+}
+
+const extras = [];
+if (rutaPuntos) {
+  extras.push({ ruta: rutaPuntos, rel: 'puntos.geojson' });
+}
+const rutaCorrelacion = join(raizRepo, 'docs', 'analisis', 'point-correlation.json');
+if (existsSync(rutaCorrelacion)) {
+  extras.push({ ruta: rutaCorrelacion, rel: 'point-correlation.json' });
+}
+
+for (const extra of extras) {
+  const texto = readFileSync(extra.ruta, 'utf8');
+  if (texto.includes('local_only')) {
+    console.error(`Abortado: ${extra.ruta} contiene "local_only".`);
+    process.exit(1);
+  }
+  const minificado = JSON.stringify(JSON.parse(texto));
+  preparados.push({ rel: extra.rel, contenido: minificado });
 }
 
 if (existsSync(dirDestino)) {
