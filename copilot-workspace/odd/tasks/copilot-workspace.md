@@ -40,7 +40,7 @@ through `?embed=1`.
 - [x] C4 — Buses: `copilotEventBus.ts` (`nasa:visor-focus-sites`, `nasa:visor-select-cell`, `nasa:visor-tour-step`),
   `simulatorTransport.ts` (iframe `?embed=1` + `postMessage`, lazy mount, `PAUSE`/`RESUME` on hide, alert
   subscription, clean destroy). Test-first for the pure parts.
-- [ ] C5 — UI: `RecommendationCards.ts`, `ReadinessMatrix.ts`, `ActionChips.ts`, `CopilotPanel.ts`, minimal CesiumJS
+- [x] C5 — UI: `RecommendationCards.ts`, `ReadinessMatrix.ts`, `ActionChips.ts`, `CopilotPanel.ts`, minimal CesiumJS
   viewer with pins; safe rendering with `textContent`.
 - [ ] C6 — Gemini: `systemPrompt.ts`, `simulatorTools.ts` (4 function calls), `geminiClient.ts` (`@google/genai`), with
   the anti-hallucination rule and the offline fallback.
@@ -71,7 +71,12 @@ through `?embed=1`.
 - 2026-11-15: C4 RED: bus and transport test files failed with "Cannot find module"; GREEN: 49/49. The transport
   takes DOM seams (`TransportEnv`) so lazy mount, PAUSE/RESUME, origin checks and listener cleanup run in Node.
   No sandbox change needed: `mountSandbox` already reads `?origin=` and restricts its `message` listener to it.
+  Commit `967a367`.
+- 2026-11-15: C5 RED: `ActionChips.test.ts` failed with "Cannot find module"; GREEN: 54/54. UI modules, CesiumJS
+  globe (offline NaturalEarthII, no ion token, lazy-loaded chunk) and `main.ts` wiring. tsc OK, build OK (Cesium
+  chunk 4.2 MB, warning only). Not checked in a browser yet (C7). The "warm the bit" chip from plan section 5 is
+  left out: the sandbox has no control for bit temperature.
 
 ## Next step
 
-C1–C5 (delegated writer), then C6 Gemini, then C7.
+C6 Gemini, then C7 browser acceptance (T1–T4).
