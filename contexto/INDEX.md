@@ -44,7 +44,7 @@ _(vacía)_
 
 ## 45-decisiones — ADR-NNN, estándares E-NN y decisiones pendientes DP-NN
 
-- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]] · [[ADR-010-motor-de-busqueda-sobre-la-tabla-del-etl]] · [[ADR-011-visor-web-sobre-el-contrato]]
+- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]] · [[ADR-010-motor-de-busqueda-sobre-la-tabla-del-etl]] · [[ADR-011-visor-web-sobre-el-contrato]] · [[ADR-012-mcp-y-asistente-con-clave-propia]]
 - _(tipo, estado y summary: ver contexto/INDEX-decisiones.md)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
@@ -68,7 +68,7 @@ _(vacía)_
 - [[2026-11-15-fernando-visor-pulido]] · sesion · fernando · antigravity · 2026-11-15 — Fase 5 del visor: segundo globo Luna/Marte con Moon Trek / Mars Trek WMTS sin token, lectura opcional de estabilidad.json en la ficha del candidato y medidor de FPS en vivo.
 - [[2026-11-15-fernando-visor-pines]] · sesion · fernando · antigravity · 2026-11-15 — Fase 3 del visor: capa de 332 pines agrupables (tubos de lava, cráteres, salares) con ficha de fuente y atribución, bloque cerca_de en la ficha del candidato y panel de correlación de entornos.
 - [[2026-11-15-fernando-visor-mapa-2025]] · sesion · fernando · antigravity · 2026-11-15 — Actualiza globo.ts para usar EOX Sentinel-2 cloudless 2025 por defecto (con respaldo a 2016, NASA GIBS Blue Marble y NaturalEarthII) y agrega selector de mapa base en la barra superior.
-- _(18 sesiones más: ver contexto/INDEX-bitacora.md)_
+- _(19 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 
