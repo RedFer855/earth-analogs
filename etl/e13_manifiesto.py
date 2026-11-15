@@ -66,8 +66,9 @@ def releer_ndvi_un_periodo(datos: Path, lat, lon, columna):
         n = _pixel(ndvi, float(la), float(lo), "<h")
         r = _pixel(fiab, float(la), float(lo), "<b")
         q = _pixel(viq, float(la), float(lo), "<H")
-        # misma regla que E-05 (fiabilidad 0 o 1 y tierra en VI Quality bits 11-13 == 1), leída por otro camino
-        tierra = q is not None and q != 65535 and ((q >> 11) & 0b111) == 1
+        # misma regla que E-05 (fiabilidad 0 o 1; VI Quality bits 11-13 en 1 tierra o 2 costa u orilla), escrita aparte
+        # a propósito: si E-05 cambia la regla y esta no, la relectura lo marca
+        tierra = q is not None and q != 65535 and ((q >> 11) & 0b111) in (1, 2)
         if n is None or r is None or r not in (0, 1) or not tierra or n <= -3000 or not np.isfinite(v):
             continue
         revisados += 1
