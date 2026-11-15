@@ -21,6 +21,13 @@ Audit trail of the data pipeline: who ran each step, with which tool, when, and 
 | `resultado`, `nota` | Outcome and free note |
 | `prev` | sha256 of the previous line; editing any line breaks the chain |
 
+## Parallel branches
+
+Each git worktree appends to its own copy of the log, so two branches that ran steps at the same time fork the chain
+at the same line. Lines are never re-chained by hand. On merge, `main` keeps its chain and the lines the branch added
+after the fork are kept as `etl-log-<branch>.jsonl`: the `prev` of its first line is the sha256 of the fork line in
+`etl-log.jsonl`, named in the note of a `verificacion` event that also records the file's sha256.
+
 ## Use
 
 ```bash
