@@ -36,6 +36,9 @@ la latitud en la Tierra (bloques de grados) y no coincidía con la de la Luna y 
 E-03 completo a 200 m: 118 min, cobertura 98.7 %. Corrió en un RUN aparte y luego se copió al compartido; las
 columnas anteriores se reemplazaron. E-13 se corrió después con `audit/audit.py` (su registro está en la rama de E-13).
 
+Coherencia entre cuerpos: `python etl/medir_coherencia_escala.py` sobre las columnas nuevas dio «21 sitios; dispersión
+máxima 0.91 puntos de percentil, media 0.45»; sobre las columnas del método anterior, 3.37 y 1.97.
+
 ## Pendiente
 
 - P-011: conectar la tabla con el motor de búsqueda; P-012: acuerdo con los análogos documentados, sin medir; P-013: permafrost al sur con NaN (ver `contexto/80-deuda/abierta.md`).

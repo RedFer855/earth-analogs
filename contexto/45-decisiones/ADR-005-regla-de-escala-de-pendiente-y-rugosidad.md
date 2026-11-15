@@ -63,7 +63,7 @@ Coherencia entre cuerpos (`etl/medir_coherencia_escala.py`, 2026-11-15): se toma
 pendiente, rugosidad y relieve de cada uno de los 21 sitios (9 regiones lunares y 12 sitios marcianos) dentro de la
 distribución terrestre. Con una escala común los tres percentiles de un sitio coinciden. Con los bloques de 200 m la
 dispersión (máximo menos mínimo) es de 0.91 puntos como máximo y 0.45 de media; con el método anterior era de 3.37
-y 1.97.
+y 1.97 (columnas de la corrida con bloques de 2×2 píxeles GLO-90, anterior a este cambio).
 
 ## 3. Diseño
 
