@@ -4,6 +4,7 @@ import * as Cesium from 'cesium';
 import { CapaCandidatos } from './capas/candidatos';
 import { CapaCapas7 } from './capas/capas7';
 import { CapaPines } from './capas/pines';
+import { CapaZonas } from './capas/zonas';
 import {
   cargarCapas7,
   evaluarCondiciones,
@@ -27,6 +28,7 @@ import { BarraNavegacion } from './ui/barra';
 import { PanelBusqueda } from './ui/busqueda';
 import { FichaCandidato } from './ui/ficha';
 import { PanelLateral } from './ui/panel';
+import { PanelZona } from './ui/panelZona';
 
 const BASE_DATOS = 'datos/';
 const ALTURA_VUELO_M = 150_000;
@@ -157,8 +159,15 @@ async function iniciar(): Promise<void> {
 
   const capa = new CapaCandidatos(viewer);
   const capaPines = new CapaPines(viewer);
-  new BarraNavegacion(ui, viewer);
+  const capaZonas = new CapaZonas(viewer);
   let panel: PanelLateral;
+  let seleccionarCandidato: (rango: number, volar?: boolean) => void = () => {};
+  const panelZona = new PanelZona(ui, BASE_DATOS, capaZonas, (rango) => {
+    seleccionarCandidato(rango, true);
+  });
+  new BarraNavegacion(ui, viewer, (coords, forma) => {
+    panelZona.mostrarAnalisis(coords, forma);
+  });
 
   const ficha = new FichaCandidato(
     ui,
@@ -180,7 +189,7 @@ async function iniciar(): Promise<void> {
     volarA(viewer, lat, lon);
   });
 
-  const seleccionarCandidato = (rango: number, volar = true): void => {
+  seleccionarCandidato = (rango: number, volar = true): void => {
     if (!resultadoActual) return;
     const candidato: Celda | undefined = resultadoActual.candidatos.find((c) => c.rango === rango);
     if (!candidato) return;
@@ -226,6 +235,7 @@ async function iniciar(): Promise<void> {
       resultadoActual = res;
       capa.mostrar(res.candidatos);
       panel.mostrarCandidatos(res.candidatos);
+      panelZona.configurarCandidatos(res.candidatos);
 
       if (candidatoInicial !== null) {
         const existe = res.candidatos.some((c) => c.rango === candidatoInicial);
@@ -259,6 +269,7 @@ async function iniciar(): Promise<void> {
     if (!geojson) return;
     const conteos = capaPines.cargar(geojson);
     panel.configurarPines(conteos);
+    panelZona.configurarPuntos(geojson);
   });
 
   void cargarCorrelacion(BASE_DATOS).then((corr) => {
@@ -268,6 +279,7 @@ async function iniciar(): Promise<void> {
   const capaCapas7 = new CapaCapas7(viewer);
   void cargarCapas7(`${BASE_DATOS}capas7/`).then((datos7) => {
     if (!datos7) return;
+    panelZona.configurarDatos7(datos7);
     const divBusqueda = document.createElement('div');
     const panelBusqueda = new PanelBusqueda(divBusqueda, datos7, {
       alAplicarBusqueda: async (condiciones, soloTodas) => {
