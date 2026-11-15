@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "earth-analogs": {
+      "command": "node",
+      "args": ["scripts/mcp/servidor-mcp.mjs"]
+    }
+  }
+}

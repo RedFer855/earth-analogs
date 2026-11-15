@@ -53,7 +53,7 @@ desktop.ini
 .claude/*
 !.claude/agents/
 !.claude/skills/
-.mcp.json
+# .mcp.json sí se versiona: registra el servidor MCP del repo (ADR-012); no lleva claves ni rutas personales
 mcp_config.json
 .atl/
 .gemini/
