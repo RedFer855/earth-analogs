@@ -36,7 +36,7 @@ quita las depresiones secas como el Valle de la Muerte ([[I-10-mascaras-de-agua]
    la misma regla, así que los tres cuerpos se miden a la misma escala.
 2. **Columnas de comparación y de ficha.** `slope_mean_deg` y `slope_std_deg` comparan. La rugosidad RMS y el relieve
    se calculan en una ventana de 5 × 5 bloques (1 km, al menos 19 válidos) con el mismo estimador en los tres cuerpos.
-   Nota: el motor privado hoy las usa como variables obligatorias; eso se decide en el equipo, no aquí.
+   Qué variables puntúan en el motor es decisión del equipo, no de este ADR.
 3. **Halo entre teselas:** cada ventana se lee con un borde de unos 0.02° tomado de las teselas vecinas, a través de
    un mosaico virtual (VRT), y se recorta después.
 4. **Ancho de celda desde la geotransformada de cada tesela,** porque el ancho en longitud cambia con la latitud.
@@ -50,12 +50,14 @@ quita las depresiones secas como el Valle de la Muerte ([[I-10-mascaras-de-agua]
 
 ### Medición del cambio (2026-11-15)
 
-Antes: bloques de 2 × 2 píxeles GLO-90 (~185 m de N a S y ~131 m de E a O a 45° de latitud) y ventana de ~900 m.
-Contra la regla de 200 m del ETL privado, cruzando por coordenada (P-010) 28,4 millones de celdas con relieve > 20 m:
-relieve y rugosidad salían un 9 % más bajos (mediana del cociente 0.907 y 0.910) y la pendiente un 4 % más alta
-(1.038). En Marte, con bloques de `200·cos(lat)` m de E a O, la misma superficie daba un relieve de 91 m a 0° y 53 m a
-60° de latitud; con bloques cuadrados la diferencia es menor que 3 % (`etl/test_e12_bloques.py`). Después: ver la nota
-de sesión de este cambio para el cociente con la corrida completa.
+Antes: bloques de 2 × 2 píxeles GLO-90 (~185 m de N a S y ~131 m de E a O a 45° de latitud) y ventana de ~900 m,
+que no es la escala de la Luna ni de Marte. En Marte, con bloques de `200·cos(lat)` m de E a O, la misma superficie daba
+un relieve de 91 m a 0° y 53 m a 60° de latitud; con bloques cuadrados la diferencia es menor que 3 %
+(`etl/test_e12_bloques.py`). En la Tierra, una prueba con una superficie sintética (`etl/test_e03_escala.py`) da una
+pendiente de 10° ± 0.2° a 0°, 45° y 70° de latitud y, medida con el estimador de los objetivos, la misma pendiente y
+el mismo relieve (±2 %). Contra la relectura independiente de E-13 (GLO-90 a UTM de 200 m y `gdaldem slope`), el error
+mediano de `slope_mean_deg` antes del cambio fue de 0.176° (p90 0.84°); el valor de después está en la nota de sesión
+del cambio.
 
 ## 3. Diseño
 
