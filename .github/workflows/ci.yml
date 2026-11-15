@@ -1,7 +1,7 @@
 name: ci
 
 # - cambios: tamaño del PR y búsqueda de secretos con gitleaks. Corre siempre.
-# - auditoria: pruebas del registro de auditoría y verificación de su cadena.
+# - auditoria: pruebas del registro de auditoría y verificación de su cadena, y del servidor MCP y el puente.
 # - motor: formato, clippy y pruebas del motor en Rust (las que no necesitan la tabla real).
 # - visor: tipos, pruebas y build del visor web.
 # - CI completo: el único check obligatorio. Falla si un job falló o se canceló.
@@ -96,6 +96,8 @@ jobs:
         run: python3 -I -m unittest discover -s audit -p 'test_*.py' -v
       - name: Cadena del registro
         run: node audit/verificar.mjs
+      - name: Servidor MCP y puente local
+        run: node --test "scripts/mcp/*.test.mjs"
 
   motor:
     name: Motor (Rust)
