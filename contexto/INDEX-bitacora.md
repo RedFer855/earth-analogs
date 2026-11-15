@@ -5,6 +5,7 @@ Todas las sesiones vigentes: una por una las del último mes con notas y del ant
 por su resumen mensual. No se inyecta al arrancar: se consulta cuando la pregunta es sobre el trabajo pasado.
 Sesiones: `sesion · autor · agente · fecha` — resumen.
 
+- [[2026-11-15-fernando-motor-sobre-etl]] · sesion · fernando · claude-code · 2026-11-15 — Se conectó el motor en Rust con $RUN sin adaptador, se corrigió la fórmula, se agregó E-20 para los perfiles y se corrigió la latitud autálica frente a la geodésica; los 21 sitios corren y 57 pruebas pasan, 5 de ellas contra la tabla real.
 - [[2026-11-15-fernando-etl-ndvi-y-e13-incremental]] · sesion · fernando · claude-code · 2026-11-15 — El NDVI recupera costas y latitudes altas (cobertura de 80.7 % a 88.15 %) y E-13 relee solo lo que cambió y abre cada fuente una sola vez (unos 10 minutos a menos de 3).
 - [[2026-11-15-fernando-etl-escala-200m]] · sesion · fernando · claude-code · 2026-11-15 — El terreno se calcula igual en los tres cuerpos (bloques cuadrados de 200 m, ventana de 1 km); el error de pendiente contra la relectura independiente de E-13 baja de 0.176° a 0.050°.
 - [[2026-11-15-fernando-e16-cuevas]] · sesion · fernando · antigravity · 2026-11-15 — Se curaron 57 entradas verificadas (55 sistemas únicos) de Pyroduct Digital Catalog v3.0 con fuentes abiertas, se implementó el paso E-16 (cueva_n_tubos y cueva_dist_km) y se regeneró el manifiesto E-13 con 78 columnas y cadena de auditoría íntegra.
