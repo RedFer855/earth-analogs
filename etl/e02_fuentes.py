@@ -47,6 +47,8 @@ FUENTES = [
     ("GSDP30", "tierra/dunas-gsdp30", "*.zip", None, None),
     ("GSDS30", "tierra/dunas-gsds30", "*.zip", None, None),
     ("Pyroduct", "tierra/cuevas-pyroduct-v3", "*.zip", None, None),
+    ("Cráteres Wikidata", "tierra/crateres-wikidata", "*.json", None, None),
+    ("Natural Earth Playas", "tierra/playas-natural-earth", "*.zip", None, None),
     ("Karjalainen", "tierra/hielo-karjalainen-2022", "*.tif", None, None),
     ("Li 2024 cielo visible", "tierra/iluminacion-li-2024", "*.nc", None, None),
     ("SoilGrids", "tierra/soilgrids-1km", "*.tif", None, None),
@@ -79,6 +81,11 @@ def abrir(ruta: Path) -> str:
     if suf == ".gz":
         with gzip.open(ruta, "rb") as g:
             return f"gzip legible ({len(g.read(1 << 20))} B leídos)"
+    if suf == ".json":
+        with ruta.open(encoding="utf-8") as f:
+            d = json.load(f)
+        n = len(d["results"]["bindings"]) if isinstance(d, dict) and "results" in d else len(d)
+        return f"json con {n} registros"
     if suf == ".csv":
         with ruta.open(encoding="utf-8", errors="replace") as f:
             return f"csv, cabecera: {f.readline().strip()[:60]}"

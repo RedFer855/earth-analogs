@@ -44,12 +44,12 @@ _(vacía)_
 
 ## 45-decisiones — ADR-NNN, estándares E-NN y decisiones pendientes DP-NN
 
-- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]]
+- [[ADR-001-preprocesar-offline-y-servir-ligero]] · [[ADR-002-malla-primero-y-una-columna-por-capa]] · [[ADR-003-variables-por-proceso-fisico]] · [[ADR-004-periodo-comun-y-climatologia]] · [[ADR-005-regla-de-escala-de-pendiente-y-rugosidad]] · [[ADR-006-valores-faltantes-y-cobertura]] · [[ADR-007-contrato-de-metrics-json]] · [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · [[ADR-009-capas-de-puntos-y-distancias]]
 - _(tipo, estado y summary: ver contexto/INDEX-decisiones.md)_
 
 ## 50-referencia — Hechos externos con fecha: misiones, sensores, portales de datos, APIs, reglas de Space Apps
 
-- _(8 notas: ver contexto/INDEX-referencia.md)_
+- _(9 notas: ver contexto/INDEX-referencia.md)_
 
 ## 55-investigaciones — I-NN y sus prompts
 
@@ -65,10 +65,10 @@ _(vacía)_
 
 ## 70-bitacora — Notas de sesión por mes
 
+- [[2026-11-15-fernando-crateres-playas-roca]] · sesion · fernando · claude-code · 2026-11-15 — E-17 (cráteres y playas), E-18 (roca volcánica y evaporitas) y E-19 (GeoJSON de pines), más un análisis de qué comparten los entornos de cada tipo de sitio.
 - [[2026-11-14-fernando-etl-e01-a-e13]] · sesion · fernando · claude-code · 2026-11-14 — Se escribió y corrió el ETL completo (malla, terreno, temperatura, NDVI, aridez, permafrost, viento y polvo, material, agua, objetivos de la Luna y Marte, manifiesto), cada paso con su comprobación y su registro de auditoría; los errores encontrados quedaron corregidos y registrados.
 - [[2026-11-14-fernando-etl-deuda-cerrada]] · sesion · fernando · claude-code · 2026-11-14 — E-03 terreno se rehízo solo en las teselas afectadas (índice validado bit a bit), E-11 suma iluminación y Mini-RF, E-12 suma el clima de la MCD 6.2 (local, presión corregida por altura), E-05 usa máscara de tierra, E-15 agrega cinco capas de 30 m y el manifiesto lista n_celdas, nivel y local_only.
-- [[2026-11-14-fernando-etl-corridas-finales]] · sesion · fernando · claude-code · 2026-11-14 — E-03 por celda (retomado tras una pausa), E-04, E-07, E-08, E-09, E-11, E-12 y E-13 corrieron con los métodos corregidos, sin fallos y con la cadena de auditoría íntegra (79 líneas); se anotan tiempos y cobertura de cada paso.
-- _(1 sesión más: ver contexto/INDEX-bitacora.md)_
+- _(2 sesiones más: ver contexto/INDEX-bitacora.md)_
 
 ## 80-deuda — Deuda técnica P-NNN
 

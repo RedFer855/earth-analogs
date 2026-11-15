@@ -12,3 +12,4 @@ No se inyecta al arrancar: se abre cuando contexto/INDEX.md apunta aquí.
 - [[ADR-006-valores-faltantes-y-cobertura]] · adr · vigente · 2026-11-14 — Un valor faltante es NaN y nunca se rellena; una celda sin dato en una columna sigue en la tabla, y la cobertura de cada columna se declara.
 - [[ADR-007-contrato-de-metrics-json]] · adr · vigente · 2026-11-14 — La web solo lee un archivo derivado, metrics.json, con versión, origen de cada número y, por dimensión, en qué coincide y en qué difiere cada análogo.
 - [[ADR-008-calidad-de-la-tabla-y-manifiesto]] · adr · vigente · 2026-11-14 — Cada paso del ETL se verifica de forma independiente antes del siguiente, y el manifiesto lleva los indicadores de calidad de cada columna.
+- [[ADR-009-capas-de-puntos-y-distancias]] · adr · vigente · 2026-11-15 — Cráteres de impacto, tubos de lava y salares entran como pines y como columnas de distancia al más cercano; las distancias filtran y explican, no puntúan.
