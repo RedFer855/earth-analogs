@@ -82,6 +82,13 @@ dieron sumas idénticas bit a bit a las viejas. Resultado: los puntos de control
 `etl/cruce.py` lleva las celdas de otra tabla a la malla por latitud geodésica y longitud con `celda_de`, y deja NaN
 donde no hay pareja. Pruebas en `etl/test_cruce.py`.
 
+### P-014 — E-13 tardaba unos 700 s y no por leer las columnas
+
+La revisión de las 76 columnas cuesta 31 s (0 s con la caché por columna). El tiempo estaba en la relectura
+independiente: `_pixel` abría la fuente en cada celda y la aridez se descomprimía de su ZIP una y otra vez. Ahora cada
+fuente se abre una sola vez. Con la misma muestra de 60 celdas: aridez de 191 s a 5 s y NDVI de 18 s a 2 s, con
+resultado idéntico (`etl/test_e13_incremental.py`, `etl/e13_manifiesto.py`).
+
 ## Relaciones
 
 - [[abierta]] — pendientes abiertos

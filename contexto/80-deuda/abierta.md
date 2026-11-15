@@ -17,7 +17,7 @@ uno se verificó en el código y con datos antes de anotarse. Los cerrados está
 
 El motor lee una carpeta plana con `manifest.json` que trae `healpix.nivel` y los nombres de columna del contrato; el
 ETL escribe `grid/` y `columns/` con el manifiesto en otra forma. Falta un adaptador que no renombre columnas que miden
-otra cosa (`arena_frac` es arena móvil y semifija, y el contrato espera solo la móvil) y recalcular los perfiles de
+otra cosa (`arena_frac` es arena móvil y semifija, y el motor espera solo la móvil; los nombres del ETL son el contrato, ADR-007 regla 8) y recalcular los perfiles de
 búsqueda sobre la tabla actual: el motor se niega a correr si el número de celdas de los perfiles no coincide con el de
 la tabla.
 
@@ -32,11 +32,6 @@ el ranking.
 Los mapas de Obu y Karjalainen no cubren el sur: las celdas de los Valles Secos de McMurdo quedan en `NaN` en
 `permafrost_prob`, `magt_c` y `hielo_suelo_*`. No se rellenan con valores fijos (ADR-006): la ficha y el pitch lo
 declaran. Falta buscar una fuente que cubra la Antártida.
-
-### P-014 — E-13 tarda unos 700 s y no por leer las columnas
-
-Revisar las 76 columnas cuesta 31 s sin caché y 0 s con ella (`etl/e13_manifiesto.py`). Los otros ~670 s están en
-otra parte (la relectura independiente) y no se midieron por etapa.
 
 ## Relaciones
 
