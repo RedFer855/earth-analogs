@@ -137,3 +137,77 @@ export function ipixAVertices(
   }
   return esquinas;
 }
+
+// --- Punto → celda (ang2pix nested) con latitud autálica, igual que etl/comun.py y el motor ---
+
+const F_WGS84 = 1 / 298.257223563;
+const E2 = F_WGS84 * (2 - F_WGS84);
+const EXC = Math.sqrt(E2);
+const qAut = (s: number): number => (1 - E2) * (s / (1 - E2 * s * s) - Math.log((1 - EXC * s) / (1 + EXC * s)) / (2 * EXC));
+const QP = qAut(1);
+
+export function geodesicaAAutalica(latDeg: number): number {
+  const v = qAut(Math.sin(latDeg / RAD_A_DEG)) / QP;
+  return Math.asin(Math.max(-1, Math.min(1, v))) * RAD_A_DEG;
+}
+
+function intercalar(x: number): number {
+  let v = x & 0xffff;
+  v = (v | (v << 8)) & 0x00ff00ff;
+  v = (v | (v << 4)) & 0x0f0f0f0f;
+  v = (v | (v << 2)) & 0x33333333;
+  v = (v | (v << 1)) & 0x55555555;
+  return v >>> 0;
+}
+
+/** Celda nested que contiene (lat, lon) geodésicos. */
+export function ang2pixNested(nside: number, latDeg: number, lonDeg: number): number {
+  const z = Math.sin(geodesicaAAutalica(latDeg) / RAD_A_DEG);
+  let lon = lonDeg % 360;
+  if (lon < 0) lon += 360;
+  const tt = lon / 90;
+  const za = Math.abs(z);
+  let cara: number;
+  let ix: number;
+  let iy: number;
+  if (za <= DOS_TERCIOS) {
+    const t1 = nside * (0.5 + tt);
+    const t2 = nside * z * 0.75;
+    const jp = Math.floor(t1 - t2);
+    const jm = Math.floor(t1 + t2);
+    const ifp = Math.floor(jp / nside);
+    const ifm = Math.floor(jm / nside);
+    cara = ifp === ifm ? ifp | 4 : ifp < ifm ? ifp : ifm + 8;
+    ix = jm & (nside - 1);
+    iy = nside - (jp & (nside - 1)) - 1;
+  } else {
+    const ntt = Math.min(3, Math.floor(tt));
+    const tp = tt - ntt;
+    const tmp = nside * Math.sqrt(3 * (1 - za));
+    const jp = Math.min(nside - 1, Math.floor(tp * tmp));
+    const jm = Math.min(nside - 1, Math.floor((1 - tp) * tmp));
+    if (z >= 0) {
+      cara = ntt;
+      ix = nside - jm - 1;
+      iy = nside - jp - 1;
+    } else {
+      cara = ntt + 8;
+      ix = jp;
+      iy = jm;
+    }
+  }
+  return cara * nside * nside + intercalar(ix) + intercalar(iy) * 2;
+}
+
+/** Índice de `ipix` en una lista ordenada ascendente, o -1. */
+export function buscarIpix(lista: Uint32Array, ipix: number): number {
+  let lo = 0;
+  let hi = lista.length - 1;
+  while (lo <= hi) {
+    const m = (lo + hi) >>> 1;
+    if (lista[m] === ipix) return m;
+    if (lista[m] < ipix) lo = m + 1;
+    else hi = m - 1;
+  }
+  return -1;
+}

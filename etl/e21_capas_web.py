@@ -41,6 +41,24 @@ COLUMNAS = [
     "cueva_dist_km",
     "dist_crater_km",
     "dist_playa_km",
+    # minerales y suelo para la ficha del visor (no puntúan; se comparan con el resto de la Tierra)
+    "aster_ci",
+    "aster_mi",
+    "aster_qi",
+    "arcilla_gkg",
+    "arena_frac",
+    "limo_gkg",
+    "emit_calcite",
+    "emit_chlorite",
+    "emit_dolomite",
+    "emit_goethite",
+    "emit_gypsum",
+    "emit_hematite",
+    "emit_illite_muscovite",
+    "emit_kaolinite",
+    "emit_montmorillonite",
+    "emit_quartz_feldspar",
+    "emit_vermiculite",
 ]
 BLOQUE = 1 << 22  # celdas de nivel 12 por bloque (~4.2 M)
 CAMPOS_META = ("unidad", "fuente", "url", "licencia")

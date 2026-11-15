@@ -2,11 +2,14 @@
 // números del candidato seleccionado. Si el puente local está activo, permite recalcular con el motor Rust.
 // Todo lo que viene del modelo o de un error se pinta con textContent (nunca innerHTML).
 
+import type { AnalogoTierra } from '../datos/analogos';
 import { cargarResultado, type Celda, type Indice, type ResultadoJson } from '../datos/contrato';
+import type { LecturaVariable } from '../datos/solidez';
 import {
   PROVEEDORES,
   URL_PUENTE,
   borrarClaveIA,
+  construirContextoAnalogo,
   construirContextoIA,
   detectarPuente,
   guardarClaveIA,
@@ -59,18 +62,22 @@ export class Asistente {
   private indice: Indice | null = null;
   private resultado: ResultadoJson | null = null;
   private candidato: Celda | null = null;
+  private analogo: AnalogoTierra | null = null;
+  private lecturasAnalogo: LecturaVariable[] = [];
   private puente: EstadoPuente = { activo: false, motor: false };
   private ocupado = false;
 
+  /** `embebido`: vive dentro de otro panel (pestaña Chat), sin botón flotante ni cabecera propia. */
   constructor(
     contenedor: HTMLElement,
     private readonly callbacks: AsistenteCallbacks,
+    private readonly embebido = false,
   ) {
     this.boton = el('button', 'btn-primario asistente-abrir', 'Asistente IA');
     this.boton.type = 'button';
-    contenedor.appendChild(this.boton);
+    if (!embebido) contenedor.appendChild(this.boton);
 
-    this.raiz = el('section', 'panel asistente oculto');
+    this.raiz = el('section', embebido ? 'asistente asistente-embebido' : 'panel asistente oculto');
     this.raiz.setAttribute('aria-label', 'Asistente IA');
     contenedor.appendChild(this.raiz);
 
@@ -80,7 +87,7 @@ export class Asistente {
     cerrar.type = 'button';
     cerrar.title = 'Cerrar';
     cab.append(cerrar);
-    this.raiz.append(cab);
+    if (!embebido) this.raiz.append(cab);
 
     this.contextoEl = el('p', 'asistente-contexto', 'Elige un candidato en el globo o en la lista.');
     this.raiz.append(this.contextoEl);
@@ -167,13 +174,26 @@ export class Asistente {
       this.chkSesion.checked = true;
     }
     this.alCambiarProveedor();
+    if (embebido) void this.sondearPuente();
+  }
+
+  private async sondearPuente(): Promise<void> {
+    this.puente = await detectarPuente();
+    this.chkPuente.disabled = !this.puente.activo;
+    this.alCambiarProveedor();
+    this.pintarMotor();
   }
 
   establecerContexto(indice: Indice, resultado: ResultadoJson | null, candidato: Celda | null): void {
-    const cambia = candidato?.ipix !== this.candidato?.ipix || resultado?.sitio !== this.resultado?.sitio;
+    const cambia =
+      this.analogo !== null ||
+      candidato?.ipix !== this.candidato?.ipix ||
+      resultado?.sitio !== this.resultado?.sitio;
     this.indice = indice;
     this.resultado = resultado;
     this.candidato = candidato;
+    this.analogo = null;
+    this.lecturasAnalogo = [];
     if (cambia) {
       this.historial = [];
       this.cuerpoChat.replaceChildren();
@@ -184,6 +204,26 @@ export class Asistente {
         : resultado
           ? `Sitio ${resultado.sitio}: elige un candidato.`
           : 'Elige un candidato en el globo o en la lista.';
+    this.pintarMotor();
+  }
+
+  establecerAnalogo(
+    indice: Indice,
+    resultado: ResultadoJson | null,
+    analogo: AnalogoTierra,
+    lecturas: LecturaVariable[] = [],
+  ): void {
+    const cambia = this.analogo?.codigo !== analogo.codigo || resultado?.sitio !== this.resultado?.sitio;
+    this.indice = indice;
+    this.resultado = resultado;
+    this.candidato = null;
+    this.analogo = analogo;
+    this.lecturasAnalogo = lecturas;
+    if (cambia) {
+      this.historial = [];
+      this.cuerpoChat.replaceChildren();
+    }
+    this.contextoEl.textContent = `Análogo ${analogo.nombre} (${analogo.codigo}) · ${analogo.lat.toFixed(3)}, ${analogo.lon.toFixed(3)} · ${analogo.programa}`;
     this.pintarMotor();
   }
 
@@ -251,13 +291,22 @@ export class Asistente {
     this.cuerpoChat.scrollTop = this.cuerpoChat.scrollHeight;
   }
 
-  private async preguntar(pregunta: string): Promise<void> {
+  async preguntar(pregunta: string): Promise<void> {
     if (this.ocupado) return;
-    if (!this.indice || !this.resultado || !this.candidato) {
-      this.estado('Primero elige un candidato.');
+    if (!this.indice || (!this.candidato && !this.analogo)) {
+      this.estado('Primero elige un candidato o un análogo.');
       return;
     }
-    const ctx = construirContextoIA(this.indice, this.resultado, this.candidato);
+    const ctx =
+      this.candidato && this.resultado
+        ? construirContextoIA(this.indice, this.resultado, this.candidato)
+        : this.analogo
+          ? construirContextoAnalogo(this.indice, this.resultado, this.analogo, this.lecturasAnalogo)
+          : null;
+    if (!ctx) {
+      this.estado('Primero elige un candidato o un análogo.');
+      return;
+    }
     this.inPregunta.value = '';
     this.agregar('usuario', pregunta);
     const p = this.proveedor();

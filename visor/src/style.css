@@ -413,8 +413,8 @@ html, body, #globo {
 
 .panel-zona {
   position: absolute;
-  bottom: 12px;
-  left: 306px;
+  bottom: 28px;
+  left: 12px;
   width: 310px;
   max-height: 62vh;
   display: flex;
@@ -440,6 +440,19 @@ html, body, #globo {
 .zona-nom { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .zona-nota, .zona-vacia { font-size: 11px; color: #94a3b8; margin: 0; }
 
+@media (min-width: 721px) and (max-width: 1360px) {
+  .barra-estado,
+  .barra-nav-contenedor {
+    left: calc(50% - 204px);
+    max-width: calc(100vw - 428px);
+  }
+  .barra-nav { flex-wrap: wrap; }
+}
+@media (max-width: 720px) {
+  .barra-estado,
+  .barra-nav-contenedor { max-width: calc(100vw - 16px); }
+  .barra-nav { flex-wrap: wrap; }
+}
 @media (max-width: 800px) {
   #ui {
     display: flex;
@@ -511,3 +524,6 @@ html, body, #globo {
 @media (max-width: 1200px) {
   .asistente, .asistente-abrir { right: 12px; }
 }
+
+.asistente-embebido { display: flex; flex-direction: column; gap: 8px; }
+.asistente-embebido .asistente-chat { max-height: 38vh; }

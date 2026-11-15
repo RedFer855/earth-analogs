@@ -11,7 +11,6 @@ modelo: Gemini 4 Hydrogen (Medium)
 rama: feat/visor-iconos-pines
 scope:
   - visor/src/capas/pines.ts
-  - visor/src/ui/panel.ts
   - visor/src/style.css
 symbols:
   - svgIconoTipo

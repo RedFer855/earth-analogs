@@ -12,7 +12,6 @@ rama: feat/visor-pulido
 scope:
   - visor/src/globo-objetivo.ts
   - visor/src/datos/contrato.ts
-  - visor/src/ui/ficha.ts
   - visor/src/main.ts
   - visor/src/style.css
 symbols:
