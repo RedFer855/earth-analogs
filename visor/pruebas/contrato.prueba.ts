@@ -16,6 +16,7 @@ import {
   type ResultadoJson,
 } from '../src/datos/contrato';
 import { evaluarCondiciones } from '../src/datos/capas7';
+import { calcularBboxZona, parsearUnidadesMacrostrat } from '../src/capas/overlaysZona';
 import { formatearAlturaM, parsearCoordenadas } from '../src/datos/coordenadas';
 import {
   crearZonaGuardada,
@@ -302,3 +303,20 @@ assert.equal(gj.type, 'FeatureCollection');
 assert.equal(gj.features.length, 1);
 assert.equal(gj.features[0].properties.nombre, 'Zona Prueba');
 assert.equal(gj.features[0].geometry.coordinates[0].length, 5);
+
+// 11. Bbox de zona y parser Macrostrat (con fallback limpio)
+const bbox = calcularBboxZona(zonaDemo.coords);
+assert.deepEqual(bbox, { west: -10, south: -10, east: 10, north: 10 });
+assert.equal(calcularBboxZona([{ lat: 0, lon: 0 }]), null);
+
+const unidades = parsearUnidadesMacrostrat({
+  success: {
+    data: [
+      { name: 'Basaltos', lith: 'Basalt', t_int_name: 'Miocene', color: '#334155' },
+      { name: 'Basaltos', lith: 'Basalt', t_int_name: 'Miocene', color: '#334155' },
+    ],
+  },
+});
+assert.equal(unidades.length, 1);
+assert.equal(unidades[0].nombre, 'Basaltos');
+assert.deepEqual(parsearUnidadesMacrostrat({}), []);

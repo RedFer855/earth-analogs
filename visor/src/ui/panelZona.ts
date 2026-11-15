@@ -14,6 +14,11 @@ import {
   type ResumenVariableZona,
 } from '../datos/cruceZona';
 import { areaEsfericaM2, perimetroEsfericoM } from '../datos/geometria';
+import {
+  CapaOverlaysZona,
+  type ResultadoOverlayZona,
+  type TipoOverlayZona,
+} from '../capas/overlaysZona';
 import { CapaZonas } from '../capas/zonas';
 import type { FormaDibujo } from '../herramientas/dibujo';
 
@@ -36,11 +41,14 @@ export class PanelZona {
   private celdasConteo = 0;
   private aproxCercania = false;
   private cargandoEtl = false;
+  private overlayTipo: TipoOverlayZona = 'ninguno';
+  private overlayRes: ResultadoOverlayZona | null = null;
 
   constructor(
     contenedor: HTMLElement,
     private readonly baseDatos: string,
     private readonly capaZonas: CapaZonas,
+    private readonly overlays: CapaOverlaysZona,
     private readonly alElegirCandidato?: (rango: number) => void,
   ) {
     this.el = document.createElement('aside');
@@ -67,6 +75,9 @@ export class PanelZona {
 
   mostrarAnalisis(coords: Coordenada[], forma: FormaDibujo): void {
     this.zonaActiva = { coords, forma };
+    this.overlayTipo = 'ninguno';
+    this.overlayRes = null;
+    this.overlays.limpiar();
     this.el.classList.remove('oculto');
     this.renderizar();
     void this.calcularResumenEtl(coords);
@@ -167,6 +178,16 @@ export class PanelZona {
           <div><strong>Pines de ref.:</strong> ${pines.length} dentro</div>
         </div>
         ${tablaEtl}
+        <div class="zona-sub">
+          <strong>Capa temática opcional:</strong>
+          <select class="select-coro" data-overlay-zona aria-label="Overlay de zona">
+            <option value="ninguno"${this.overlayTipo === 'ninguno' ? ' selected' : ''}>Ninguna (solo ETL)</option>
+            <option value="gibs-aod"${this.overlayTipo === 'gibs-aod' ? ' selected' : ''}>Polvo / Aerosoles AOD (NASA GIBS)</option>
+            <option value="gibs-lst"${this.overlayTipo === 'gibs-lst' ? ' selected' : ''}>Temp. superficial diurna (NASA GIBS)</option>
+            <option value="macrostrat"${this.overlayTipo === 'macrostrat' ? ' selected' : ''}>Litología y formaciones (Macrostrat)</option>
+          </select>
+          ${this.renderizarEstadoOverlay()}
+        </div>
         <div class="zona-sub"><strong>Candidatos dentro (${cands.length}):</strong> ${htmlCands}</div>
         <div class="zona-guardar-fila">
           <input type="text" class="input-coord" data-zona-nombre placeholder="Nombre de zona..." />
@@ -211,7 +232,19 @@ export class PanelZona {
   }
 
   private enlazarEventosDom(): void {
-    this.el.querySelector('[data-accion="cerrar-zona"]')?.addEventListener('click', () => this.ocultar());
+    this.el.querySelector('[data-accion="cerrar-zona"]')?.addEventListener('click', () => {
+      this.overlays.limpiar();
+      this.ocultar();
+    });
+    this.el.querySelector<HTMLSelectElement>('[data-overlay-zona]')?.addEventListener('change', (ev) => {
+      if (!this.zonaActiva) return;
+      const tipo = (ev.target as HTMLSelectElement).value as TipoOverlayZona;
+      this.overlayTipo = tipo;
+      void this.overlays.aplicar(tipo, this.zonaActiva.coords).then((res) => {
+        this.overlayRes = res;
+        this.renderizar();
+      });
+    });
     this.el.querySelector('[data-accion="toggle-relleno"]')?.addEventListener('click', () => {
       this.capaZonas.alternarRelleno();
       this.renderizar();
@@ -264,5 +297,20 @@ export class PanelZona {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  private renderizarEstadoOverlay(): string {
+    if (!this.overlayRes || this.overlayTipo === 'ninguno') return '';
+    const lista = this.overlayRes.unidades?.length
+      ? `<ul class="zona-lista">${this.overlayRes.unidades
+          .map(
+            (u) => `<li class="zona-item">
+              <span class="zona-color" style="background:${escaparHtml(u.color)}"></span>
+              <span class="zona-nom" title="${escaparHtml(u.litologia)}">${escaparHtml(u.nombre)} · ${escaparHtml(u.edad)}</span>
+            </li>`,
+          )
+          .join('')}</ul>`
+      : '';
+    return `<p class="zona-nota">${escaparHtml(this.overlayRes.nota)} (${escaparHtml(this.overlayRes.fuente)})</p>${lista}`;
   }
 }
