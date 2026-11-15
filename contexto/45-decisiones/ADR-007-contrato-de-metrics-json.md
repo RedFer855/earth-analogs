@@ -35,6 +35,11 @@ reto pide justamente "en qué coinciden y en qué difieren".
 5. Declara las **diferencias físicas** que ninguna columna captura: gravedad, atmósfera, presión y escala.
 6. **Nada `local_only` entra.** Las columnas con licencia restringida no salen en ningún archivo público.
 7. Un valor faltante se escribe como `null`, nunca como 0.
+8. **Los nombres de columna son los del ETL** (decidido por fernando el 2026-11-14, cierra esa parte de P-008): las
+   columnas que lista `columnas` en el manifiesto de E-13 son el contrato, y el motor y la web se escriben contra
+   ellos; no se renombran para calzar con otro código. Convención: minúsculas con `_`, la unidad al final (`_k`,
+   `_m`, `_deg`, `_pct`, `_frac`, `_ms`, `_pa`, `_gkg`), `_clase` para categóricas (nunca se promedian) y `_n_`
+   para conteos de soporte. Renombrar una columna exige subir la versión del contrato.
 
 ## 3. Diseño
 

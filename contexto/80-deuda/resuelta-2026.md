@@ -31,8 +31,10 @@ E-11 y E-12 corrieron ok.
 ### P-005 — Máscaras de agua en ASTER y MODIS
 
 `etl/e09_material.py` recorta cada tesela de ASTER GED a 99x99 y pone `NaN` donde `LWmap != 0`;
-`etl/e04_temperatura.py` exige `Percent_land_in_grid >= 50`. La máscara del NDVI (MOD13C1) sigue sin hacerse: el NDVI
-no puntúa la semejanza.
+`etl/e04_temperatura.py` exige `Percent_land_in_grid >= 50`. `etl/e05_ndvi.py` usa solo los periodos en que
+"VI Quality" marca tierra (bits 11-13 == 1, según la guía MOD13 C6.1); la cobertura de `ndvi_max` baja de 89.0 % a
+83.8 % y la de `ndvi_max_clim` de 88.7 % a 80.7 % (píxeles de 0.05° con costa, orilla o agua interior). Que una celda
+sin NDVI no pase el filtro de vegetación del motor queda como decisión abierta del equipo.
 
 ### P-006 — Temperatura: media, amplitud y años emparejados
 
@@ -43,6 +45,42 @@ día y noche del mismo año-mes. E-04 corrió ok.
 
 Sus columnas quedaron repartidas en E-04, E-07, E-08 y E-09. El script y sus columnas viejas se retiraron de la
 carpeta de corrida para que E-13 no los incluya en el manifiesto.
+
+### P-003 — Variables de Marte y la Luna que faltan
+
+- Luna (E-11): iluminación de Mazarico (fracción del tiempo con Sol: mediana, MAD y p90 por región; mapa de 60 m
+  donde la región cabe y de 120 m para N2, MP y CB), fracción de sombra permanente (PSR) y CPR de Mini-RF (mediana,
+  MAD y p90). Sin equivalente terrestre global: quedan en `ausentes` y `advertencias`.
+- Marte (E-12): clima de superficie de la Mars Climate Database 6.2 (escenario climatológico, EUV medio) leído de sus
+  NetCDF sin compilar el código Fortran: temperatura media, máxima y mínima, rango diurno, amplitud anual y presión.
+  La presión se corrige por la diferencia entre la elevación del sitio y la orografía del modelo (hidrostática con la
+  temperatura del nivel más bajo); la temperatura no se corrige. Licencia de uso local: todos los campos van en
+  `local_only` y el manifiesto los lista (ADR-007, regla 6).
+- Ya estaban resueltos: E-12 guarda las 13 capas de TES y E-11 pone a NaN el sin dato de LOLA 20 m.
+- Viento de Marte sigue en `ausentes`: no lo pedía este ítem.
+
+### P-008 — Columnas que faltan y nombres del contrato con el motor
+
+- Paso nuevo E-15 (`etl/e15_capas_30m.py`): `agua_ocurrencia_media_pct` y `agua_frac_ocurrencia_gt0` (JRC GSW
+  v1.5), `dunas_frac` (GSDP30), `arena_frac` (GSDS30) y `agua_humedal_area_pct` (GLWD v2 `area_pct`, que suma las
+  33 clases, lagos y ríos incluidos; por eso no se llama `humedal_area_pct`). Fuera de la extensión de cada producto
+  la celda queda en NaN; dentro y sin rasgo, en 0.
+- El manifiesto trae `nivel_healpix`, `n_celdas`, `arbol_limpio` y `local_only`.
+- Nombres de columna: los del ETL son el contrato (ADR-007, regla 8).
+
+### P-009 — `slope_mean_deg` con pendientes sobre bloques de agua aislados
+
+E-03 terreno se rehízo con la máscara del centro de Horn. En lugar de recalcular las 25 755 teselas se usó
+`etl/e03_indice_afectadas.py`: una tesela cambia solo si tiene un píxel de agua o sin dato propio, o si toca el
+antimeridiano (18 172 afectadas, 7 583 sanas). Validación: 891 teselas sanas recalculadas en la corrida completa
+dieron sumas idénticas bit a bit a las viejas. Resultado: los puntos de control no cambian (Everest 43.24°, Erg Chech
+1.32°), la cobertura pasa de 98.829 % a 98.827 % y la mediana de 1.1554° a 1.1555°. Pruebas en
+`etl/test_e03_indice.py`.
+
+### P-010 — Comparar tablas por coordenada, no por `ipix`
+
+`etl/cruce.py` lleva las celdas de otra tabla a la malla por latitud geodésica y longitud con `celda_de`, y deja NaN
+donde no hay pareja. Pruebas en `etl/test_cruce.py`.
 
 ## Relaciones
 
