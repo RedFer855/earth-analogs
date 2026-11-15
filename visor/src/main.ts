@@ -98,7 +98,7 @@ async function iniciar(): Promise<void> {
   barra.className = 'barra-estado';
   barra.innerHTML = `<span class="fps-badge" data-fps>-- FPS</span>
     <select class="select-coro" data-mapa-base aria-label="Mapa base">
-      <option value="sentinel2-eox" selected>EOX 2016 · 10 m</option>
+      <option value="sentinel2-eox" selected>EOX 2025 · 10 m</option>
       <option value="gibs-bluemarble">GIBS Marble · 500 m</option>
       <option value="naturalearth">NaturalEarth · Offline</option>
     </select>

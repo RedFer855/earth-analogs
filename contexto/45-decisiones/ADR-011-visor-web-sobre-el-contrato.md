@@ -37,8 +37,12 @@ cuadros por segundo y que un `Primitive` con color por instancia aguanta.
    coincide/difiere/sin dato; cobertura; temperatura como diagnóstico que no puntúa; y lo que ningún dato captura
    (gravedad, presión, atmósfera, radiación) desde `cuerpos`. Avisa cuando la celda puede caer sobre hielo (P-015).
 5. **Estado en la URL** (`?sitio=JZ&candidato=3`) para compartir una vista.
-6. **Imagen base abierta:** Sentinel-2 cloudless 2016 de EOX (CC BY 4.0), luego NASA GIBS Blue Marble y por último
-   NaturalEarthII, que viene con Cesium. Relieve de Cesium ion solo si hay token en `.env`.
+6. **Imagen base abierta:** Sentinel-2 cloudless 2025 de EOX (CC BY-NC-SA 4.0), con 2016 (CC BY 4.0) de respaldo,
+   luego NASA GIBS Blue Marble y por último NaturalEarthII, que viene con Cesium. Relieve de Cesium ion solo si hay
+   token en `.env`. *Enmienda del 2026-11-15:* se pasó de 2016 a 2025 porque la imagen es más reciente y la licencia
+   permite el uso no comercial con atribución ([[I-39-imagen-satelital-de-la-tierra-sin-clave]],
+   [[eox-cloudless-licencias]]). Condiciones: el visor no se vende, el crédito con la licencia queda visible y lo que
+   se derive de esas teselas se comparte con la misma licencia.
 7. **Lo siguiente entra por fases** sobre esta base: pines de E-19 con distancia `cerca_de` del motor (ADR-009),
    búsqueda por varias condiciones sobre capas agregadas de E-21, estabilidad de escenarios y vista del sitio en la
    Luna o Marte.

@@ -36,11 +36,13 @@ El servicio pide además atribución visible en el mapa (`AccessConstraints` del
 
 ## Qué cambia para el proyecto
 
-- El visor usa 2016 por defecto, como fija ADR-011, porque es la única capa sin la cláusula NC ni ShareAlike.
-- Los años 2018 a 2025 solo se cargan si se piden con `?imagen=AAAA`, y el crédito muestra entonces
-  CC BY-NC-SA 4.0. NASA Space Apps es uso no comercial, pero ShareAlike obliga a compartir lo derivado con la misma
-  licencia; por eso no es el predeterminado.
-- El crédito en `visor/src/globo.ts` usa el texto oficial y enlaza la licencia de cada año.
+- El visor usa 2025 por defecto (ADR-011): el proyecto no se vende, así que la cláusula NC se cumple. Lo que
+  obliga la licencia: crédito visible con la licencia, y compartir lo derivado de las teselas con la misma licencia
+  (ShareAlike).
+- Si el proyecto se llegara a vender o a usar comercialmente, hay que volver a 2016 (CC BY 4.0, sin NC ni
+  ShareAlike) o comprar la licencia comercial de EOX. 2016 ya queda como respaldo si 2025 no responde.
+- Otro año se pide con `?imagen=AAAA`. El crédito en `visor/src/globo.ts` usa el texto oficial y enlaza la licencia
+  de cada año.
 
 ## Estado de verificación
 
@@ -49,4 +51,5 @@ Verificado — fernando, 2026-11-15, leyendo el XML de capacidades y la página 
 ## Relaciones
 
 - [[capas-gibs-truecolor]] — comparación de EOX 2016 con las capas de NASA GIBS
-- [[ADR-011-visor-web-sobre-el-contrato]] — fija EOX 2016 como imagen base
+- [[ADR-011-visor-web-sobre-el-contrato]] — fija EOX 2025 como imagen base, con 2016 de respaldo
+- [[I-39-imagen-satelital-de-la-tierra-sin-clave]] — investigación que ya había encontrado la cláusula no comercial

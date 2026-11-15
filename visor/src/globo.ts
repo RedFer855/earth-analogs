@@ -6,15 +6,15 @@ const EOX_ULTIMO_ANIO = 2025;
 
 export type TipoMapaBase = 'sentinel2-eox' | 'gibs-bluemarble' | 'naturalearth';
 
-// Solo el mosaico 2016 es CC BY 4.0; los de 2017 a 2025 son CC BY-NC-SA 4.0
-// (contexto/50-referencia/eox-cloudless-licencias.md). Por eso 2016 es el
-// predeterminado y los otros años solo se piden con ?imagen=AAAA.
+// El mosaico 2025 es CC BY-NC-SA 4.0: se usa porque el visor no se vende
+// (ADR-011, I-39). El de 2016 es CC BY 4.0 y queda de respaldo; otro año se
+// pide con ?imagen=AAAA (contexto/50-referencia/eox-cloudless-licencias.md).
 function anioEoxSolicitado(): number {
   const raw = new URLSearchParams(window.location.search).get('imagen');
-  const anio = raw === null ? EOX_PRIMER_ANIO : Number(raw);
+  const anio = raw === null ? EOX_ULTIMO_ANIO : Number(raw);
   return Number.isInteger(anio) && anio >= EOX_PRIMER_ANIO && anio <= EOX_ULTIMO_ANIO
     ? anio
-    : EOX_PRIMER_ANIO;
+    : EOX_ULTIMO_ANIO;
 }
 
 function plantillaEox(anio: number): string {
