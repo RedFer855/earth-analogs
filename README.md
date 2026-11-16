@@ -25,6 +25,24 @@ Creation phase (2026-11-14 and 2026-11-15).
 | Viewer | [visor/](visor/README.md) | CesiumJS globe with candidates, pins and a sheet of what matches and what differs. |
 | Agents and AI | [scripts/mcp/](docs/mcp-and-ai.md) | MCP server for AI agents, local bridge, and a bring-your-own-key assistant in the viewer. |
 
+## WebAssembly: the engine scoring inside the browser
+
+`motor/wasm` wraps the same `nucleo` profile in an `extern "C"` ABI (no `wasm-bindgen`, so the artifact is one `.wasm`
+of ~36 KB that loads with `WebAssembly.instantiateStreaming`). JavaScript writes the profile and the cells into Wasm
+linear memory, gets back `S` and `D²` per cell, and frees explicitly.
+
+```bash
+cd motor && cargo build -p wasm --target wasm32-unknown-unknown --release
+node visor/pruebas/wasm/paridad.mjs    # nativo vs wasm, 1e-9
+```
+
+The parity test scores the four cells of `motor/wasm/src/datos_prueba.rs` twice — once with the native binary, once
+with the `.wasm` — and fails if `S` or `D²` differ. That is the guarantee ADR-003 asks for: one formula, two targets.
+
+What stays native is the sweep: 58.7 million cells × 6 variables in `f32` are 1.41 GB, and `memmap2` on
+`wasm32-unknown-unknown` is a stub that returns `Unsupported` while `rayon` falls back to a single thread. So the
+browser re-scores candidates that the native engine already prefiltered, instead of scanning the planet.
+
 ## Run everything with one command
 
 ```bash
