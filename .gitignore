@@ -3,6 +3,7 @@ datos/
 !scripts/datos/
 !visor/src/datos/
 !visor/pruebas/datos/
+!visor/public/datos/
 scripts/datos/fuentes-glo90.json
 *.tif
 *.tiff
