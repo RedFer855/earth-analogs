@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earth analogs of Moon and Mars base sites — NASA Space Apps 2026 (J4Ks)</title>
+<meta name="description" content="Find Earth locations that analog the candidate permanent Moon base regions and Mars, comparing several physical variables at once. NASA Space Apps Challenge 2026, team J4Ks.">
+<style>
+  :root {
+    --fondo: #05070d;
+    --panel: #0c111c;
+    --borde: #1d2738;
+    --texto: #e8edf6;
+    --tenue: #8d9bb0;
+    --acento: #6ea8ff;
+    --verde: #4ade80;
+    --ambar: #fbbf24;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--acento); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .envuelto { max-width: 1040px; margin: 0 auto; padding: 28px 22px 72px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--borde); }
+  .marca { display: flex; align-items: center; gap: 10px; font-weight: 650; letter-spacing: .2px; }
+  .punto { width: 11px; height: 11px; border-radius: 50%; background: var(--acento); box-shadow: 0 0 18px var(--acento); }
+  nav { display: flex; gap: 18px; font-size: 14px; color: var(--tenue); }
+  h1 { font-size: clamp(28px, 4.4vw, 46px); line-height: 1.12; margin: 44px 0 14px; letter-spacing: -0.6px; }
+  h1 span { color: var(--acento); }
+  .bajada { color: var(--tenue); font-size: 17px; max-width: 62ch; margin: 0 0 30px; }
+  .etiqueta { display: inline-block; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--tenue); border: 1px solid var(--borde); border-radius: 999px; padding: 4px 12px; margin-bottom: 6px; }
+  .acciones { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .boton {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 13px 22px; border-radius: 11px; font-weight: 650; font-size: 15px;
+    border: 1px solid transparent; cursor: pointer; transition: transform .12s ease, filter .12s ease;
+  }
+  .boton:hover { transform: translateY(-1px); filter: brightness(1.08); text-decoration: none; }
+  .principal { background: var(--acento); color: #04101f; }
+  .secundario { background: transparent; color: var(--texto); border-color: var(--borde); }
+  .estado { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--tenue); }
+  .luz { width: 8px; height: 8px; border-radius: 50%; background: var(--ambar); }
+  .luz.ok { background: var(--verde); box-shadow: 0 0 10px var(--verde); }
+  .luz.mal { background: #ef4444; }
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; margin: 46px 0 0; }
+  .caja { background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 20px 20px 18px; }
+  .caja h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: .2px; }
+  .caja p { margin: 0; color: var(--tenue); font-size: 14px; }
+  .caja code { background: #131a28; border: 1px solid var(--borde); border-radius: 6px; padding: 1px 6px; font-size: 12.5px; color: #cfe0ff; }
+  .pasos { margin: 46px 0 0; background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 22px; }
+  .pasos h2 { margin: 0 0 4px; font-size: 18px; }
+  .pasos p { color: var(--tenue); font-size: 14px; margin: 0 0 16px; }
+  pre { margin: 0; background: #080c14; border: 1px solid var(--borde); border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px; color: #d7e5ff; }
+  .copiar { margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .copiar button { background: #131a28; color: var(--texto); border: 1px solid var(--borde); border-radius: 9px; padding: 9px 14px; font-size: 13.5px; cursor: pointer; }
+  .copiar button:hover { border-color: var(--acento); }
+  .aviso { font-size: 13px; color: var(--tenue); margin-top: 14px; }
+  .aviso.warn { color: var(--ambar); }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--borde); display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--tenue); }
+  ul.limpia { margin: 10px 0 0; padding-left: 18px; color: var(--tenue); font-size: 14px; }
+  ul.limpia li { margin: 3px 0; }
+</style>
+</head>
+<body>
+<div class="envuelto">
+
+  <header>
+    <div class="marca"><span class="punto"></span> J4Ks · NASA Space Apps 2026</div>
+    <nav>
+      <a href="https://github.com/RedFer855/earth-analogs">Repository</a>
+      <a href="https://github.com/RedFer855/earth-analogs/blob/main/docs/data-sources.md">Data sources</a>
+      <a href="https://github.com/RedFer855/earth-analogs/blob/main/docs/ai-tools.md">AI use</a>
+    </nav>
+  </header>
+
+  <span class="etiqueta">Challenge · Identify Earth locations that analog Moon and Mars base sites</span>
+  <h1>Earth <span>analogs</span> of the places where we will live next.</h1>
+  <p class="bajada">
+    We compare every 2.5 km cell of the planet against the candidate permanent Moon base regions and Mars sites, using
+    several physical variables at once — slope, roughness, temperature, thermal inertia, mineralogy, permafrost, ice,
+    wind, dust — and we state for each candidate <strong>what matches and what differs</strong>, gravity, atmosphere and
+    pressure included.
+  </p>
+
+  <div class="acciones">
+    <a id="abrir" class="boton principal" href="http://localhost:5176/" target="_blank" rel="noopener">
+      Open the 3D viewer →
+    </a>
+    <button id="arrancar" class="boton secundario">Start viewer + engine</button>
+    <span class="estado" id="estado"><span class="luz" id="luz"></span><span id="texto-estado">checking the local viewer…</span></span>
+  </div>
+  <p class="aviso" id="aviso">
+    The viewer is a 3D globe served from your own machine; it is not a hosted page. The button looks for it on the usual
+    local ports and goes there if it is running.
+  </p>
+
+  <div class="rejilla">
+    <div class="caja">
+      <h3>Engine · Rust</h3>
+      <p>Mahalanobis distance with a tolerance zone turned into a similarity score, one score per variable, and a sweep
+      over 58,700,374 cells in 0.25 s on 16 threads. The same core compiles to WebAssembly for the browser.</p>
+    </div>
+    <div class="caja">
+      <h3>Viewer · CesiumJS</h3>
+      <p>3D globe with the documented analogs, the sweep candidates, cave and crater layers, and a sheet per area saying
+      which variables agree and which do not, with a confidence level.</p>
+    </div>
+    <div class="caja">
+      <h3>Data · open</h3>
+      <p>NASA, USGS, ESA and other public archives, each product with its version, link and license. The 23 GB table is
+      rebuilt with the ETL in the repository; it is never committed.</p>
+    </div>
+  </div>
+
+  <div class="pasos">
+    <h2>Run it on your machine</h2>
+    <p>Requirements: Node.js 24 and nothing else. No Rust, no Python, no account, no API key.</p>
+    <pre id="comando">git clone https://github.com/RedFer855/earth-analogs.git
+cd earth-analogs
+node scripts/iniciar.mjs</pre>
+    <div class="copiar">
+      <button id="copiar">Copy commands</button>
+      <span class="aviso" id="copiado" style="margin:0"></span>
+    </div>
+    <ul class="limpia">
+      <li>The script installs the viewer dependencies, starts the local bridge on 5174 and the viewer on the first free port, then opens the page.</li>
+      <li><code>node scripts/iniciar.mjs --run /path/to/run</code> turns on the button that re-runs the Rust engine with another profile.</li>
+      <li>Without the 23 GB table the viewer still works: it shows the published results and the layers.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>Team J4Ks — Tegucigalpa, Honduras · 14–15 November 2026</span>
+    <span>Code MIT · documentation CC BY 4.0 · datasets keep their own licenses</span>
+  </footer>
+</div>
+
+<script>
+const PUERTOS = [5173, 5174, 5175, 5176, 5177, 5178, 5179, 5180];
+const abrir = document.getElementById('abrir');
+const luz = document.getElementById('luz');
+const textoEstado = document.getElementById('texto-estado');
+const aviso = document.getElementById('aviso');
+
+async function vivo(puerto) {
+  try {
+    // no-cors: no se puede leer la respuesta, solo saber si hubo red; el visor no expone CORS.
+    await fetch(`http://localhost:${puerto}/`, { mode: 'no-cors', signal: AbortSignal.timeout(900) });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function buscar(puerto) {
+  for (const p of PUERTOS.filter((x) => x !== 5174)) {
+    if (await vivo(p)) return p;
+  }
+  return null;
+}
+
+(async () => {
+  // 5174 es el puente (JSON), no el visor: se excluye a propósito.
+  const puerto = await buscar();
+  if (puerto) {
+    abrir.href = `http://localhost:${puerto}/`;
+    luz.className = 'luz ok';
+    textoEstado.textContent = `viewer detected on port ${puerto}`;
+    aviso.textContent = 'The viewer is running on this machine: the button opens it directly.';
+  } else {
+    luz.className = 'luz mal';
+    textoEstado.textContent = 'viewer not running yet';
+    aviso.className = 'aviso warn';
+    aviso.textContent = 'No viewer found on the usual ports. Run the three commands below (Node.js 24) and this page will light up green.';
+  }
+})();
+
+document.getElementById('arrancar').addEventListener('click', async () => {
+  const comando = document.getElementById('comando').textContent;
+  try {
+    await navigator.clipboard.writeText(comando);
+    document.getElementById('copiado').textContent = 'Commands copied. Paste them in a terminal.';
+  } catch {
+    document.getElementById('copiado').textContent = 'Select the commands above and copy them.';
+  }
+});
+
+document.getElementById('copiar').addEventListener('click', async () => {
+  const comando = document.getElementById('comando').textContent;
+  try {
+    await navigator.clipboard.writeText(comando);
+    document.getElementById('copiado').textContent = 'Copied.';
+  } catch {
+    document.getElementById('copiado').textContent = 'Select the block and copy it manually.';
+  }
+});
+</script>
+</body>
+</html>
