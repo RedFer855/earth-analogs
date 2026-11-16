@@ -92,11 +92,16 @@
       Open the 3D viewer →
     </a>
     <button id="arrancar" class="boton secundario">Start viewer + engine</button>
-    <span class="estado" id="estado"><span class="luz" id="luz"></span><span id="texto-estado">checking the local viewer…</span></span>
+    <span class="estado" id="estado">
+      <span class="luz" id="luz"></span>
+      <label for="puerto">viewer port</label>
+      <input id="puerto" value="5173" inputmode="numeric" aria-label="viewer port"
+             style="width:74px;background:#131a28;color:inherit;border:1px solid var(--borde);border-radius:7px;padding:5px 8px;font:inherit;font-size:13px">
+    </span>
   </div>
   <p class="aviso" id="aviso">
-    The viewer is a 3D globe served from your own machine; it is not a hosted page. The button looks for it on the usual
-    local ports and goes there if it is running.
+    The viewer is a 3D globe served from your own machine, not a hosted page. <code>node scripts/iniciar.mjs</code> prints
+    the port it picked (5173 unless it is taken); type it in the box and the button opens it.
   </p>
 
   <div class="rejilla">
@@ -141,44 +146,18 @@ node scripts/iniciar.mjs</pre>
 </div>
 
 <script>
-const PUERTOS = [5173, 5174, 5175, 5176, 5177, 5178, 5179, 5180];
 const abrir = document.getElementById('abrir');
-const luz = document.getElementById('luz');
-const textoEstado = document.getElementById('texto-estado');
+const campo = document.getElementById('puerto');
 const aviso = document.getElementById('aviso');
 
-async function vivo(puerto) {
-  try {
-    // no-cors: no se puede leer la respuesta, solo saber si hubo red; el visor no expone CORS.
-    await fetch(`http://localhost:${puerto}/`, { mode: 'no-cors', signal: AbortSignal.timeout(900) });
-    return true;
-  } catch {
-    return false;
-  }
+// Un sitio en https no puede sondear http://localhost: el navegador bloquea esa petición (Private Network Access),
+// así que el puerto se escribe o se toma el que imprime `node scripts/iniciar.mjs` en la terminal.
+function aplicar() {
+  const p = String(campo.value || '5173').replace(/\D/g, '') || '5173';
+  abrir.href = `http://localhost:${p}/`;
 }
-
-async function buscar(puerto) {
-  for (const p of PUERTOS.filter((x) => x !== 5174)) {
-    if (await vivo(p)) return p;
-  }
-  return null;
-}
-
-(async () => {
-  // 5174 es el puente (JSON), no el visor: se excluye a propósito.
-  const puerto = await buscar();
-  if (puerto) {
-    abrir.href = `http://localhost:${puerto}/`;
-    luz.className = 'luz ok';
-    textoEstado.textContent = `viewer detected on port ${puerto}`;
-    aviso.textContent = 'The viewer is running on this machine: the button opens it directly.';
-  } else {
-    luz.className = 'luz mal';
-    textoEstado.textContent = 'viewer not running yet';
-    aviso.className = 'aviso warn';
-    aviso.textContent = 'No viewer found on the usual ports. Run the three commands below (Node.js 24) and this page will light up green.';
-  }
-})();
+campo.addEventListener('input', aplicar);
+aplicar();
 
 document.getElementById('arrancar').addEventListener('click', async () => {
   const comando = document.getElementById('comando').textContent;
