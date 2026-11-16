@@ -23,6 +23,8 @@ import {
   type MensajeIA,
   type ProveedorIA,
 } from '../datos/iaCliente';
+import { construirEnlace, cuerpoSim, resumenEnlace, variablesDeCelda, type DatosEnlace } from '../simulador/enlaceSimulador';
+import { accionDeModelo, interpretarSimulacion, type ContextoSimulacion } from '../simulador/intencionSimular';
 
 export interface AsistenteCallbacks {
   /** Caja [lat1, lon1, lat2, lon2] de la vista actual, o null si no se puede calcular. */
@@ -291,8 +293,47 @@ export class Asistente {
     this.cuerpoChat.scrollTop = this.cuerpoChat.scrollHeight;
   }
 
+  private contextoSimulacion(): ContextoSimulacion {
+    const sitios = this.indice?.sitios_objetivo ?? [];
+    const c = this.candidato;
+    const r = this.resultado;
+    if (!c || !r) return { sitios };
+    const sitio = sitios.find((x) => x.id === r.sitio);
+    return {
+      sitios,
+      seleccion: {
+        cuerpo: cuerpoSim(sitio?.cuerpo),
+        variables: variablesDeCelda(c),
+        ipix: c.ipix,
+        sitio: r.sitio,
+        etiqueta: `${sitio?.nombre ?? r.sitio} #${c.rango}`,
+      },
+    };
+  }
+
+  /** Respuesta con el resumen y un botón: abrir otra pestaña exige un clic del usuario. */
+  private agregarSimulacion(resumen: string, datos: DatosEnlace): void {
+    const caja = el('div', 'asistente-msg asistente asistente-sim');
+    const b = el('button', 'btn-mini', 'Abrir simulador');
+    b.type = 'button';
+    b.addEventListener('click', () => {
+      window.open(construirEnlace(datos), '_blank', 'noopener');
+    });
+    caja.append(el('p', '', resumen), b);
+    this.cuerpoChat.append(caja);
+    this.cuerpoChat.scrollTop = this.cuerpoChat.scrollHeight;
+  }
+
   async preguntar(pregunta: string): Promise<void> {
     if (this.ocupado) return;
+    const sim = interpretarSimulacion(pregunta, this.contextoSimulacion());
+    if (sim) {
+      this.inPregunta.value = '';
+      this.agregar('usuario', pregunta);
+      if (sim.tipo === 'enlace') this.agregarSimulacion(sim.resumen, sim.datos);
+      else this.agregar('asistente', sim.mensaje);
+      return;
+    }
     if (!this.indice || (!this.candidato && !this.analogo)) {
       this.estado('Primero elige un candidato o un análogo.');
       return;
@@ -331,6 +372,8 @@ export class Asistente {
       const r = await preguntarIA(this.inModelo.value.trim(), ctx.sistema, this.historial, viaPuente);
       this.historial.push({ rol: 'asistente', texto: r });
       this.agregar('asistente', r);
+      const accion = accionDeModelo(r);
+      if (accion) this.agregarSimulacion(resumenEnlace(accion), accion);
       this.estado('Respuesta generada por IA a partir de los datos del motor; verifica las cifras en la ficha.');
     } catch (e) {
       this.historial.pop();

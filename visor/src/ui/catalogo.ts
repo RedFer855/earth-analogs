@@ -43,6 +43,10 @@ export interface AccionesCatalogo {
   abrirCapas?: (zona: ZonaGuardada) => void;
   /** Avisa que una zona se borró, para cerrar lo que dependa de ella. */
   alBorrarZona?: (id: string) => void;
+  /** Abre el simulador 3D con las medias ETL de una zona (filas vacías si aún no hay datos). */
+  simularZona?: (zona: ZonaGuardada, filas: ResumenVariableZona[]) => void;
+  /** Abre el simulador 3D desde un pin (solo tiene lat/lon). */
+  simularPin?: (pin: { lat: number; lon: number; nombre: string; categoria: CategoriaPin }) => void;
 }
 
 const COLUMNAS_TARJETA: { columna: string; etiqueta: string }[] = [
@@ -279,6 +283,7 @@ export class PanelCatalogo {
         <button type="button" class="cat-btn" data-a="capas" data-id="${id}" title="Geología, suelos, radiación, agua y NDVI recortados a esta zona">Capas</button>
         <button type="button" class="cat-btn" data-a="relleno" data-id="${id}" title="Alternar relleno para ver el terreno">${this.zonas.rellenoDeZona(z.id) ? 'Relleno' : 'Contorno'}</button>
         <button type="button" class="cat-btn" data-a="geojson-zona" data-id="${id}">GeoJSON</button>
+        <button type="button" class="cat-btn" data-a="simular-zona" data-id="${id}" title="Abre el simulador 3D con las medias de esta zona">Ir al simulador</button>
         <button type="button" class="cat-btn cat-color" data-a="color" data-id="${id}" title="Cambiar color" aria-label="Cambiar color de la zona"><i style="background:${escaparHtml(z.color)}"></i></button>
         <button type="button" class="cat-btn cat-borrar" data-a="borrar-zona" data-id="${id}" title="Eliminar zona" aria-label="Eliminar zona">Borrar</button>
       </div>
@@ -322,6 +327,7 @@ export class PanelCatalogo {
             <button type="button" class="cat-btn" data-a="volar-pin" data-id="${id}">Volar</button>
             <button type="button" class="cat-btn" data-a="medir-pin" data-id="${id}" title="Mide un cuadro o círculo alrededor del pin con los valores de la barra">Medir</button>
             <button type="button" class="cat-btn" data-a="geojson-pin" data-id="${id}">GeoJSON</button>
+            <button type="button" class="cat-btn" data-a="simular-pin" data-id="${id}" title="Abre el simulador 3D en este punto">Ir al simulador</button>
             <button type="button" class="cat-btn cat-borrar" data-a="borrar-pin" data-id="${id}" aria-label="Eliminar pin">Borrar</button>
           </div>
         </article>`;
@@ -403,6 +409,17 @@ export class PanelCatalogo {
       case 'geojson-pin': {
         const txt = this.pines.exportarUno(id);
         if (txt) descargarTexto(`pin-${fechaHoy()}.geojson`, txt);
+        break;
+      }
+      case 'simular-zona': {
+        const z = this.zonas.obtener(id);
+        const r = this.resumenes.get(id);
+        if (z) this.acciones.simularZona?.(z, r && r !== 'cargando' ? r.filas : []);
+        break;
+      }
+      case 'simular-pin': {
+        const p = this.pines.obtener(id);
+        if (p) this.acciones.simularPin?.(p);
         break;
       }
       case 'borrar-pin':

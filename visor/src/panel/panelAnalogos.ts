@@ -55,6 +55,8 @@ export interface PanelAnalogosCallbacks {
   alVerGrupo: (g: Grupo, visible: boolean) => void;
   alCambiarPines: (visibles: Set<TipoPunto>) => void;
   alPreguntar: (pregunta: string) => void;
+  /** Abre el simulador 3D con las variables del candidato. */
+  alSimular?: (c: Celda, r: ResultadoJson) => void;
 }
 
 const num = (x: number | null | undefined, d?: number): string => {
@@ -214,6 +216,15 @@ export class PanelAnalogos {
     this.pintarMarco();
     this.pintarMapa();
     this.cargarExtras();
+  }
+
+  /** Candidato seleccionado ahora, para el simulador y la intención "simula con este lugar" del chat. */
+  candidatoSeleccionado(): { celda: Celda; resultado: ResultadoJson } | null {
+    const sel = this.seleccion;
+    const r = this.resultado;
+    if (sel?.tipo !== 'candidato' || !r) return null;
+    const c = r.candidatos.find((x) => x.rango === sel.rango);
+    return c ? { celda: c, resultado: r } : null;
   }
 
   contextoAnalogo(): { analogo: AnalogoTierra; lecturas: LecturaVariable[] } | null {
@@ -425,7 +436,7 @@ export class PanelAnalogos {
       ${this.htmlCuerpos(sitio?.cuerpo)}
       <details class="mp-sec mp-expl" open><summary><span class="mp-sec-t">En palabras simples</span><small>Resumen con los datos reales del motor</small></summary>
         <p style="white-space:pre-line">${esc(respuestaLocal(ctx))}</p>
-        <div class="mp-fila-btn"><button class="mp-btn" data-a="preguntar" data-q="¿Por qué se parece y en qué difiere físicamente?">Preguntar al chat</button></div></details>
+        <div class="mp-fila-btn"><button class="mp-btn" data-a="preguntar" data-q="¿Por qué se parece y en qué difiere físicamente?">Preguntar al chat</button><button class="mp-btn" data-a="simular" title="Abre el simulador 3D con la pendiente, rugosidad, relieve y rango diurno de esta celda">Ir al simulador</button></div></details>
       <p class="mp-fuente">Fuentes: ${[...new Set(r.parametros.variables.map((v) => v.origen.fuente ?? '').filter(Boolean))].map((f) => esc(f)).join(' · ')}</p>
     </article>`;
   }
@@ -682,6 +693,11 @@ export class PanelAnalogos {
         this.cb.alCerrarFicha();
         this.pintarMapa();
         break;
+      case 'simular': {
+        const actual = this.candidatoSeleccionado();
+        if (actual) this.cb.alSimular?.(actual.celda, actual.resultado);
+        break;
+      }
       case 'preguntar':
         this.irAChat();
         this.cb.alPreguntar(t.dataset.q ?? '¿Por qué se parece?');
