@@ -35,6 +35,38 @@ import { PanelCatalogo } from './ui/catalogo';
 import { ZoneLayerPanel } from './ui/panelCapasZona';
 import { PanelZona } from './ui/panelZona';
 import { Asistente } from './ui/asistente';
+import type { DatosCapas7 } from './datos/capas7';
+import { ang2pixNested } from './datos/healpix';
+import { indiceCapas7 } from './datos/ficha';
+import {
+  COLUMNA_A_N,
+  construirEnlace,
+  cuerpoSim,
+  variablesDeCelda,
+  variablesDeFilas,
+  type DatosEnlace,
+  type VariablesSim,
+} from './simulador/enlaceSimulador';
+
+/** Abre el simulador 3D en otra pestaña; debe llamarse dentro de un clic para que el navegador no lo bloquee. */
+function abrirSimulador(datos: DatosEnlace): void {
+  window.open(construirEnlace(datos), '_blank', 'noopener');
+}
+
+/** Variables de la celda de nivel 7 más cercana, solo con columnas ya en caché (síncrono, para no perder el clic). */
+function variablesCapas7(d: DatosCapas7 | null, lat: number, lon: number): { variables: VariablesSim; ipix: number | null } {
+  if (!d) return { variables: {}, ipix: null };
+  const ipix = ang2pixNested(d.meta.nside, lat, lon);
+  const i = indiceCapas7(d, lat, lon);
+  const variables: VariablesSim = {};
+  if (i >= 0) {
+    for (const [col, n] of Object.entries(COLUMNA_A_N)) {
+      const v = d.cacheColumnas.get(col)?.[i];
+      if (v !== undefined && Number.isFinite(v)) variables[n] = v;
+    }
+  }
+  return { variables, ipix };
+}
 
 const BASE_DATOS = 'datos/';
 const ALTURA_VUELO_M = 150_000;
@@ -90,6 +122,7 @@ async function iniciar(): Promise<void> {
   const indice = indiceRes.valor;
 
   let resultadoActual: ResultadoJson | null = null;
+  let datos7Sim: DatosCapas7 | null = null;
   let sitioActual: Sitio | null = null;
   let sitioActualId: string | null = null;
   let solicitudId = 0;
@@ -180,6 +213,22 @@ async function iniciar(): Promise<void> {
     medirEn: (coord) => barraNav.medirEn(coord),
     abrirCapas: (z) => panelCapas.openForZone({ id: z.id, name: z.nombre, coordinates: z.coords }),
     alBorrarZona: (id) => panelCapas.handleZoneDeleted(id),
+    simularZona: (z, filas) => {
+      const c = z.coords.reduce((a, b) => ({ lat: a.lat + b.lat / z.coords.length, lon: a.lon + b.lon / z.coords.length }), { lat: 0, lon: 0 });
+      const extra = filas.length ? null : variablesCapas7(datos7Sim, c.lat, c.lon);
+      abrirSimulador({
+        cuerpo: cuerpoSim(z.cuerpo),
+        modo: 'rover',
+        variables: filas.length ? variablesDeFilas(filas) : (extra?.variables ?? {}),
+        ipix: extra?.ipix ?? (datos7Sim ? ang2pixNested(datos7Sim.meta.nside, c.lat, c.lon) : null),
+        sitio: z.objetivo || null,
+        etiqueta: z.nombre,
+      });
+    },
+    simularPin: (pin) => {
+      const { variables, ipix } = variablesCapas7(datos7Sim, pin.lat, pin.lon);
+      abrirSimulador({ cuerpo: cuerpoSim(pin.categoria, 'earth'), modo: 'rover', variables, ipix, etiqueta: pin.nombre });
+    },
   });
   const barraNav = new BarraNavegacion(
     ui,
@@ -234,6 +283,17 @@ async function iniciar(): Promise<void> {
         asistente.establecerAnalogo(indice, resultadoActual, ctxAnalogo.analogo, ctxAnalogo.lecturas);
       }
       void asistente.preguntar(q);
+    },
+    alSimular: (c, r) => {
+      const sitio = indice.sitios_objetivo.find((x) => x.id === r.sitio);
+      abrirSimulador({
+        cuerpo: cuerpoSim(sitio?.cuerpo),
+        modo: 'rover',
+        variables: variablesDeCelda(c),
+        ipix: c.ipix,
+        sitio: r.sitio,
+        etiqueta: `${sitio?.nombre ?? r.sitio} #${c.rango}`,
+      });
     },
   });
 
@@ -351,6 +411,7 @@ async function iniciar(): Promise<void> {
   const capaCapas7 = new CapaCapas7(viewer);
   void cargarCapas7(`${BASE_DATOS}capas7/`).then((datos7) => {
     if (!datos7) return;
+    datos7Sim = datos7;
     panelZona.configurarDatos7(datos7);
     catalogo.configurarDatos7(datos7, BASE_DATOS);
     panel.configurarDatos7(datos7, `${BASE_DATOS}capas7/`);
