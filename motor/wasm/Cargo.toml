@@ -1,0 +1,25 @@
+[package]
+name = "wasm"
+description = "Puente WebAssembly del núcleo de puntaje (ADR-003): expone el mismo Perfil de nucleo sin dependencias ni E/S."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lib]
+name = "motor_wasm"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "volcar"
+path = "src/bin/volcar.rs"
+
+[dependencies]
+nucleo = { path = "../nucleo" }
+
+# Sin `[lints] workspace = true` a propósito: la frontera `extern "C"` necesita `unsafe` para leer los punteros que
+# entrega JavaScript, y el workspace prohíbe `unsafe_code`. Todo bloque `unsafe` de este crate es una conversión de
+# puntero a slice con longitud ya validada en la misma función, y está documentado con su razón.
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+missing_docs = "warn"
