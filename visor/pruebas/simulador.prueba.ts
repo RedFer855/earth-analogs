@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import type { Celda } from '../src/datos/contrato';
 import { construirEnlace, variablesDeCelda, variablesDeFilas } from '../src/simulador/enlaceSimulador';
-import { interpretarSimulacion } from '../src/simulador/intencionSimular';
+import { accionDeModelo, interpretarSimulacion } from '../src/simulador/intencionSimular';
 
 const BASE = 'http://localhost:5180/';
 
@@ -86,5 +86,13 @@ assert.ok(r5 && r5.tipo === 'enlace');
 assert.equal(r5.datos.modo, 'rover');
 assert.equal(r5.datos.variables.n2, 0.3);
 assert.equal(r5.datos.variables.n3, 5);
+
+// bloque de acción del modelo
+const a = accionDeModelo('Listo. {"accion":"simular","cuerpo":"luna","modo":"lidar","n1":12,"n2":"x"}');
+assert.ok(a);
+assert.equal(a.cuerpo, 'moon');
+assert.equal(a.modo, 'lidar');
+assert.deepEqual(a.variables, { n1: 12 });
+assert.equal(accionDeModelo('sin bloque'), null);
 
 console.log('simulador: ok');

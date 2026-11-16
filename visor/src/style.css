@@ -535,3 +535,4 @@ select option, select optgroup { background: #0f172a; color: #e6edf3; }
 
 .asistente-embebido { display: flex; flex-direction: column; gap: 8px; }
 .asistente-embebido .asistente-chat { max-height: 38vh; }
+.asistente-sim p { margin: 0 0 6px; }
