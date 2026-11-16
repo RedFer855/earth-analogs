@@ -53,9 +53,43 @@ DeepSeek or Claude key. The key stays in the page's memory only: never on disk, 
 
 ## Data
 
-Open data from NASA, USGS, ESA and other public archives. Each dataset is listed with name, version, URL and license.
+Open data from NASA, USGS, ESA and other public archives. Raw files stay outside the repository (`$DATOS`, git-ignored);
+what this repository carries is the code that reads them and the aggregated results. Every product is listed with
+name, version, source and license in [docs/data-sources.md](docs/data-sources.md) — Earth, Moon and Mars — including the
+cases where a source publishes no license and must be cited by service, version and access date.
 
-## License
+The master table (58,700,374 HEALPix level-12 cells, 77 columns, ~23 GB) is **not** distributed: it is rebuilt from those
+sources with `etl/`. Nothing from a dataset is quoted in this repository without its source.
 
-Code under the [MIT License](LICENSE). Documentation and notes under
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Datasets keep their own licenses.
+## Licenses
+
+| What | License |
+| :-- | :-- |
+| Code (`motor/`, `etl/`, `scripts/`, `visor/`) | [MIT](LICENSE) |
+| Documentation and notes (`README`, `docs/`, `contexto/`) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| Third-party software (134 Rust crates, 121 npm packages, 5 Python packages) | Their own OSI licenses, all permissive; inventory in [docs/dependencies.md](docs/dependencies.md) |
+| Datasets | Their own: NASA open data, CC BY 3.0/4.0, Copernicus and ODbL 1.0; see [docs/data-sources.md](docs/data-sources.md) |
+
+Raw data files are not redistributed here. The aggregated outputs (`metrics.json`, `robustez.json`, sheets) are derived
+work by the team and travel under the same MIT license, keeping the attribution of their sources.
+
+## AI tools used
+
+Declared in [docs/ai-tools.md](docs/ai-tools.md): Claude Code (engine, ETL, MCP bridge) and Antigravity/Gemini (viewer
+interface), with the session count per tool, what the team decided and reviewed, and the explicit statement that **no
+figure in this repository comes from a model**. Every number is computed from the datasets above and verified against
+an independent NumPy implementation.
+
+## NASA Space Apps requirements
+
+Checked against the *2026 NASA Space Apps Participant Terms and Conditions* (https://www.spaceappschallenge.org/legal/):
+
+| Requirement | Where |
+| :-- | :-- |
+| Original content freely available or OSI-licensed (Apache-2.0 is NASA's default when none is stated) | MIT, root [`LICENSE`](LICENSE) |
+| Licenses of all third-party materials identified in the documentation | [docs/dependencies.md](docs/dependencies.md) |
+| Every source cited, even open-source and freely available ones | [docs/data-sources.md](docs/data-sources.md) |
+| AI tools and other resources identified | [docs/ai-tools.md](docs/ai-tools.md) |
+| Publicly accessible, no registration, no password | Public repository; the viewer runs locally with one command and needs no account or key |
+| No secrets in the repository | `.env` ignored, gitleaks in CI, no key in history |
+
